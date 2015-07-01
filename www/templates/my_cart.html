@@ -1,0 +1,26 @@
+<ion-header-bar class="bar bar-subheader item-input-inset">
+
+    <label class="item-input-wrapper" ng-click="clearSearch()">
+        <i class="icon ion-ios-search placeholder-icon"></i>
+        <input type="search" ng-model="searchQuery" placeholder="URL, #hashtag, @nickname">
+        <button class="button button-clear">X</button>
+    </label>
+
+</ion-header-bar>
+<ion-view view-title="My Cart">
+
+    <button ng-click="ClearMyCart()" class="button button-outline button-positive icon-left ion-ios-compose-outline">Clear my cart</button>
+
+    <button ng-click="FindBestShop()" class="button button-outline button-positive icon-left ion-ios-compose-outline">Find best shop</button>
+
+    <ion-content class="content-bg">
+        <ion-list ng-if='searchQuery != undefined && searchQuery != "" || 1'>
+            <li ng-repeat="product in myCart | filter:searchQuery">
+                <div class="item">
+                    Name: {{product["ItemName"]}} Price: {{product["ItemPrice"]}}
+                </div>
+            </li>
+        </ion-list>
+    </ion-content>
+
+</ion-view>

@@ -1,0 +1,24 @@
+<ion-header-bar class="bar bar-subheader item-input-inset">
+
+    <label class="item-input-wrapper" ng-click="clearSearch()">
+        <i class="icon ion-ios-search placeholder-icon"></i>
+        <input type="search" ng-model="searchQuery" placeholder="URL, #hashtag, @nickname dsghfgn">
+        <button class="button button-clear">X</button>
+    </label>
+
+</ion-header-bar>
+<ion-view view-title="Create Cart">
+    <ion-content class="content-bg">
+        <ion-list ng-if='searchQuery != undefined && searchQuery != ""'>
+            <li ng-repeat="product in allProducts | filter:searchQuery">
+                <div class="item" ng-click="ItemWasClicked(product)">
+                    Name: {{product["ItemName"]}} Code: {{product["ItemCode"]}}
+                </div>
+            </li>
+        </ion-list>
+        <!--<ion-infinite-scroll ng-if="layout=='posts' && loadMoreTimes<=100"-->
+        <!-- TODO: it doesn't work -->
+        <ion-infinite-scroll ng-if='searchQuery != undefined && searchQuery != ""' on-infinite="loadMore()" distance="10%" immediate-check="true">
+        </ion-infinite-scroll>
+    </ion-content>
+</ion-view>
