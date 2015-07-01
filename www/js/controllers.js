@@ -54,14 +54,30 @@ angular.module('ComparePrices.controllers', [])
         $scope.FindBestShop = function() {
             // At first get from myCart only ItemCodes
             numOfProductsInCart = $scope.myCart.length
-            itemCodesinMyCart = []
+            productCodesinMyCart = []
             for (var i=0; i < numOfProductsInCart; i++)
             {
-                itemCodesinMyCart.push($scope.myCart[i]['ItemCode'])
+                productCodesinMyCart.push($scope.myCart[i]['ItemCode'])
             }
 
-            ComparePricesStorage.GetProductsForEachShopByItemCode(itemCodesinMyCart, function(result) {
-                console.log(result)
+            // TODO: there's a JS way to do this
+            ComparePricesStorage.GetProductsForEachShopByItemCode(productCodesinMyCart, function(result) {
+                var priceInAmPM = 0.0;
+                for (var i=0; i < result['AM_PM'].rows.length; i++) {
+                    priceInAmPM += parseFloat(result['AM_PM'].rows[i]['ItemPrice'])
+                }
+                var priceInMega = 0.0;
+                for (var i=0; i < result['Mega'].rows.length; i++) {
+                    priceInMega += parseFloat(result['Mega'].rows[i]['ItemPrice'])
+                }
+                var priceInSuperSal = 0.0;
+                for (var i=0; i < result['SuperSal'].rows.length; i++) {
+                    priceInSuperSal += parseFloat(result['SuperSal'].rows[i]['ItemPrice'])
+                }
+
+                alert("AM_PM Price: " + priceInAmPM + "\n" +
+                      "Mega Price: " + priceInMega + "\n" +
+                      "SuperSal Price: " + priceInSuperSal)
             });
         }
 

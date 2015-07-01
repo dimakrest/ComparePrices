@@ -11,7 +11,7 @@ angular.module('ComparePrices.services', ['ngResource'])
             })
         }])
 
-    .factory('ComparePricesStorage', ['Shop', function (Shop) {
+    .factory('ComparePricesStorage', ['Shop', '$q', function (Shop, $q) {
 
         var createUserCartsTbQuery = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID, ItemCode)'
 
@@ -110,6 +110,36 @@ angular.module('ComparePrices.services', ['ngResource'])
             console.log("Db connection success!");
         }
 
+        function IsssueSelectQuery(productCodes, tableName) {
+            var d = $q.defer();
+
+            var response = {}
+            response.rows = []
+            var selectQuery = 'SELECT * FROM ' + tableName + ' WHERE ItemCode IN ('
+
+            var numOfProducts = productCodes.length
+            for (var i=0; i < numOfProducts; i++) {
+                selectQuery += '"' + productCodes[i] + '"'
+                if (i != (numOfProducts-1)) {
+                    selectQuery += ', '
+                }
+            }
+            selectQuery += ')'
+
+            db.transaction(function (tx) {
+                tx.executeSql(selectQuery, [], function (tx, rawresults) {
+                    var len = rawresults.rows.length;
+                    console.log("GetAllProducts: " + len + " rows found.");
+                    for (var i = 0; i < len; i++) {
+                        response.rows.push(rawresults.rows.item(i));
+                    }
+                    d.resolve(response)
+                });
+            });
+
+            return d.promise
+        }
+
         // TODO: succes, error handlers
         return {
 
@@ -155,6 +185,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 response.rows = []
                 tmp = db.transaction(function (tx) {
                     tx.executeSql('SELECT * FROM tbProducts JOIN tbUserCarts ON tbProducts.ItemCode=tbUserCarts.ItemCode WHERE tbUserCarts.CartID=1', [], function (tx, rawresults) {
+                        // TODO: do I need the rows thing? if yes wrap this code in some kind of a function
                         var len = rawresults.rows.length;
                         console.log("GetMyCart: " + len + " rows found.");
                         for (var i = 0; i < len; i++) {
@@ -168,9 +199,21 @@ angular.module('ComparePrices.services', ['ngResource'])
                 return response
             },
 
-            GetProductsForEachShopByItemCode: function(itemCodes, success) {
-                console.log(fileNameToTable)
-            },
+            GetProductsForEachShopByItemCode: function(productCodes, success) {
+                $q.all([
+                    IsssueSelectQuery(productCodes, 'tbAmPmProducts'),
+                    IsssueSelectQuery(productCodes, 'tbMegaProducts'),
+                    IsssueSelectQuery(productCodes, 'tbSuperSalProducts')]).then(function(data) {
+
+                        // TODO: is there a way to do this prettier?
+                        if (success) {
+                            dataAdjusted = {'AM_PM':data[0],
+                                            'Mega' :data[1],
+                                            'SuperSal':data[2]}
+                            success(dataAdjusted)
+                        }
+                    }
+                )},
 
             getAllSecrets: function (success, error) {
                 console.log("getAllSecrets: Init")
