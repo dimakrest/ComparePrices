@@ -55,24 +55,32 @@ angular.module('ComparePrices.controllers', [])
             // At first get from myCart only ItemCodes
             numOfProductsInCart = $scope.myCart.length
             productCodesinMyCart = []
+            productCodesOccurrencesinMyCart = []
             for (var i=0; i < numOfProductsInCart; i++)
             {
-                productCodesinMyCart.push($scope.myCart[i]['ItemCode'])
+                itemCode = $scope.myCart[i]['ItemCode']
+                productCodesinMyCart.push(itemCode)
+                if(typeof productCodesOccurrencesinMyCart[itemCode] === 'undefined') {
+                    productCodesOccurrencesinMyCart[itemCode] = 1
+                }
+                else {
+                    productCodesOccurrencesinMyCart[itemCode]++
+                }
             }
 
             // TODO: there's a JS way to do this
             ComparePricesStorage.GetProductsForEachShopByItemCode(productCodesinMyCart, function(result) {
                 var priceInAmPM = 0.0;
                 for (var i=0; i < result['AM_PM'].rows.length; i++) {
-                    priceInAmPM += parseFloat(result['AM_PM'].rows[i]['ItemPrice'])
+                    priceInAmPM += parseFloat(result['AM_PM'].rows[i]['ItemPrice']) * productCodesOccurrencesinMyCart[result['AM_PM'].rows[i]['ItemCode']]
                 }
                 var priceInMega = 0.0;
                 for (var i=0; i < result['Mega'].rows.length; i++) {
-                    priceInMega += parseFloat(result['Mega'].rows[i]['ItemPrice'])
+                    priceInMega += parseFloat(result['Mega'].rows[i]['ItemPrice']) * productCodesOccurrencesinMyCart[result['AM_PM'].rows[i]['ItemCode']]
                 }
                 var priceInSuperSal = 0.0;
                 for (var i=0; i < result['SuperSal'].rows.length; i++) {
-                    priceInSuperSal += parseFloat(result['SuperSal'].rows[i]['ItemPrice'])
+                    priceInSuperSal += parseFloat(result['SuperSal'].rows[i]['ItemPrice']) * productCodesOccurrencesinMyCart[result['AM_PM'].rows[i]['ItemCode']]
                 }
 
                 alert("AM_PM Price: " + priceInAmPM + "\n" +
