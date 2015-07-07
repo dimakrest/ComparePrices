@@ -44,8 +44,7 @@ angular.module('ComparePrices.controllers', [])
 
     .controller('MyCartCtrl', function($scope, ComparePricesStorage) {
 
-        $scope.myCart = {}
-        // TODO: can I do this using promises?
+        $scope.myCart = []
         // TODO: if i update the cart and then go back, nothing is changed
         ComparePricesStorage.GetMyCart(function(result) {
             $scope.myCart = result.rows
@@ -53,39 +52,35 @@ angular.module('ComparePrices.controllers', [])
 
         $scope.FindBestShop = function() {
             // At first get from myCart only ItemCodes
-            numOfProductsInCart = $scope.myCart.length
-            productCodesinMyCart = []
-            productCodesOccurrencesinMyCart = []
-            for (var i=0; i < numOfProductsInCart; i++)
-            {
-                itemCode = $scope.myCart[i]['ItemCode']
-                productCodesinMyCart.push(itemCode)
-                if(typeof productCodesOccurrencesinMyCart[itemCode] === 'undefined') {
-                    productCodesOccurrencesinMyCart[itemCode] = 1
-                }
-                else {
-                    productCodesOccurrencesinMyCart[itemCode]++
-                }
-            }
+            var productCodesinMyCart = []
+            $scope.myCart.forEach(function(singleItem) {
+               productCodesinMyCart.push(singleItem['ItemCode'])
+            });
 
-            // TODO: there's a JS way to do this
             ComparePricesStorage.GetProductsForEachShopByItemCode(productCodesinMyCart, function(result) {
-                var priceInAmPM = 0.0;
-                for (var i=0; i < result['AM_PM'].rows.length; i++) {
-                    priceInAmPM += parseFloat(result['AM_PM'].rows[i]['ItemPrice']) * productCodesOccurrencesinMyCart[result['AM_PM'].rows[i]['ItemCode']]
-                }
-                var priceInMega = 0.0;
-                for (var i=0; i < result['Mega'].rows.length; i++) {
-                    priceInMega += parseFloat(result['Mega'].rows[i]['ItemPrice']) * productCodesOccurrencesinMyCart[result['AM_PM'].rows[i]['ItemCode']]
-                }
-                var priceInSuperSal = 0.0;
-                for (var i=0; i < result['SuperSal'].rows.length; i++) {
-                    priceInSuperSal += parseFloat(result['SuperSal'].rows[i]['ItemPrice']) * productCodesOccurrencesinMyCart[result['AM_PM'].rows[i]['ItemCode']]
-                }
 
-                alert("AM_PM Price: " + priceInAmPM + "\n" +
-                      "Mega Price: " + priceInMega + "\n" +
-                      "SuperSal Price: " + priceInSuperSal)
+                var priceInAmPM = 0.0;
+                result['AM_PM'].rows.forEach(function(product) {
+                    priceInAmPM += parseFloat(product['ItemPrice'])
+                });
+
+                var priceInMega = 0.0;
+                result['Mega'].rows.forEach(function(product) {
+                    priceInMega += parseFloat(product['ItemPrice'])
+                });
+
+                var priceInSuperSal = 0.0;
+                result['SuperSal'].rows.forEach(function(product) {
+                    priceInSuperSal += parseFloat(product['ItemPrice'])
+                });
+
+                ComparePricesStorage.GetStoresInRadius(15, function(storesInRadius) {
+                    alertMessage = "AM_PM Price: " + priceInAmPM + "\n" +
+                        "Mega Price: " + priceInMega + "\n" +
+                        "SuperSal Price: " + priceInSuperSal + "\n " +
+                        "stores near you " + storesInRadius
+                    alert(alertMessage)
+                })
             });
         }
 
