@@ -31,12 +31,22 @@ angular.module('ComparePrices', ['ionic', 'ComparePrices.controllers', 'CompareP
             templateUrl: "templates/tabs.html"
         })
 
-        .state('tabs.createCart', {
-            url: "/createCart",
+//        .state('tabs.createCart', {
+//            url: "/createCart",
+//            views: {
+//                'tabCreateCart': {
+//                    templateUrl: "templates/edit_cart.html",
+//                    controller: 'MyCartCtrl'
+//                }
+//            }
+//        })
+
+        .state('tabs.editCart', {
+            url: "/editCart",
             views: {
-                'tabCreateCart': {
-                    templateUrl: "templates/create_cart.html",
-                    controller: 'CreateCartCtrl'
+                'tabMyCart': {
+                    templateUrl: "templates/edit_cart.html",
+                    controller: 'EditCartCtrl'
                 }
             }
         })
@@ -56,11 +66,11 @@ angular.module('ComparePrices', ['ionic', 'ComparePrices.controllers', 'CompareP
             views: {
                 'tabSuggestedCarts': {
                     templateUrl: "templates/suggested_carts.html",
-                    controller: 'MyCartCtrl'
+                    controller: 'SuggestedCtrl'
                 }
             }
         });
 
     // if none of the above states are matched, use this as the fallback
-    $urlRouterProvider.otherwise('/tab/createCart');
+    $urlRouterProvider.otherwise('/tab/myCart');
 });

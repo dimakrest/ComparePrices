@@ -1,26 +1,66 @@
 <ion-header-bar class="bar bar-subheader item-input-inset">
 
+    <div class="bar bar-header">
+        <button class="button button-icon icon ion-minus-circled" ng-click="ToggleDeleteValue()"></button>
+        <div class="h1 title">Header Buttons</div>
+        <button class="button button-clear button-positive" OnClick="location.href='#/tab/editCart'"> Edit </button>
+    </div>
+
+    <!-- TODO: I don't see search bar -->
     <label class="item-input-wrapper" ng-click="clearSearch()">
         <i class="icon ion-ios-search placeholder-icon"></i>
         <input type="search" ng-model="searchQuery" placeholder="URL, #hashtag, @nickname">
         <button class="button button-clear">X</button>
     </label>
-
 </ion-header-bar>
+
+        <!--    Drop down select menu
+                <div class="list">
+
+                    <label class="item item-input item-select">
+                        <div class="input-label">
+                            Amount
+                        </div>
+                        <select>
+                            <option>Blue</option>
+                            <option selected>Green</option>
+                            <option>Red</option>
+                        </select>
+                    </label>
+
+                </div>
+                -->
 <ion-view view-title="My Cart">
 
-    <button ng-click="ClearMyCart()" class="button button-outline button-positive icon-left ion-ios-compose-outline">Clear my cart</button>
-
-    <button ng-click="FindBestShop()" class="button button-outline button-positive icon-left ion-ios-compose-outline">Find best shop</button>
-
     <ion-content class="content-bg">
-        <ion-list ng-if='searchQuery != undefined && searchQuery != "" || 1'>
-            <li ng-repeat="product in myCart | filter:searchQuery">
-                <div class="item">
-                    Name: {{product["ItemName"]}} Price: {{product["ItemPrice"]}}
-                </div>
-            </li>
+
+        <!-- TODO: Is there a way to make swipe right? -->
+        <ion-list show-delete="shouldShowDelete"
+                  show-reorder="shouldShowReorder"
+                  can-swipe="listCanSwipe">
+            <ion-item ng-repeat="product in c.myCart | filter:searchQuery"
+                      class="item-avatar-right">
+
+                <img ng-src="img/tabasco.jpg">
+                <h2 style="float:right">{{product.ItemName}} Amount: {{product.Amount}}</h2>
+
+                <ion-option-button class="ion-minus-circled"
+                                   ng-click="DeleteProduct(product)">
+                </ion-option-button>
+
+                <ion-delete-button class="ion-minus-circled"
+                                   ng-click="DeleteProduct(product)">
+                </ion-delete-button>
+
+            </ion-item>
         </ion-list>
+
+        <div>
+            <button ng-click="ClearMyCart()" class="button button-outline button-positive icon-left ion-ios-compose-outline">Clear my cart</button>
+
+            <button ng-click="FindBestShop()" class="button button-outline button-positive icon-left ion-ios-compose-outline">Find best shop</button>
+        </div>
     </ion-content>
+
 
 </ion-view>

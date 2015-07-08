@@ -13,7 +13,7 @@ angular.module('ComparePrices.services', ['ngResource'])
 
     .factory('ComparePricesStorage', ['Shop', '$q', function (Shop, $q) {
 
-        var createUserCartsTbQuery = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID, ItemCode)'
+        var createUserCartsTbQuery = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID, ItemCode, Amount)'
         var fileNameToTable = {'am_pm_products'     : 'tbAmPmProducts',
                                'mega_products'      : 'tbMegaProducts',
                                'supersal_products'  : 'tbSuperSalProducts'}
@@ -237,19 +237,23 @@ angular.module('ComparePrices.services', ['ngResource'])
                 return response
             },
 
-            InsertItemToCart: function(item) {
-                console.log("Adding item to cart" + item)
+            // DELETE FROM table_name
+            // WHERE some_column=some_value;
+            // TODO: for now I assume single cart
+            UpdateCart: function(newCart) {
                 db.transaction(function (tx) {
-                    tx.executeSql('INSERT INTO tbUserCarts ' +
-                        '(CartID, ItemCode)' +
-                        'VALUES (' + "1" + ', "' + item['ItemCode']  + '")')
+                    tx.executeSql('DELETE FROM tbUserCarts WHERE CartID = "1"')
+                    newCart.forEach(function(singleProduct) {
+                        tx.executeSql('INSERT INTO tbUserCarts (CartID, ItemCode, Amount)' +
+                                      'VALUES ("' + singleProduct['CartID'] + '", "' + singleProduct['ItemCode'] + '", "' + singleProduct['Amount'] + '")')
+                    });
                 });
             },
 
             ClearMyCart: function() {
                 console.log("Clear my cart")
                 db.transaction(function (tx) {
-                    tx.executeSql('DROP TABLE tbUserCarts')
+                    tx.executeSql('DROP TABLE IF EXISTS tbUserCarts')
                     tx.executeSql(createUserCartsTbQuery)
                 }, logError())
             },
@@ -259,7 +263,11 @@ angular.module('ComparePrices.services', ['ngResource'])
                 var response = {}
                 response.rows = []
                 db.transaction(function (tx) {
-                    tx.executeSql('SELECT * FROM tbProducts JOIN tbUserCarts ON tbProducts.ItemCode=tbUserCarts.ItemCode WHERE tbUserCarts.CartID=1', [], function (tx, rawresults) {
+                    tx.executeSql('SELECT tbProducts.ItemCode AS ItemCode, ' +
+                                  'tbProducts.ItemName AS ItemName,' +
+                                  'tbUserCarts.Amount AS Amount, ' +
+                                  'tbUserCarts.CartID AS CartID ' +
+                                  'FROM tbProducts JOIN tbUserCarts ON tbProducts.ItemCode=tbUserCarts.ItemCode WHERE tbUserCarts.CartID="1"', [], function (tx, rawresults) {
                         // TODO: do I need the rows thing? if yes wrap this code in some kind of a function
                         var len = rawresults.rows.length;
                         console.log("GetMyCart: " + len + " rows found.");
