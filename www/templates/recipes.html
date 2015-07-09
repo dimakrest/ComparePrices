@@ -1,0 +1,34 @@
+<ion-header-bar class="bar bar-subheader item-input-inset">
+
+    <label class="item-input-wrapper" ng-click="clearSearch()">
+        <i class="icon ion-ios-search placeholder-icon"></i>
+        <input type="search" ng-model="searchQuery" placeholder="Enter recipe name">
+        <button class="button button-clear">X</button>
+    </label>
+
+</ion-header-bar>
+
+
+<ion-view view-title="Recipes">
+
+    <ion-content class="content-bg">
+
+        <ion-list>
+            <li ng-repeat="recipe in recipes | filter:searchQuery" class="row">
+                    <a nav-direction="forward" href="#/tab/recipes/{{recipe.id}}" class="thumb item item-thumbnail-left col col-80">
+                        <img ng-src="{{recipe.imageUrl}}">
+                        <h2>{{recipe.name}}</h2>
+                        <p>{{recipe.description}}</p>
+                    </a>
+                    <button class="button button-outline button-positive col">
+                        +
+                    </button>
+                    <button class="button button-outline button-positive col">
+                        -
+                    </button>
+            </li>
+        </ion-list>
+
+    </ion-content>
+</ion-view>
+

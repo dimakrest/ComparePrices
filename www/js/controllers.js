@@ -246,4 +246,35 @@ angular.module('ComparePrices.controllers', [])
         $scope.ToggleDeleteValue = function() {
             $scope.shouldShowDelete = !$scope.shouldShowDelete;
         }
-     });
+     })
+
+    .controller('RecipesListCtrl', ['$scope', 'Recipes',
+        function($scope, Recipes) {
+            $scope.recipes = Recipes.query();
+    }])
+
+    .controller('RecipeCtrl', ['$scope', '$stateParams', 'Recipes',
+        function($scope, $stateParams, Recipes) {
+            $scope.recipe = Recipes.get({recipe: $stateParams.recipe}, function() {});
+
+            $scope.showGroup = [];
+            for (var i=0; i<10; i++) {
+                $scope.showGroup[i] = 0;
+            }
+
+            $scope.toggleGroup = function(groupId) {
+                if ($scope.isGroupShown(groupId)) {
+                    $scope.showGroup[groupId] = 0;
+                } else {
+                    $scope.showGroup[groupId] = 1;
+                }
+            };
+            $scope.isGroupShown = function(groupId) {
+                return $scope.showGroup[groupId] == 1;
+            };
+
+
+
+    }])
+
+;

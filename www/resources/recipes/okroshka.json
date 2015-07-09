@@ -1,0 +1,8 @@
+    {
+        "id": "okroshka", 
+        "imageUrl": "img/recipes/okroshka.jpg", 
+        "name": "O-baby!", 
+        "description": "Cold soup of Russian origin. \nThe name probably originates from kroshit', which means to crumble into small pieces.",
+        "nutritional":{"Calories":"257","Fat":"13","Protein":"16","Carbohydrate":"27"},
+        "products":[1000,1001,1002]
+    }

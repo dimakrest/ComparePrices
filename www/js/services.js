@@ -11,6 +11,15 @@ angular.module('ComparePrices.services', ['ngResource'])
             })
         }])
 
+    .factory('Recipes', ['$resource',
+        function($resource){
+            return $resource('resources/recipes/:recipe.json', {}, {
+                query: {method:'GET', params:{recipe:'recipes'}, isArray:true}
+            });
+    }])
+
+
+
     .factory('ComparePricesStorage', ['Shop', '$q', function (Shop, $q) {
 
         var createUserCartsTbQuery = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID, ItemCode, Amount)'

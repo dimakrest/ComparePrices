@@ -1,0 +1,8 @@
+    {
+        "id": "golubtsi", 
+        "imageUrl": "img/recipes/golubtsi.jpg", 
+        "name": "Lazy golubtsi", 
+        "description": "Popular among European Jews, and traditionally served on Simchat Torah. /nStuffed cabbage is described by Gil Marks to have entered Jewish cooking some 2,000 years ago.",
+        "nutritional":{"Calories":"257","Fat":"13","Protein":"16","Carbohydrate":"27"},
+        "products":[1000,1001,1002]
+    }
