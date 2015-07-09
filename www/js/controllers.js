@@ -41,61 +41,60 @@ angular.module('ComparePrices.controllers', [])
       };
     })
 
+    .controller('RootCtrl', function($scope) {
+        $scope.c = {}
 
-    .controller('MyCartCtrl', function($scope, ComparePricesStorage) {
+        $scope.c.myCart      = []
+        $scope.c.allProducts = []
+    })
 
-        $scope.myCart = {}
-        // TODO: can I do this using promises?
-        // TODO: if i update the cart and then go back, nothing is changed
-        ComparePricesStorage.GetMyCart(function(result) {
-            $scope.myCart = result.rows
+    .controller('SuggestedCtrl', function() {
+        console.log("Here")
+    })
+
+    .controller('EditCartCtrl', function($scope,ComparePricesStorage) {
+        $scope.searchQuery = ""
+
+        ComparePricesStorage.GetAllProducts(function(result) {
+            $scope.c.allProducts = result.rows
         })
 
-        $scope.FindBestShop = function() {
-            // At first get from myCart only ItemCodes
-            numOfProductsInCart = $scope.myCart.length
-            productCodesinMyCart = []
-            productCodesOccurrencesinMyCart = []
-            for (var i=0; i < numOfProductsInCart; i++)
-            {
-                itemCode = $scope.myCart[i]['ItemCode']
-                productCodesinMyCart.push(itemCode)
-                if(typeof productCodesOccurrencesinMyCart[itemCode] === 'undefined') {
-                    productCodesOccurrencesinMyCart[itemCode] = 1
-                }
-                else {
-                    productCodesOccurrencesinMyCart[itemCode]++
-                }
-            }
-
-            // TODO: there's a JS way to do this
-            ComparePricesStorage.GetProductsForEachShopByItemCode(productCodesinMyCart, function(result) {
-                var priceInAmPM = 0.0;
-                for (var i=0; i < result['AM_PM'].rows.length; i++) {
-                    priceInAmPM += parseFloat(result['AM_PM'].rows[i]['ItemPrice']) * productCodesOccurrencesinMyCart[result['AM_PM'].rows[i]['ItemCode']]
-                }
-                var priceInMega = 0.0;
-                for (var i=0; i < result['Mega'].rows.length; i++) {
-                    priceInMega += parseFloat(result['Mega'].rows[i]['ItemPrice']) * productCodesOccurrencesinMyCart[result['AM_PM'].rows[i]['ItemCode']]
-                }
-                var priceInSuperSal = 0.0;
-                for (var i=0; i < result['SuperSal'].rows.length; i++) {
-                    priceInSuperSal += parseFloat(result['SuperSal'].rows[i]['ItemPrice']) * productCodesOccurrencesinMyCart[result['AM_PM'].rows[i]['ItemCode']]
-                }
-
-                alert("AM_PM Price: " + priceInAmPM + "\n" +
-                      "Mega Price: " + priceInMega + "\n" +
-                      "SuperSal Price: " + priceInSuperSal)
-            });
+        $scope.clearSearch = function()
+        {
+            $scope.searchQuery = ""
         }
 
-        $scope.ClearMyCart = function() {
-            $scope.myCart = {}
-            ComparePricesStorage.ClearMyCart()
+        // TODO: maybe there's a prettier way, no need to change the entire cart
+        $scope.ItemWasClicked = function(clickedItem) {
+            var numOfProductsInCart = $scope.c.myCart.length
+            var productIndex        = -1
+            for (var i=0; i < numOfProductsInCart; i++) {
+                if ($scope.c.myCart[i]['ItemCode'] == clickedItem['ItemCode']) {
+                    productIndex = i
+                    break;
+                }
+            }
+            if (productIndex == -1) {
+                var newItemInCart = {'CartID': 1,
+                    'ItemCode': clickedItem['ItemCode'],
+                    'ItemName': clickedItem['ItemName'],
+                    'Amount': 1}
+                $scope.c.myCart.push(newItemInCart)
+            } else {
+                $scope.c.myCart[i]['Amount']++
+            }
+
+            ComparePricesStorage.UpdateCart($scope.c.myCart)
         }
     })
 
-    .controller('CreateCartCtrl', function($scope, ComparePricesStorage) {
+    .controller('MyCartCtrl', function($scope, ComparePricesStorage) {
+
+        // ionic related variables. Used to create advanced  <ion-list>
+        $scope.shouldShowDelete = false;
+        $scope.shouldShowReorder = false;
+        $scope.listCanSwipe = true
+
         $scope.searchQuery = ""
 
         $scope.clearSearch = function()
@@ -103,12 +102,95 @@ angular.module('ComparePrices.controllers', [])
             $scope.searchQuery = ""
         }
 
-        ComparePricesStorage.GetAllProducts(function(result) {
-            $scope.allProducts = result.rows
+        ComparePricesStorage.GetMyCart(function(result) {
+            $scope.$apply(function() {
+                $scope.c.myCart = result.rows
+            });
         })
 
-        $scope.ItemWasClicked = function(clickedItem) {
-            ComparePricesStorage.InsertItemToCart(clickedItem)
+        $scope.FindBestShop = function() {
+            // At first get from myCart only ItemCodes
+            var productCodesInMyCart = []
+            $scope.c.myCart.forEach(function(singleItem) {
+                productCodesInMyCart.push(singleItem['ItemCode'])
+            });
+
+            ComparePricesStorage.GetProductsForEachShopByItemCode(productCodesInMyCart, function(result) {
+
+                var priceInAmPM = 0.0;
+                result['AM_PM'].rows.forEach(function(product) {
+                    var numOfProductsInCart = $scope.c.myCart.length
+                    var amount = 0
+                    for (var i=0; i < numOfProductsInCart; i++) {
+                        if ($scope.c.myCart[i]['ItemCode'] == product['ItemCode']) {
+                            amount = parseInt($scope.c.myCart[i]['Amount'])
+                            break;
+                        }
+                    }
+                    priceInAmPM += parseFloat(product['ItemPrice']) * amount
+                });
+
+                var priceInMega = 0.0;
+                result['Mega'].rows.forEach(function(product) {
+                    var numOfProductsInCart = $scope.c.myCart.length
+                    var amount = 0
+                    for (var i=0; i < numOfProductsInCart; i++) {
+                        if ($scope.c.myCart[i]['ItemCode'] == product['ItemCode']) {
+                            amount = parseInt($scope.c.myCart[i]['Amount'])
+                            break;
+                        }
+                    }
+                    priceInMega += parseFloat(product['ItemPrice']) * amount
+                });
+
+                var priceInSuperSal = 0.0;
+                result['SuperSal'].rows.forEach(function(product) {
+                    var numOfProductsInCart = $scope.c.myCart.length
+                    var amount = 0
+                    for (var i=0; i < numOfProductsInCart; i++) {
+                        if ($scope.c.myCart[i]['ItemCode'] == product['ItemCode']) {
+                            amount = parseInt($scope.c.myCart[i]['Amount'])
+                            break;
+                        }
+                    }
+                    priceInSuperSal += parseFloat(product['ItemPrice']) * amount
+                });
+
+                ComparePricesStorage.GetStoresInRadius(15, function(storesInRadius) {
+                    var alertMessage = "AM_PM Price: " + priceInAmPM + "\n" +
+                                        "Mega Price: " + priceInMega + "\n" +
+                                        "SuperSal Price: " + priceInSuperSal + "\nStores near you: \n"
+
+                    storesInRadius.rows.forEach(function(singleStore) {
+                        alertMessage += "Store Name " + singleStore['StoreName'] + ", Distance to store: " + singleStore['Distance'] + "\n"
+                    })
+                    alert(alertMessage)
+                })
+            });
+        }
+
+        $scope.ClearMyCart = function() {
+            $scope.c.myCart = []
+            ComparePricesStorage.ClearMyCart()
+        }
+
+        $scope.DeleteProduct = function(product) {
+            var numOfProductsInCart = $scope.c.myCart.length
+            var productIndex        = -1
+            for (i=0; i < numOfProductsInCart; i++) {
+                if ($scope.c.myCart[i]['ItemCode'] == product['ItemCode']) {
+                    productIndex = i
+                    break;
+                }
+            }
+            if (productIndex != -1) {
+                $scope.c.myCart.splice(productIndex, 1)
+            }
+            ComparePricesStorage.UpdateCart($scope.c.myCart)
+        }
+
+        $scope.ToggleDeleteValue = function() {
+            $scope.shouldShowDelete = !$scope.shouldShowDelete;
         }
      })
 

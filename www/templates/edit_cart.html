@@ -7,10 +7,10 @@
     </label>
 
 </ion-header-bar>
-<ion-view view-title="Create Cart">
+<ion-view view-title="Edit Cart">
     <ion-content class="content-bg">
         <ion-list ng-if='searchQuery != undefined && searchQuery != ""'>
-            <li ng-repeat="product in allProducts | filter:searchQuery">
+            <li ng-repeat="product in c.allProducts | filter:searchQuery">
                 <div class="item" ng-click="ItemWasClicked(product)">
                     Name: {{product["ItemName"]}} Code: {{product["ItemCode"]}}
                 </div>
