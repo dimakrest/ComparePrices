@@ -46,15 +46,66 @@ angular.module('ComparePrices.controllers', [])
 
         $scope.c.myCart      = []
         $scope.c.allProducts = []
+        // TODO: for now define at root level, make it better via state params?
+        $scope.c.cartID = -1;
+
+        $scope.c.localize = document.localize
+        document.selectLanguage('heb')
+
+        console.log($scope.c.localize.strings)
     })
 
     .controller('SuggestedCtrl', function() {
         console.log("Here")
     })
 
-    .controller('EditCartCtrl', function($scope,ComparePricesStorage) {
+    .controller('MyCartsCtrl', function($scope, ComparePricesStorage) {
+        // ionic related variables. Used to create advanced  <ion-list>
+        $scope.shouldShowDelete = false;
+        $scope.shouldShowReorder = false;
+        $scope.listCanSwipe = true
+
+        ComparePricesStorage.GetAllCarts(function(result) {
+            $scope.$apply(function() {
+                $scope.myCartIDs = result.rows
+            })
+        })
+
+        $scope.lastCartID = localStorage.getItem('lastCartID') || "1"
+
+        $scope.CreateNewCart = function() {
+            var cartName = "Cart_" + $scope.lastCartID
+            $scope.myCartIDs[$scope.lastCartID] = cartName
+            ComparePricesStorage.UpdateCartsList({'CartID': $scope.lastCartID,
+                                                  'CartName':cartName})
+
+            $scope.lastCartID = String(parseInt($scope.lastCartID) + 1)
+
+            localStorage.setItem('lastCartID', $scope.lastCartID)
+        }
+
+        $scope.DeleteCart = function(cartID) {
+            delete $scope.myCartIDs[cartID]
+
+            ComparePricesStorage.DeleteCart(cartID)
+        }
+
+        $scope.ToggleDeleteValue = function() {
+            $scope.shouldShowDelete = !$scope.shouldShowDelete;
+        }
+
+        $scope.OpenCartDetails = function(cartID) {
+            setTimeout(function()
+            {
+                location.href="#/tab/myCarts/cartDetails/" + cartID
+            },100)
+        }
+    })
+
+    .controller('EditCartCtrl', function($scope, ComparePricesStorage) {
         $scope.searchQuery = ""
 
+        // TODO: Do I want to move this to RootCtrl?
         ComparePricesStorage.GetAllProducts(function(result) {
             $scope.c.allProducts = result.rows
         })
@@ -75,7 +126,7 @@ angular.module('ComparePrices.controllers', [])
                 }
             }
             if (productIndex == -1) {
-                var newItemInCart = {'CartID': 1,
+                var newItemInCart = {'CartID': $scope.c.cartID,
                     'ItemCode': clickedItem['ItemCode'],
                     'ItemName': clickedItem['ItemName'],
                     'Amount': 1}
@@ -84,16 +135,19 @@ angular.module('ComparePrices.controllers', [])
                 $scope.c.myCart[i]['Amount']++
             }
 
-            ComparePricesStorage.UpdateCart($scope.c.myCart)
+            ComparePricesStorage.UpdateCart($scope.c.cartID, $scope.c.myCart)
         }
     })
 
-    .controller('MyCartCtrl', function($scope, ComparePricesStorage) {
+    .controller('CartDetailsCtrl', function($scope, $stateParams, ComparePricesStorage) {
 
+        console.log("In cart details ctrl")
         // ionic related variables. Used to create advanced  <ion-list>
         $scope.shouldShowDelete = false;
         $scope.shouldShowReorder = false;
         $scope.listCanSwipe = true
+
+        $scope.c.cartID = $stateParams.cartID
 
         $scope.searchQuery = ""
 
@@ -102,7 +156,7 @@ angular.module('ComparePrices.controllers', [])
             $scope.searchQuery = ""
         }
 
-        ComparePricesStorage.GetMyCart(function(result) {
+        ComparePricesStorage.GetMyCart($scope.c.cartID, function(result) {
             $scope.$apply(function() {
                 $scope.c.myCart = result.rows
             });
@@ -186,7 +240,7 @@ angular.module('ComparePrices.controllers', [])
             if (productIndex != -1) {
                 $scope.c.myCart.splice(productIndex, 1)
             }
-            ComparePricesStorage.UpdateCart($scope.c.myCart)
+            ComparePricesStorage.UpdateCart($scope.c.cartID, $scope.c.myCart)
         }
 
         $scope.ToggleDeleteValue = function() {

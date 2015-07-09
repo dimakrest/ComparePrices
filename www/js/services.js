@@ -14,6 +14,7 @@ angular.module('ComparePrices.services', ['ngResource'])
     .factory('ComparePricesStorage', ['Shop', '$q', function (Shop, $q) {
 
         var createUserCartsTbQuery = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID, ItemCode, Amount)'
+        var createCartsTbQuery     = 'CREATE TABLE IF NOT EXISTS tbCarts (CartID, CartName)'
         var fileNameToTable = {'am_pm_products'     : 'tbAmPmProducts',
                                'mega_products'      : 'tbMegaProducts',
                                'supersal_products'  : 'tbSuperSalProducts'}
@@ -174,8 +175,8 @@ angular.module('ComparePrices.services', ['ngResource'])
 
         function initDB(tx) {
             tx.executeSql(createUserCartsTbQuery)
+            tx.executeSql(createCartsTbQuery)
         }
-
 
         // TODO: add flag to mask all prints
         function errorCB(err) {
@@ -240,9 +241,9 @@ angular.module('ComparePrices.services', ['ngResource'])
             // DELETE FROM table_name
             // WHERE some_column=some_value;
             // TODO: for now I assume single cart
-            UpdateCart: function(newCart) {
+            UpdateCart: function(cartID, newCart) {
                 db.transaction(function (tx) {
-                    tx.executeSql('DELETE FROM tbUserCarts WHERE CartID = "1"')
+                    tx.executeSql('DELETE FROM tbUserCarts WHERE CartID = "' + cartID + '"')
                     newCart.forEach(function(singleProduct) {
                         tx.executeSql('INSERT INTO tbUserCarts (CartID, ItemCode, Amount)' +
                                       'VALUES ("' + singleProduct['CartID'] + '", "' + singleProduct['ItemCode'] + '", "' + singleProduct['Amount'] + '")')
@@ -258,7 +259,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 }, logError())
             },
 
-            GetMyCart: function(success, error) {
+            GetMyCart: function(cartID, success, error) {
                 console.log("GetMyCart: Init")
                 var response = {}
                 response.rows = []
@@ -267,7 +268,8 @@ angular.module('ComparePrices.services', ['ngResource'])
                                   'tbProducts.ItemName AS ItemName,' +
                                   'tbUserCarts.Amount AS Amount, ' +
                                   'tbUserCarts.CartID AS CartID ' +
-                                  'FROM tbProducts JOIN tbUserCarts ON tbProducts.ItemCode=tbUserCarts.ItemCode WHERE tbUserCarts.CartID="1"', [], function (tx, rawresults) {
+                                  'FROM tbProducts JOIN tbUserCarts ON tbProducts.ItemCode=tbUserCarts.ItemCode ' +
+                                  'WHERE tbUserCarts.CartID="' + cartID + '"', [], function (tx, rawresults) {
                         // TODO: do I need the rows thing? if yes wrap this code in some kind of a function
                         var len = rawresults.rows.length;
                         console.log("GetMyCart: " + len + " rows found.");
@@ -299,11 +301,11 @@ angular.module('ComparePrices.services', ['ngResource'])
             },
 
             GetStoresInRadius: function($radius, success) {
-                var $sqlQuery = "SELECT * FROM tbStoresLocation WHERE Distance < " + $radius
+                var sqlQuery = "SELECT * FROM tbStoresLocation WHERE Distance < " + $radius
                 var response = {}
                 response.rows = []
                 db.transaction(function (tx) {
-                    tx.executeSql($sqlQuery, [], function (tx, rawresults) {
+                    tx.executeSql(sqlQuery, [], function (tx, rawresults) {
                         // TODO: do I need the rows thing? if yes wrap this code in some kind of a function
                         var len = rawresults.rows.length;
                         console.log("GetStoresInRadius: " + len + " rows found.");
@@ -316,6 +318,47 @@ angular.module('ComparePrices.services', ['ngResource'])
                     });
                 });
                 return response
+            },
+
+            GetAllCarts: function(success) {
+                var sqlQuery = 'SELECT * FROM tbCarts;'
+                var response = {}
+                response.rows = {}
+                db.transaction(function (tx) {
+                    tx.executeSql(sqlQuery, [], function (tx, rawresults) {
+                        // TODO: do I need the rows thing? if yes wrap this code in some kind of a function
+                        var len = rawresults.rows.length;
+                        console.log("GetAllCarts: " + len + " rows found.");
+                        for (var i = 0; i < len; i++) {
+                            response.rows[rawresults.rows.item(i)['CartID']] = rawresults.rows.item(i)['CartName']
+                        }
+                        if (success) {
+                            success(response)
+                        }
+                    });
+                });
+                return response
+            },
+
+            UpdateCartsList: function(newCart) {
+                var sqlQuery = 'INSERT INTO tbCarts VALUES ("' +
+                    newCart['CartID'] + '", "' +
+                    newCart['CartName'] + '")'
+
+                db.transaction(function (tx) {
+                    tx.executeSql(sqlQuery)
+                });
+            },
+
+            DeleteCart: function(cartID) {
+                db.transaction(function (tx) {
+                    var sqlQuery = 'DELETE FROM tbCarts WHERE CartID = "' + cartID + '"'
+                    tx.executeSql(sqlQuery)
+                });
+                db.transaction(function (tx) {
+                    var sqlQuery = 'DELETE FROM tbUserCarts WHERE CartID = "' + cartID + '"'
+                    tx.executeSql(sqlQuery)
+                });
             }
         }
     }]);

@@ -42,7 +42,9 @@
                       class="item-avatar-right">
 
                 <img ng-src="img/tabasco.jpg">
-                <h2 style="float:right">{{product.ItemName}} Amount: {{product.Amount}}</h2>
+
+                <h2 style="text-align:right">{{product.ItemName}}</h2>
+                <h2 style="text-align:right">{{c.localize.strings['Amount']}} {{product.Amount}}</h2>
 
                 <ion-option-button class="ion-minus-circled"
                                    ng-click="DeleteProduct(product)">

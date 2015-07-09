@@ -31,32 +31,33 @@ angular.module('ComparePrices', ['ionic', 'ComparePrices.controllers', 'CompareP
             templateUrl: "templates/tabs.html"
         })
 
-//        .state('tabs.createCart', {
-//            url: "/createCart",
-//            views: {
-//                'tabCreateCart': {
-//                    templateUrl: "templates/edit_cart.html",
-//                    controller: 'MyCartCtrl'
-//                }
-//            }
-//        })
-
-        .state('tabs.editCart', {
-            url: "/editCart",
+        .state('tabs.myCarts', {
+            url: "/myCarts",
             views: {
-                'tabMyCart': {
-                    templateUrl: "templates/edit_cart.html",
-                    controller: 'EditCartCtrl'
+                'tabMyCarts': {
+                templateUrl: "templates/my_carts.html",
+                controller: 'MyCartsCtrl'
                 }
             }
         })
 
-        .state('tabs.myCart', {
-            url: "/myCart",
+        // TODO: Do I need here a new view? How I can do this if I use here another nav view, nothing works
+        .state('tabs.cartDetails', {
+            url: "/myCarts/cartDetails/:cartID",
             views: {
-                'tabMyCart': {
-                    templateUrl: "templates/my_cart.html",
-                    controller: 'MyCartCtrl'
+                'tabMyCarts': {
+                    templateUrl: "templates/cart_details.html",
+                    controller: 'CartDetailsCtrl'
+                }
+            }
+        })
+
+        .state('tabs.editCart', {
+            url: "/editCart",
+            views: {
+                'tabMyCarts': {
+                    templateUrl: "templates/edit_cart.html",
+                    controller: 'EditCartCtrl'
                 }
             }
         })
@@ -72,5 +73,5 @@ angular.module('ComparePrices', ['ionic', 'ComparePrices.controllers', 'CompareP
         });
 
     // if none of the above states are matched, use this as the fallback
-    $urlRouterProvider.otherwise('/tab/myCart');
+    $urlRouterProvider.otherwise('/tab/myCarts');
 });

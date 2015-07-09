@@ -1,0 +1,39 @@
+<ion-header-bar class="bar bar-subheader item-input-inset">
+
+    <div class="bar bar-header">
+        <button class="button button-icon icon ion-minus-circled" ng-click="ToggleDeleteValue()"></button>
+        <div class="h1 title">Header Buttons</div>
+        <button class="button button-clear icon ion-plus-circled" ng-click="CreateNewCart()"></button>
+    </div>
+
+</ion-header-bar>
+
+<ion-view view-title="My Carts">
+
+    <ion-content class="content-bg">
+
+        <!-- TODO: Is there a way to make swipe right? -->
+        <ion-list show-delete="shouldShowDelete"
+                  show-reorder="shouldShowReorder"
+                  can-swipe="listCanSwipe">
+            <ion-item ng-repeat="(cartID, cartName) in myCartIDs"
+                      class="item-avatar-right" ng-click="OpenCartDetails(cartID)">
+
+                <img ng-src="img/tabasco.jpg">
+                <h2 style="float:right">{{cartName}}</h2>
+
+                <ion-option-button class="ion-minus-circled"
+                                   ng-click="DeleteCart(cartID)">
+                </ion-option-button>
+
+                <ion-delete-button class="ion-minus-circled"
+                                   ng-click="DeleteCart(cartID)">
+                </ion-delete-button>
+
+            </ion-item>
+        </ion-list>
+
+    </ion-content>
+
+
+</ion-view>
