@@ -370,4 +370,16 @@ angular.module('ComparePrices.services', ['ngResource'])
                 });
             }
         }
+    }])
+
+    .factory('PopUpWithDuration', ['$ionicLoading', function($ionicLoading) {
+        return function(duration, message)
+            {
+            var template = "<h2><i class='ion-checkmark-circled'></i></h2><br><small>"+message+"</small>"
+            $ionicLoading.show({
+                template:'<span style="color:white;">'+template+"</span>",
+                noBackdrop:false,
+                duration:duration
+            });
+        }
     }]);

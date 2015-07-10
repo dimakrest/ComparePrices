@@ -1,17 +1,23 @@
-<ion-header-bar class="bar bar-subheader item-input-inset">
+<ion-modal-view >
+    <ion-header-bar class="positive-bg text-center">
+        <div class="h1 title light">Edit Cart</div>
+        <button class="button button-icon icon ion-ios-close-empty light" ng-click="c.editProduct.close()"></button>
+    </ion-header-bar>
 
-    <label class="item-input-wrapper" ng-click="clearSearch()">
-        <i class="icon ion-ios-search placeholder-icon"></i>
-        <input type="search" ng-model="searchQuery" placeholder="URL, #hashtag, @nickname dsghfgn">
-        <button class="button button-clear">X</button>
-    </label>
-
-</ion-header-bar>
-<ion-view view-title="Edit Cart">
     <ion-content class="content-bg">
-        <ion-list ng-if='searchQuery != undefined && searchQuery != ""'>
-            <li ng-repeat="product in c.allProducts | filter:searchQuery">
-                <div class="item" ng-click="ItemWasClicked(product)">
+        <!--<div class="positive-bg item-input-inset" >-->
+        <div class="item item-input-inset">
+            <label class="item-input-wrapper" ng-click="c.clearSearch()">
+                <!-- TODO: without the style="width it doesn't work -->
+                <i class="icon ion-ios-search placeholder-icon" style="width: 100%;"></i>
+                <input type="search" ng-model="c.searchQueryEditProduct" placeholder="URL, #hashtag">
+                <button class="button button-clear">X</button>
+            </label>
+        </div>
+
+        <ion-list ng-if='c.searchQueryEditProduct != undefined && c.searchQueryEditProduct != ""'>
+            <li ng-repeat="product in c.allProducts | filter:c.searchQueryEditProduct">
+                <div class="item" ng-click="c.ItemWasClicked(product)">
                     Name: {{product["ItemName"]}} Code: {{product["ItemCode"]}}
                 </div>
             </li>
@@ -21,4 +27,4 @@
         <ion-infinite-scroll ng-if='searchQuery != undefined && searchQuery != ""' on-infinite="loadMore()" distance="10%" immediate-check="true">
         </ion-infinite-scroll>
     </ion-content>
-</ion-view>
+</ion-modal-view >

@@ -52,16 +52,6 @@ angular.module('ComparePrices', ['ionic', 'ComparePrices.controllers', 'CompareP
             }
         })
 
-        .state('tabs.editCart', {
-            url: "/editCart",
-            views: {
-                'tabMyCarts': {
-                    templateUrl: "templates/edit_cart.html",
-                    controller: 'EditCartCtrl'
-                }
-            }
-        })
-
         .state('tabs.recipes', {
             url: "/recipes",
             views: {

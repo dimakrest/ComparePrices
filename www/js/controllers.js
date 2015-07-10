@@ -41,18 +41,55 @@ angular.module('ComparePrices.controllers', [])
       };
     })
 
-    .controller('RootCtrl', function($scope) {
+    .controller('RootCtrl', function($scope, ComparePricesStorage, PopUpWithDuration) {
         $scope.c = {}
 
         $scope.c.myCart      = []
         $scope.c.allProducts = []
-        // TODO: for now define at root level, make it better via state params?
-        $scope.c.cartID = -1;
+        $scope.c.cartID = -1
 
+        // init localization array
         $scope.c.localize = document.localize
         document.selectLanguage('heb')
 
-        console.log($scope.c.localize.strings)
+        //////////// Edit cart related variables and methods ////////////
+        ComparePricesStorage.GetAllProducts(function(result) {
+            $scope.c.allProducts = result.rows
+        })
+
+
+        $scope.c.searchQueryEditProduct =""
+        $scope.c.clearSearch = function()
+        {
+            $scope.c.searchQueryEditProduct = ""
+        }
+
+        // TODO: maybe there's a prettier way, no need to change the entire cart
+        $scope.c.ItemWasClicked = function(clickedItem) {
+            var numOfProductsInCart = $scope.c.myCart.length
+            var productIndex        = -1
+            for (var i=0; i < numOfProductsInCart; i++) {
+                if ($scope.c.myCart[i]['ItemCode'] == clickedItem['ItemCode']) {
+                    productIndex = i
+                    break;
+                }
+            }
+            if (productIndex == -1) {
+                var newItemInCart = {'CartID': $scope.c.cartID,
+                    'ItemCode': clickedItem['ItemCode'],
+                    'ItemName': clickedItem['ItemName'],
+                    'Amount': 1}
+                $scope.c.myCart.push(newItemInCart)
+            } else {
+                $scope.c.myCart[i]['Amount']++
+            }
+
+            ComparePricesStorage.UpdateCart($scope.c.cartID, $scope.c.myCart)
+
+            PopUpWithDuration(400, $scope.c.localize.strings['AddedProduct'])
+        }
+
+        ////////////////////////////////////////////////////////////////////////
     })
 
     .controller('SuggestedCtrl', function() {
@@ -102,44 +139,7 @@ angular.module('ComparePrices.controllers', [])
         }
     })
 
-    .controller('EditCartCtrl', function($scope, ComparePricesStorage) {
-        $scope.searchQuery = ""
-
-        // TODO: Do I want to move this to RootCtrl?
-        ComparePricesStorage.GetAllProducts(function(result) {
-            $scope.c.allProducts = result.rows
-        })
-
-        $scope.clearSearch = function()
-        {
-            $scope.searchQuery = ""
-        }
-
-        // TODO: maybe there's a prettier way, no need to change the entire cart
-        $scope.ItemWasClicked = function(clickedItem) {
-            var numOfProductsInCart = $scope.c.myCart.length
-            var productIndex        = -1
-            for (var i=0; i < numOfProductsInCart; i++) {
-                if ($scope.c.myCart[i]['ItemCode'] == clickedItem['ItemCode']) {
-                    productIndex = i
-                    break;
-                }
-            }
-            if (productIndex == -1) {
-                var newItemInCart = {'CartID': $scope.c.cartID,
-                    'ItemCode': clickedItem['ItemCode'],
-                    'ItemName': clickedItem['ItemName'],
-                    'Amount': 1}
-                $scope.c.myCart.push(newItemInCart)
-            } else {
-                $scope.c.myCart[i]['Amount']++
-            }
-
-            ComparePricesStorage.UpdateCart($scope.c.cartID, $scope.c.myCart)
-        }
-    })
-
-    .controller('CartDetailsCtrl', function($scope, $stateParams, ComparePricesStorage) {
+    .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicModal, ComparePricesStorage) {
 
         console.log("In cart details ctrl")
         // ionic related variables. Used to create advanced  <ion-list>
@@ -246,6 +246,27 @@ angular.module('ComparePrices.controllers', [])
         $scope.ToggleDeleteValue = function() {
             $scope.shouldShowDelete = !$scope.shouldShowDelete;
         }
+
+        $scope.OpenProductsList = function()
+        {
+            $ionicModal.fromTemplateUrl('templates/edit_cart.html', {
+                scope: $scope,
+                animation: 'slide-in-up',
+                backdropClickToClose: true,
+                hardwareBackButtonClose:true
+            }).then(function(modal)
+            {
+                $scope.c.editProduct = modal
+                $scope.c.editProduct.show()
+
+
+                $scope.c.editProduct.close= function()
+                {
+                    $scope.c.editProduct.remove()
+                }
+            })
+        }
+
      })
 
     .controller('RecipesListCtrl', ['$scope', 'Recipes',

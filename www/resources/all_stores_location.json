@@ -1,0 +1,46 @@
+[
+{"ChainID":"123456",
+ "StoreID":"1",
+ "StoreName":"Mega",
+ "Lat":"32.310584",
+ "Lon":"34.854837",
+ "Address":"Netanya, Ben Zvi 17"
+}, 
+{"ChainID":"123456",
+ "StoreID":"2",
+ "StoreName":"Mega",
+ "Lat":"32.788495",
+ "Lon":"35.000378",
+ "Address":"Haifa Keren Ha yasod 17"
+},
+
+{"ChainID":"7891011",
+ "StoreID":"1",
+ "StoreName":"AM_PM",
+ "Lat":"32.329651",
+ "Lon":"34.853957",
+ "Address":"Netanya Herzel 10"
+}, 
+{"ChainID":"7891011",
+ "StoreID":"2",
+ "StoreName":"AM_PM",
+ "Lat":"32.060898",
+ "Lon":"34.784543",
+ "Address":"Tel Aviv HaMasger 7"
+},
+
+{"ChainID":"12131415",
+ "StoreID":"1",
+ "StoreName":"SuperSal",
+ "Lat":"32.779055",
+ "Lon":"35.006828",
+ "Address":"Haifa Brener 24"
+},
+{"ChainID":"12131415",
+ "StoreID":"2",
+ "StoreName":"SuperSal",
+ "Lat":"32.084289",
+ "Lon":"34.786774",
+ "Address":"Tel Aviv, Arlozorov 113"
+}
+]

@@ -6,7 +6,8 @@
     document.localize = {}
 
     var heb = {
-        'Amount':'כמות:'
+        'Amount':'כמות:',
+        'AddedProduct': 'מוצר נוסף'
     }
 
     document.selectLanguage = function(lang)
