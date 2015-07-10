@@ -6,15 +6,8 @@
         <!--<button class="button button-clear button-positive" OnClick="location.href='#/tab/editCart'"> Edit </button>-->
 
         <button class="button button-clear button-positive" ng-click="OpenProductsList()"> Edit </button>
-
     </div>
 
-    <!-- TODO: I don't see search bar -->
-    <label class="item-input-wrapper" ng-click="clearSearch()">
-        <i class="icon ion-ios-search placeholder-icon"></i>
-        <input type="search" ng-model="searchQuery" placeholder="URL, #hashtag, @nickname">
-        <button class="button button-clear">X</button>
-    </label>
 </ion-header-bar>
 
         <!--    Drop down select menu
@@ -37,11 +30,20 @@
 
     <ion-content class="content-bg">
 
+        <div class="item item-input-inset">
+            <label class="item-input-wrapper" ng-click="clearSearch()">
+                <!-- TODO: without the style="width it doesn't work -->
+                <i class="icon ion-ios-search placeholder-icon" style="width: 100%;"></i>
+                <input type="search" ng-model="c.searchQuery" placeholder="URL, #hashtag, @nickname">
+                <button class="button button-clear">X</button>
+            </label>
+        </div>
+
         <!-- TODO: Is there a way to make swipe right? -->
         <ion-list show-delete="shouldShowDelete"
                   show-reorder="shouldShowReorder"
                   can-swipe="listCanSwipe">
-            <ion-item ng-repeat="product in c.myCart | filter:searchQuery"
+            <ion-item ng-repeat="product in c.myCart | filter:c.searchQuery"
                       class="item-avatar-right">
 
                 <img ng-src="img/tabasco.jpg">

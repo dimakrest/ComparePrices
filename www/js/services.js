@@ -199,18 +199,18 @@ angular.module('ComparePrices.services', ['ngResource'])
         function IsssueSelectQuery(productCodes, tableName) {
             var d = $q.defer();
 
-            var response = {}
-            response.rows = []
-            var selectQuery = 'SELECT * FROM ' + tableName + ' WHERE ItemCode IN ('
+            var response = {};
+            response.rows = [];
+            var selectQuery = 'SELECT * FROM ' + tableName + ' WHERE ItemCode IN (';
 
             var numOfProducts = productCodes.length
             for (var i=0; i < numOfProducts; i++) {
-                selectQuery += '"' + productCodes[i] + '"'
+                selectQuery += '"' + productCodes[i] + '"';
                 if (i != (numOfProducts-1)) {
                     selectQuery += ', '
                 }
             }
-            selectQuery += ')'
+            selectQuery += ')';
 
             db.transaction(function (tx) {
                 tx.executeSql(selectQuery, [], function (tx, rawresults) {
@@ -229,9 +229,9 @@ angular.module('ComparePrices.services', ['ngResource'])
         return {
 
             GetAllProducts: function(success) {
-                console.log("GetAllProducts: Init")
-                var response = {}
-                response.rows = []
+                console.log("GetAllProducts: Init");
+                var response = {};
+                response.rows = [];
                 db.transaction(function (tx) {
                     tx.executeSql('SELECT * FROM tbProducts;', [], function (tx, rawresults) {
                         var len = rawresults.rows.length;
@@ -252,7 +252,7 @@ angular.module('ComparePrices.services', ['ngResource'])
             // TODO: for now I assume single cart
             UpdateCart: function(cartID, newCart) {
                 db.transaction(function (tx) {
-                    tx.executeSql('DELETE FROM tbUserCarts WHERE CartID = "' + cartID + '"')
+                    tx.executeSql('DELETE FROM tbUserCarts WHERE CartID = "' + cartID + '"');
                     newCart.forEach(function(singleProduct) {
                         tx.executeSql('INSERT INTO tbUserCarts (CartID, ItemCode, Amount)' +
                                       'VALUES ("' + singleProduct['CartID'] + '", "' + singleProduct['ItemCode'] + '", "' + singleProduct['Amount'] + '")')
@@ -261,17 +261,17 @@ angular.module('ComparePrices.services', ['ngResource'])
             },
 
             ClearMyCart: function() {
-                console.log("Clear my cart")
+                console.log("Clear my cart");
                 db.transaction(function (tx) {
-                    tx.executeSql('DROP TABLE IF EXISTS tbUserCarts')
+                    tx.executeSql('DROP TABLE IF EXISTS tbUserCarts');
                     tx.executeSql(createUserCartsTbQuery)
                 }, logError())
             },
 
             GetMyCart: function(cartID, success, error) {
-                console.log("GetMyCart: Init")
-                var response = {}
-                response.rows = []
+                console.log("GetMyCart: Init");
+                var response = {};
+                response.rows = [];
                 db.transaction(function (tx) {
                     tx.executeSql('SELECT tbProducts.ItemCode AS ItemCode, ' +
                                   'tbProducts.ItemName AS ItemName,' +
@@ -310,9 +310,9 @@ angular.module('ComparePrices.services', ['ngResource'])
             },
 
             GetStoresInRadius: function($radius, success) {
-                var sqlQuery = "SELECT * FROM tbStoresLocation WHERE Distance < " + $radius
-                var response = {}
-                response.rows = []
+                var sqlQuery = "SELECT * FROM tbStoresLocation WHERE Distance < " + $radius;
+                var response = {};
+                response.rows = [];
                 db.transaction(function (tx) {
                     tx.executeSql(sqlQuery, [], function (tx, rawresults) {
                         // TODO: do I need the rows thing? if yes wrap this code in some kind of a function
@@ -330,16 +330,16 @@ angular.module('ComparePrices.services', ['ngResource'])
             },
 
             GetAllCarts: function(success) {
-                var sqlQuery = 'SELECT * FROM tbCarts;'
-                var response = {}
-                response.rows = {}
+                var sqlQuery = 'SELECT * FROM tbCarts;';
+                var response = {};
+                response.rows = [];
                 db.transaction(function (tx) {
                     tx.executeSql(sqlQuery, [], function (tx, rawresults) {
                         // TODO: do I need the rows thing? if yes wrap this code in some kind of a function
                         var len = rawresults.rows.length;
                         console.log("GetAllCarts: " + len + " rows found.");
                         for (var i = 0; i < len; i++) {
-                            response.rows[rawresults.rows.item(i)['CartID']] = rawresults.rows.item(i)['CartName']
+                            response.rows.push(rawresults.rows.item(i))
                         }
                         if (success) {
                             success(response)
@@ -352,7 +352,7 @@ angular.module('ComparePrices.services', ['ngResource'])
             UpdateCartsList: function(newCart) {
                 var sqlQuery = 'INSERT INTO tbCarts VALUES ("' +
                     newCart['CartID'] + '", "' +
-                    newCart['CartName'] + '")'
+                    newCart['CartName'] + '")';
 
                 db.transaction(function (tx) {
                     tx.executeSql(sqlQuery)
@@ -361,11 +361,11 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             DeleteCart: function(cartID) {
                 db.transaction(function (tx) {
-                    var sqlQuery = 'DELETE FROM tbCarts WHERE CartID = "' + cartID + '"'
+                    var sqlQuery = 'DELETE FROM tbCarts WHERE CartID = "' + cartID + '"';
                     tx.executeSql(sqlQuery)
                 });
                 db.transaction(function (tx) {
-                    var sqlQuery = 'DELETE FROM tbUserCarts WHERE CartID = "' + cartID + '"'
+                    var sqlQuery = 'DELETE FROM tbUserCarts WHERE CartID = "' + cartID + '"';
                     tx.executeSql(sqlQuery)
                 });
             }
@@ -375,11 +375,67 @@ angular.module('ComparePrices.services', ['ngResource'])
     .factory('PopUpWithDuration', ['$ionicLoading', function($ionicLoading) {
         return function(duration, message)
             {
-            var template = "<h2><i class='ion-checkmark-circled'></i></h2><br><small>"+message+"</small>"
+            var template = "<h2><i class='ion-checkmark-circled'></i></h2><br><small>"+message+"</small>";
             $ionicLoading.show({
                 template:'<span style="color:white;">'+template+"</span>",
                 noBackdrop:false,
                 duration:duration
             });
+        }
+    }])
+
+    .factory('MiscFunctions', ['ComparePricesStorage', function(ComparePricesStorage) {
+        return {
+            CalculateBestShopValues: function(productCart, productPricesInStore) {
+                var priceInAmPM = 0.0;
+                productPricesInStore['AM_PM'].rows.forEach(function(product) {
+                    var numOfProductsInCart = productCart.length;
+                    var amount = 0;
+                    for (var i=0; i < numOfProductsInCart; i++) {
+                        if (productCart[i]['ItemCode'] == product['ItemCode']) {
+                            amount = parseInt(productCart[i]['Amount']);
+                            break;
+                        }
+                    }
+                    priceInAmPM += parseFloat(product['ItemPrice']) * amount
+                });
+
+                var priceInMega = 0.0;
+                productPricesInStore['Mega'].rows.forEach(function(product) {
+                    var numOfProductsInCart = productCart.length;
+                    var amount = 0;
+                    for (var i=0; i < numOfProductsInCart; i++) {
+                        if (productCart[i]['ItemCode'] == product['ItemCode']) {
+                            amount = parseInt(productCart[i]['Amount']);
+                            break;
+                        }
+                    }
+                    priceInMega += parseFloat(product['ItemPrice']) * amount
+                });
+
+                var priceInSuperSal = 0.0;
+                productPricesInStore['SuperSal'].rows.forEach(function(product) {
+                    var numOfProductsInCart = productCart.length;
+                    var amount = 0;
+                    for (var i=0; i < numOfProductsInCart; i++) {
+                        if (productCart[i]['ItemCode'] == product['ItemCode']) {
+                            amount = parseInt(productCart[i]['Amount']);
+                            break;
+                        }
+                    }
+                    priceInSuperSal += parseFloat(product['ItemPrice']) * amount
+                });
+
+                ComparePricesStorage.GetStoresInRadius(15, function(storesInRadius) {
+                    var alertMessage = "AM_PM Price: " + priceInAmPM + "\n" +
+                        "Mega Price: " + priceInMega + "\n" +
+                        "SuperSal Price: " + priceInSuperSal + "\nStores near you: \n";
+
+                    storesInRadius.rows.forEach(function(singleStore) {
+                        alertMessage += "Store Name " + singleStore['StoreName'] + ", Distance to store: " + singleStore['Distance'] + "\n"
+                    });
+                    alert(alertMessage)
+                })
+            }
         }
     }]);
