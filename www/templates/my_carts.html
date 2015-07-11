@@ -16,18 +16,23 @@
         <ion-list show-delete="shouldShowDelete"
                   show-reorder="shouldShowReorder"
                   can-swipe="listCanSwipe">
-            <ion-item ng-repeat="(cartID, cartName) in myCartIDs"
-                      class="item-avatar-right" ng-click="OpenCartDetails(cartID)">
+            <ion-item ng-repeat="cartInfo in myCartsInfo"
+                      class="item-avatar-right" ng-click="OpenCartDetails(cartInfo['CartID'])">
 
                 <img ng-src="img/tabasco.jpg">
-                <h2 style="float:right">{{cartName}}</h2>
+                <h2 style="float:right">{{cartInfo['CartName']}}</h2>
 
                 <ion-option-button class="ion-minus-circled"
-                                   ng-click="DeleteCart(cartID)">
+                                   ng-click="DeleteCart(cartInfo['CartID'])">
+                </ion-option-button>
+
+                <ion-option-button class="button-positive"
+                                   ng-click="FindNearestShopMyCarts(cartInfo['CartID'])">
+                    {{c.localize.strings['FindNearestShop']}}
                 </ion-option-button>
 
                 <ion-delete-button class="ion-minus-circled"
-                                   ng-click="DeleteCart(cartID)">
+                                   ng-click="DeleteCart(cartInfo['CartID'])">
                 </ion-delete-button>
 
             </ion-item>
