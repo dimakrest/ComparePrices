@@ -36,9 +36,9 @@
       </ion-item>
       <ion-item class="item-accordion"
                 ng-show="isGroupShown(1)">
-        <table style="width:50%">
-          <tr ng-repeat="product in recipe.products">
-            <td> {{product}} </td>
+        <table style="width:95%">
+          <tr ng-repeat="productID in recipe.products">
+            <td align="right"> {{c.allProductsByItemID[productID]["ItemName"]}} </td>
           </tr>
         </table>
       </ion-item>

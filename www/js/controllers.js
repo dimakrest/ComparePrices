@@ -46,6 +46,7 @@ angular.module('ComparePrices.controllers', [])
 
         $scope.c.myCart      = []
         $scope.c.allProducts = []
+        $scope.c.allProductsByItemID = []
         $scope.c.cartID = -1
 
         // init localization array
@@ -55,8 +56,11 @@ angular.module('ComparePrices.controllers', [])
         //////////// Edit cart related variables and methods ////////////
         ComparePricesStorage.GetAllProducts(function(result) {
             $scope.c.allProducts = result.rows
+            // TODO: may be to replace allProducts with allProductsByItemID in the whole code?
+            $scope.c.allProducts.forEach(function(singleProduct) {
+                $scope.c.allProductsByItemID[singleProduct['ItemCode']] = singleProduct;
+            });
         })
-
 
         $scope.c.searchQueryEditProduct =""
         $scope.c.clearSearch = function()
