@@ -58,6 +58,10 @@ angular.module('ComparePrices.controllers', [])
         //////////// Edit cart related variables and methods ////////////
         ComparePricesStorage.GetAllProducts(function(result) {
             $scope.c.allProducts = result.rows
+            // TODO: may be to replace allProducts with allProductsByItemID in the whole code?
+            $scope.c.allProducts.forEach(function(singleProduct) {
+                $scope.c.allProductsByItemID[singleProduct['ItemCode']] = singleProduct;
+            });
         })
 
 
@@ -243,13 +247,11 @@ angular.module('ComparePrices.controllers', [])
 
      })
 
-    .controller('RecipesListCtrl', ['$scope', 'Recipes',
-        function($scope, Recipes) {
+    .controller('RecipesListCtrl', function($scope, Recipes) {
             $scope.recipes = Recipes.query();
-    }])
+    })
 
-    .controller('RecipeCtrl', ['$scope', '$stateParams', 'Recipes',
-        function($scope, $stateParams, Recipes) {
+    .controller('RecipeCtrl', function($scope, $stateParams, Recipes, ComparePricesStorage, MiscFunctions) {
             $scope.recipe = Recipes.get({recipe: $stateParams.recipe}, function() {});
 
             $scope.showGroup = [];
@@ -268,8 +270,21 @@ angular.module('ComparePrices.controllers', [])
                 return $scope.showGroup[groupId] == 1;
             };
 
+            $scope.FindBestShop = function() {
+                // At first get from myCart only ItemCodes
+                var productCodesInMyCart = [];
+                var productsStructForCalculation = [];
+                $scope.recipe.products.forEach(function(itemCode) {
+                    productCodesInMyCart.push(itemCode);
+                    productsStructForCalculation.push({"ItemCode":itemCode,"Amount":1});
+                });
 
 
-    }])
+                ComparePricesStorage.GetProductsForEachShopByItemCode(productCodesInMyCart, function(result) {
+                    MiscFunctions.CalculateBestShopValues(productsStructForCalculation, result)
+                });
+            };
+
+    })
 
 ;

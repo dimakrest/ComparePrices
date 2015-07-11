@@ -427,9 +427,11 @@ angular.module('ComparePrices.services', ['ngResource'])
                 });
 
                 ComparePricesStorage.GetStoresInRadius(15, function(storesInRadius) {
+                    console.log(storesInRadius);
                     var alertMessage = "AM_PM Price: " + priceInAmPM + "\n" +
                         "Mega Price: " + priceInMega + "\n" +
                         "SuperSal Price: " + priceInSuperSal + "\nStores near you: \n";
+
 
                     storesInRadius.rows.forEach(function(singleStore) {
                         alertMessage += "Store Name " + singleStore['StoreName'] + ", Distance to store: " + singleStore['Distance'] + "\n"
