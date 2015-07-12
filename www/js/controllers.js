@@ -41,19 +41,33 @@ angular.module('ComparePrices.controllers', [])
       };
     })
 
-    .controller('RootCtrl', function($scope, ComparePricesStorage, PopUpWithDuration) {
+    .controller('RootCtrl', function($scope, ComparePricesStorage, PopUpWithDuration, GoogleGeocode) {
         $scope.c = {};
 
-        $scope.c.myCart      = []
-        $scope.c.allProducts = []
-        $scope.c.allProductsByItemID = []
-        $scope.c.cartID = -1
+        $scope.c.myCart      = [];
+        $scope.c.allProducts = [];
+        $scope.c.allProductsByItemID = [];
+        $scope.c.cartID = -1;
 
         $scope.c.searchQuery = "";
 
         // init localization array
         $scope.c.localize = document.localize;
         document.selectLanguage('heb');
+
+        $scope.c.address     = "";
+        $scope.c.lastAddress = localStorage.getItem('lastAddress') || "";
+
+        $scope.c.FindLocation = function() {
+            GoogleGeocode.GetLatAndLong.get({'address':$scope.c.address}, function(result) {
+                if (result.results.length != 0) {
+                    ComparePricesStorage.UpdateStoreRadiusFromLocations(result.results[0].geometry.location.lat,
+                                                                        result.results[0].geometry.location.lng);
+                    $scope.c.lastAddress = $scope.c.address;
+                    localStorage.setItem('lastAddress', $scope.c.address)
+                }
+            })
+        };
 
         //////////// Edit cart related variables and methods ////////////
         ComparePricesStorage.GetAllProducts(function(result) {
@@ -65,7 +79,7 @@ angular.module('ComparePrices.controllers', [])
         })
 
 
-        $scope.c.searchQueryEditProduct =""
+        $scope.c.searchQueryEditProduct ="";
         $scope.c.clearSearch = function()
         {
             $scope.c.searchQueryEditProduct = ""

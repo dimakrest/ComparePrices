@@ -18,7 +18,16 @@ angular.module('ComparePrices.services', ['ngResource'])
             });
     }])
 
-
+    .factory('GoogleGeocode', function ($resource) {
+        var googleGeocode= "https://maps.googleapis.com/maps/api/geocode/json?"
+        var server = {}
+        function initServer()
+        {
+            server.GetLatAndLong = $resource(googleGeocode+"address=:address"+ "&key=AIzaSyBaHL-Agrso7SJGqUK5rfS0WQtpRlJdKF4",{})
+        }
+        initServer()
+        return server
+    })
 
     .factory('ComparePricesStorage', ['Shop', '$q', function (Shop, $q) {
 
@@ -41,54 +50,6 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             // For now do this only once
             localStorage.setItem('initProductList', 0)
-        }
-
-        calcStoreRadius = localStorage.getItem('calcStoreRadius') || 1
-        if (calcStoreRadius == 1) {
-            var sqlQuery = "SELECT ChainID, StoreID, Lat, Lon FROM tbStoresLocation;"
-            var response = {}
-            response.rows = []
-            db.transaction(function (tx) {
-                tx.executeSql(sqlQuery, [], function (tx, rawresults) {
-                    // TODO: do I need the rows thing? if yes wrap this code in some kind of a function
-                    var len = rawresults.rows.length;
-                    console.log("CalcStoreInRadius: " + len + " rows found.");
-                    for (var i = 0; i < len; i++) {
-                        response.rows.push(rawresults.rows.item(i));
-                    }
-
-                   CalculateDistanceBasedOnLogLat(response)
-                });
-            });
-            // For now do this only once
-            localStorage.setItem('calcStoreRadius', 0)
-        }
-
-        function CalculateDistanceBasedOnLogLat(storeLocationsInfo)
-        {
-            // Netanya, Irus Argaman 70
-            var myLat = 32.286227;
-            var myLon = 34.847234;
-
-            db.transaction(function (tx) {
-                var len  = storeLocationsInfo.rows.length
-                for (var i=0; i < len; i++) {
-
-                    var singleStore = storeLocationsInfo.rows[i]
-                    var storeLat = parseFloat(singleStore['Lat'])
-                    var storeLon = parseFloat(singleStore['Lon'])
-
-                    var R = 6371; // Radius of the earth in km
-                    var dLat = (myLat - storeLat) * Math.PI / 180;  // deg2rad below
-                    var dLon = (myLon - storeLon) * Math.PI / 180;
-                    var a = 0.5 - Math.cos(dLat) / 2 + Math.cos(storeLat * Math.PI / 180) * Math.cos(myLat * Math.PI / 180) * (1 - Math.cos(dLon)) / 2;
-                    var distance = Math.round(R * 2 * Math.asin(Math.sqrt(a)));
-
-                    var sqlQuery = 'UPDATE tbStoresLocation SET Distance=' + distance + ' WHERE ChainID="' + singleStore['ChainID'] + '"AND StoreID="' +
-                        singleStore['StoreID'] + '";'
-                    tx.executeSql(sqlQuery)
-                }
-            })
         }
 
         // TODO: add index
@@ -228,7 +189,7 @@ angular.module('ComparePrices.services', ['ngResource'])
         // TODO: succes, error handlers
         return {
 
-            GetAllProducts: function(success) {
+            GetAllProducts: function (success) {
                 console.log("GetAllProducts: Init");
                 var response = {};
                 response.rows = [];
@@ -250,17 +211,17 @@ angular.module('ComparePrices.services', ['ngResource'])
             // DELETE FROM table_name
             // WHERE some_column=some_value;
             // TODO: for now I assume single cart
-            UpdateCart: function(cartID, newCart) {
+            UpdateCart: function (cartID, newCart) {
                 db.transaction(function (tx) {
                     tx.executeSql('DELETE FROM tbUserCarts WHERE CartID = "' + cartID + '"');
-                    newCart.forEach(function(singleProduct) {
+                    newCart.forEach(function (singleProduct) {
                         tx.executeSql('INSERT INTO tbUserCarts (CartID, ItemCode, Amount)' +
-                                      'VALUES ("' + singleProduct['CartID'] + '", "' + singleProduct['ItemCode'] + '", "' + singleProduct['Amount'] + '")')
+                            'VALUES ("' + singleProduct['CartID'] + '", "' + singleProduct['ItemCode'] + '", "' + singleProduct['Amount'] + '")')
                     });
                 });
             },
 
-            ClearMyCart: function() {
+            ClearMyCart: function () {
                 console.log("Clear my cart");
                 db.transaction(function (tx) {
                     tx.executeSql('DROP TABLE IF EXISTS tbUserCarts');
@@ -268,17 +229,17 @@ angular.module('ComparePrices.services', ['ngResource'])
                 }, logError())
             },
 
-            GetMyCart: function(cartID, success, error) {
+            GetMyCart: function (cartID, success, error) {
                 console.log("GetMyCart: Init");
                 var response = {};
                 response.rows = [];
                 db.transaction(function (tx) {
                     tx.executeSql('SELECT tbProducts.ItemCode AS ItemCode, ' +
-                                  'tbProducts.ItemName AS ItemName,' +
-                                  'tbUserCarts.Amount AS Amount, ' +
-                                  'tbUserCarts.CartID AS CartID ' +
-                                  'FROM tbProducts JOIN tbUserCarts ON tbProducts.ItemCode=tbUserCarts.ItemCode ' +
-                                  'WHERE tbUserCarts.CartID="' + cartID + '"', [], function (tx, rawresults) {
+                        'tbProducts.ItemName AS ItemName,' +
+                        'tbUserCarts.Amount AS Amount, ' +
+                        'tbUserCarts.CartID AS CartID ' +
+                        'FROM tbProducts JOIN tbUserCarts ON tbProducts.ItemCode=tbUserCarts.ItemCode ' +
+                        'WHERE tbUserCarts.CartID="' + cartID + '"', [], function (tx, rawresults) {
                         // TODO: do I need the rows thing? if yes wrap this code in some kind of a function
                         var len = rawresults.rows.length;
                         console.log("GetMyCart: " + len + " rows found.");
@@ -293,23 +254,23 @@ angular.module('ComparePrices.services', ['ngResource'])
                 return response
             },
 
-            GetProductsForEachShopByItemCode: function(productCodes, success) {
+            GetProductsForEachShopByItemCode: function (productCodes, success) {
                 $q.all([
                     IsssueSelectQuery(productCodes, 'tbAmPmProducts'),
                     IsssueSelectQuery(productCodes, 'tbMegaProducts'),
-                    IsssueSelectQuery(productCodes, 'tbSuperSalProducts')]).then(function(data) {
+                    IsssueSelectQuery(productCodes, 'tbSuperSalProducts')]).then(function (data) {
 
-                        // TODO: is there a way to do this prettier?
-                        if (success) {
-                            dataAdjusted = {'AM_PM':data[0],
-                                            'Mega' :data[1],
-                                            'SuperSal':data[2]}
-                            success(dataAdjusted)
-                        }
-                    });
+                    // TODO: is there a way to do this prettier?
+                    if (success) {
+                        dataAdjusted = {'AM_PM': data[0],
+                            'Mega': data[1],
+                            'SuperSal': data[2]}
+                        success(dataAdjusted)
+                    }
+                });
             },
 
-            GetStoresInRadius: function($radius, success) {
+            GetStoresInRadius: function ($radius, success) {
                 var sqlQuery = "SELECT * FROM tbStoresLocation WHERE Distance < " + $radius;
                 var response = {};
                 response.rows = [];
@@ -329,7 +290,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 return response
             },
 
-            GetAllCarts: function(success) {
+            GetAllCarts: function (success) {
                 var sqlQuery = 'SELECT * FROM tbCarts;';
                 var response = {};
                 response.rows = [];
@@ -349,7 +310,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 return response
             },
 
-            UpdateCartsList: function(newCart) {
+            UpdateCartsList: function (newCart) {
                 var sqlQuery = 'INSERT INTO tbCarts VALUES ("' +
                     newCart['CartID'] + '", "' +
                     newCart['CartName'] + '")';
@@ -359,7 +320,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 });
             },
 
-            DeleteCart: function(cartID) {
+            DeleteCart: function (cartID) {
                 db.transaction(function (tx) {
                     var sqlQuery = 'DELETE FROM tbCarts WHERE CartID = "' + cartID + '"';
                     tx.executeSql(sqlQuery)
@@ -368,6 +329,32 @@ angular.module('ComparePrices.services', ['ngResource'])
                     var sqlQuery = 'DELETE FROM tbUserCarts WHERE CartID = "' + cartID + '"';
                     tx.executeSql(sqlQuery)
                 });
+            },
+
+            UpdateStoreRadiusFromLocations: function (myLat, myLon) {
+                var sqlQuery = "SELECT ChainID, StoreID, Lat, Lon FROM tbStoresLocation;"
+                db.transaction(function (tx) {
+                    tx.executeSql(sqlQuery, [], function (tx, rawresults) {
+                        // TODO: do I need the rows thing? if yes wrap this code in some kind of a function
+                        var len = rawresults.rows.length;
+                        console.log("CalcStoreInRadius: " + len + " rows found.");
+                        for (var i = 0; i < len; i++) {
+                            var singleStore = rawresults.rows.item(i)
+                            var storeLat = parseFloat(singleStore['Lat'])
+                            var storeLon = parseFloat(singleStore['Lon'])
+
+                            var R = 6371; // Radius of the earth in km
+                            var dLat = (myLat - storeLat) * Math.PI / 180;  // deg2rad below
+                            var dLon = (myLon - storeLon) * Math.PI / 180;
+                            var a = 0.5 - Math.cos(dLat) / 2 + Math.cos(storeLat * Math.PI / 180) * Math.cos(myLat * Math.PI / 180) * (1 - Math.cos(dLon)) / 2;
+                            var distance = Math.round(R * 2 * Math.asin(Math.sqrt(a)));
+
+                            var sqlQuery = 'UPDATE tbStoresLocation SET Distance=' + distance + ' WHERE ChainID="' + singleStore['ChainID'] + '"AND StoreID="' +
+                                singleStore['StoreID'] + '";'
+                            tx.executeSql(sqlQuery)
+                        }
+                    })
+                })
             }
         }
     }])
@@ -427,14 +414,13 @@ angular.module('ComparePrices.services', ['ngResource'])
                 });
 
                 ComparePricesStorage.GetStoresInRadius(15, function(storesInRadius) {
-                    console.log(storesInRadius);
                     var alertMessage = "AM_PM Price: " + priceInAmPM + "\n" +
                         "Mega Price: " + priceInMega + "\n" +
                         "SuperSal Price: " + priceInSuperSal + "\nStores near you: \n";
 
 
                     storesInRadius.rows.forEach(function(singleStore) {
-                        alertMessage += "Store Name " + singleStore['StoreName'] + ", Distance to store: " + singleStore['Distance'] + "\n"
+                        alertMessage += "Name " + singleStore['StoreName'] + "Address " + singleStore['Address'] + ", Distance: " + singleStore['Distance'] + "\n"
                     });
                     alert(alertMessage)
                 })
