@@ -18,17 +18,6 @@ angular.module('ComparePrices.services', ['ngResource'])
             });
     }])
 
-    .factory('GoogleGeocode', function ($resource) {
-        var googleGeocode= "https://maps.googleapis.com/maps/api/geocode/json?"
-        var server = {}
-        function initServer()
-        {
-            server.GetLatAndLong = $resource(googleGeocode+"address=:address"+ "&key=AIzaSyBaHL-Agrso7SJGqUK5rfS0WQtpRlJdKF4",{})
-        }
-        initServer()
-        return server
-    })
-
     .factory('ComparePricesStorage', ['Shop', '$q', function (Shop, $q) {
 
         var createUserCartsTbQuery = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID, ItemCode, Amount)'

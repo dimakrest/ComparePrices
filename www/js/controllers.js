@@ -41,7 +41,7 @@ angular.module('ComparePrices.controllers', [])
       };
     })
 
-    .controller('RootCtrl', function($scope, ComparePricesStorage, PopUpWithDuration, GoogleGeocode) {
+    .controller('RootCtrl', function($scope, ComparePricesStorage, PopUpWithDuration) {
         $scope.c = {};
 
         $scope.c.myCart      = [];
@@ -55,19 +55,7 @@ angular.module('ComparePrices.controllers', [])
         $scope.c.localize = document.localize;
         document.selectLanguage('heb');
 
-        $scope.c.address     = "";
         $scope.c.lastAddress = localStorage.getItem('lastAddress') || "";
-
-        $scope.c.FindLocation = function() {
-            GoogleGeocode.GetLatAndLong.get({'address':$scope.c.address}, function(result) {
-                if (result.results.length != 0) {
-                    ComparePricesStorage.UpdateStoreRadiusFromLocations(result.results[0].geometry.location.lat,
-                                                                        result.results[0].geometry.location.lng);
-                    $scope.c.lastAddress = $scope.c.address;
-                    localStorage.setItem('lastAddress', $scope.c.address)
-                }
-            })
-        };
 
         //////////// Edit cart related variables and methods ////////////
         ComparePricesStorage.GetAllProducts(function(result) {
@@ -111,6 +99,26 @@ angular.module('ComparePrices.controllers', [])
         };
 
         ////////////////////////////////////////////////////////////////////////
+
+        // Location calculation + auto complete
+        var input = /** @type {HTMLInputElement} */(
+            document.getElementById('pac-input'));
+        var autocomplete = new google.maps.places.Autocomplete(input);
+        google.maps.event.addListener(autocomplete, 'place_changed', function() {
+            var place = autocomplete.getPlace();
+
+            console.log(place)
+            if (!place.geometry) {
+                // TODO: chamge error message
+                window.alert("Autocomplete's returned place contains no geometry");
+                return;
+            }
+
+            ComparePricesStorage.UpdateStoreRadiusFromLocations(place.geometry.location.A,
+                                                                place.geometry.location.F);
+            $scope.c.lastAddress = place.formatted_address;
+            localStorage.setItem('lastAddress', $scope.c.lastAddress)
+            });
     })
 
     .controller('SuggestedCtrl', function() {
