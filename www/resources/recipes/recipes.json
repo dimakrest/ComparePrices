@@ -3,19 +3,22 @@
         "id": "okroshka", 
         "imageUrl": "img/recipes/okroshka.jpg", 
         "name": "O-baby!", 
-        "description": "Cold soup of Russian origin. \nThe name probably originates from kroshit', which means to crumble into small pieces."
+        "description": "Cold soup of Russian origin. \nThe name probably originates from kroshit', which means to crumble into small pieces.",
+        "products":{"32147230":"1","40111216":"1","40883007":"2"}
     }, 
     {
         "id": "solyanka", 
         "imageUrl": "img/recipes/solyanka.jpg", 
         "name": "Salt-yanka", 
-        "description": "Thick, spicy and sour soup in Russian and Ukrainian cuisines."
+        "description": "Thick, spicy and sour soup in Russian and Ukrainian cuisines.",
+        "products":{"32147230":"1","40111216":"1","40883007":"2"}
     }, 
     {
         "id": "golubtsi", 
         "imageUrl": "img/recipes/golubtsi.jpg", 
         "name": "Lazy golubtsi", 
-        "description": "Popular among European Jews, and traditionally served on Simchat Torah. /nStuffed cabbage is described by Gil Marks to have entered Jewish cooking some 2,000 years ago."
+        "description": "Popular among European Jews, and traditionally served on Simchat Torah.",
+        "products":{"32147230":"1","40111216":"1","40883007":"2"}
     }
 ]
 
