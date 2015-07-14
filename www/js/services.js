@@ -20,22 +20,22 @@ angular.module('ComparePrices.services', ['ngResource'])
 
     .factory('ComparePricesStorage', ['Shop', '$q', function (Shop, $q) {
 
-        var createUserCartsTbQuery = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID, ItemCode, Amount)'
-        var createCartsTbQuery     = 'CREATE TABLE IF NOT EXISTS tbCarts (CartID, CartName)'
+        var createUserCartsTbQuery = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID, ItemCode, Amount)';
+        var createCartsTbQuery     = 'CREATE TABLE IF NOT EXISTS tbCarts (CartID, CartName)';
         var fileNameToTable = {'am_pm_products'     : 'tbAmPmProducts',
                                'mega_products'      : 'tbMegaProducts',
-                               'supersal_products'  : 'tbSuperSalProducts'}
+                               'supersal_products'  : 'tbSuperSalProducts'};
 
         // TODO: database size + don't want to call init every time
         var db = openDatabase("ComparePricesDB", "1.0", "Global storage", 100 * 1024 * 1024);
         db.transaction(initDB, errorCB, successCB); // creates tables for the first time if required
 
 
-        initProductList = localStorage.getItem('initProductList') || 1
+        initProductList = localStorage.getItem('initProductList') || 1;
         if (initProductList == 1) {
-            CreateTbProducts()
-            CreateStoresLocationTable()
-            CreateProductTablesForShops()
+            CreateTbProducts();
+            CreateStoresLocationTable();
+            CreateProductTablesForShops();
 
             // For now do this only once
             localStorage.setItem('initProductList', 0)
@@ -45,19 +45,19 @@ angular.module('ComparePrices.services', ['ngResource'])
         function CreateTbProducts()
         {
             db.transaction(function(tx) {
-                tx.executeSql('DROP TABLE IF EXISTS tbProducts')
+                tx.executeSql('DROP TABLE IF EXISTS tbProducts');
                 tx.executeSql('CREATE TABLE IF NOT EXISTS tbProducts (ItemCode, ItemName)')
-            }, errorCB, successCB)
+            }, errorCB, successCB);
 
             Shop.query({shopName:'all_products'}, function (products) {
                 db.transaction(function (tx) {
-                    var numOfProducts = products.length
+                    var numOfProducts = products.length;
                     // TODO: how better mask ' and "
                     for (var i = 0; i < numOfProducts; i++) {
-                        var singleProduct = products[i]
+                        var singleProduct = products[i];
                         var sqlQuery = 'INSERT INTO tbProducts VALUES ("' +
                             singleProduct['ItemCode'] + '", "' +
-                            singleProduct['ItemName'].replace(/\"/g, "\'\'") + '")'
+                            singleProduct['ItemName'].replace(/\"/g, "\'\'") + '")';
                         tx.executeSql(sqlQuery)
                     }
                 }, errorCB, successCB)
@@ -68,13 +68,13 @@ angular.module('ComparePrices.services', ['ngResource'])
         function CreateStoresLocationTable()
         {
             db.transaction(function(tx) {
-                tx.executeSql('DROP TABLE IF EXISTS tbStoresLocation')
+                tx.executeSql('DROP TABLE IF EXISTS tbStoresLocation');
                 tx.executeSql('CREATE TABLE IF NOT EXISTS tbStoresLocation (ChainID, StoreID, StoreName, Lat, Lon, Address, Distance)')
-            }, errorCB, successCB)
+            }, errorCB, successCB);
 
             Shop.query({shopName:'all_stores_location'}, function (storeLocations) {
                 db.transaction(function (tx) {
-                    var numOfStoreLocations = storeLocations.length
+                    var numOfStoreLocations = storeLocations.length;
                     // TODO: how better mask ' and "
                     for (var i = 0; i < numOfStoreLocations; i++) {
                         var singleStore = storeLocations[i]
@@ -84,7 +84,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                             singleStore['StoreName'].replace(/\"/g, "\'\'") + '", "' +
                             singleStore['Lat'] + '", "' +
                             singleStore['Lon'] + '", "' +
-                            singleStore['Address'].replace(/\"/g, "\'\'") + '", "0")'
+                            singleStore['Address'].replace(/\"/g, "\'\'") + '", "0")';
                         tx.executeSql(sqlQuery)
                     }
                 }, errorCB, successCB)
@@ -96,18 +96,18 @@ angular.module('ComparePrices.services', ['ngResource'])
         {
             // create table if needed
             db.transaction(function(tx) {
-                tx.executeSql('DROP TABLE IF EXISTS ' + tableName)
+                tx.executeSql('DROP TABLE IF EXISTS ' + tableName);
                 tx.executeSql('CREATE TABLE IF NOT EXISTS ' + tableName + ' (ItemCode, ItemPrice)')
-            }, errorCB, successCB)
+            }, errorCB, successCB);
             Shop.query({shopName:fileName}, function (products) {
                 db.transaction(function (tx) {
-                    var numOfProducts = products.length
+                    var numOfProducts = products.length;
                     // TODO: how better mask ' and "
                     for (var i = 0; i < numOfProducts; i++) {
-                        var singleProduct = products[i]
+                        var singleProduct = products[i];
                         var sqlQuery = 'INSERT INTO ' + tableName + ' VALUES ("' +
                             singleProduct['ItemCode'] + '", "' +
-                            singleProduct['ItemPrice'] + '")'
+                            singleProduct['ItemPrice'] + '")';
                         tx.executeSql(sqlQuery)
                     }
                 }, errorCB, successCB)
@@ -118,14 +118,14 @@ angular.module('ComparePrices.services', ['ngResource'])
         {
             for (fileName in fileNameToTable)
             {
-                var tableName = fileNameToTable[fileName]
+                var tableName = fileNameToTable[fileName];
                 CreateProductTableForSingleShop(tableName, fileName)
             }
         }
 
         function logError(errorCallBack) {
             return function (err) {
-                console.log("DB error: " + err.code)
+                console.log("DB error: " + err.code);
                 if (errorCallBack)
                     errorCallBack(err)
             }
@@ -133,8 +133,8 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
 
         function initDB(tx) {
-            tx.executeSql(createUserCartsTbQuery)
-            tx.executeSql(createCartsTbQuery)
+            tx.executeSql(createUserCartsTbQuery);
+            tx.executeSql(createCartsTbQuery);
         }
 
         // TODO: add flag to mask all prints
@@ -153,7 +153,7 @@ angular.module('ComparePrices.services', ['ngResource'])
             response.rows = [];
             var selectQuery = 'SELECT * FROM ' + tableName + ' WHERE ItemCode IN (';
 
-            var numOfProducts = productCodes.length
+            var numOfProducts = productCodes.length;
             for (var i=0; i < numOfProducts; i++) {
                 selectQuery += '"' + productCodes[i] + '"';
                 if (i != (numOfProducts-1)) {
@@ -253,7 +253,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     if (success) {
                         dataAdjusted = {'AM_PM': data[0],
                             'Mega': data[1],
-                            'SuperSal': data[2]}
+                            'SuperSal': data[2]};
                         success(dataAdjusted)
                     }
                 });
@@ -328,9 +328,9 @@ angular.module('ComparePrices.services', ['ngResource'])
                         var len = rawresults.rows.length;
                         console.log("CalcStoreInRadius: " + len + " rows found.");
                         for (var i = 0; i < len; i++) {
-                            var singleStore = rawresults.rows.item(i)
-                            var storeLat = parseFloat(singleStore['Lat'])
-                            var storeLon = parseFloat(singleStore['Lon'])
+                            var singleStore = rawresults.rows.item(i);
+                            var storeLat = parseFloat(singleStore['Lat']);
+                            var storeLon = parseFloat(singleStore['Lon']);
 
                             var R = 6371; // Radius of the earth in km
                             var dLat = (myLat - storeLat) * Math.PI / 180;  // deg2rad below
@@ -339,7 +339,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                             var distance = Math.round(R * 2 * Math.asin(Math.sqrt(a)));
 
                             var sqlQuery = 'UPDATE tbStoresLocation SET Distance=' + distance + ' WHERE ChainID="' + singleStore['ChainID'] + '"AND StoreID="' +
-                                singleStore['StoreID'] + '";'
+                                singleStore['StoreID'] + '";';
                             tx.executeSql(sqlQuery)
                         }
                     })

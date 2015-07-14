@@ -10,7 +10,9 @@
         'AddedProduct': 'מוצר נוסף',
         'FindNearestShop':'מצא חנות קרובה',
         'AddressPlaceHolder': 'הכנס כתובת',
-        'FindLocationButton': 'חפש'
+        'FindLocationButton': 'חפש',
+        'SearchQueryEditProductPlaceholder': 'הקלד שם מוצר',
+        'SearchQueryCartDetailsPlaceholder': 'הקלד שם מוצר'
     }
 
     document.selectLanguage = function(lang)

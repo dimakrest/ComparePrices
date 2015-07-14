@@ -41,15 +41,19 @@ angular.module('ComparePrices.controllers', [])
       };
     })
 
-    .controller('RootCtrl', function($scope, ComparePricesStorage, PopUpWithDuration) {
+    .controller('RootCtrl', function($scope, ComparePricesStorage, PopUpWithDuration, ComparePricesConstants) {
         $scope.c = {};
 
         $scope.c.myCart      = [];
         $scope.c.allProducts = [];
+        $scope.c.allProductsFiltered = [];
         $scope.c.allProductsByItemID = [];
+
         $scope.c.cartID = -1;
+        $scope.c.numOfProductsToShow = ComparePricesConstants.NUM_OF_PRODUCTS_TO_SHOW_INIT;
 
         $scope.c.searchQuery = "";
+        $scope.c.searchQueryEditProduct = "";
 
         // init localization array
         $scope.c.localize = document.localize;
@@ -59,7 +63,7 @@ angular.module('ComparePrices.controllers', [])
 
         //////////// Edit cart related variables and methods ////////////
         ComparePricesStorage.GetAllProducts(function(result) {
-            $scope.c.allProducts = result.rows
+            $scope.c.allProducts = result.rows;
             // TODO: may be to replace allProducts with allProductsByItemID in the whole code?
             $scope.c.allProducts.forEach(function(singleProduct) {
                 $scope.c.allProductsByItemID[singleProduct['ItemCode']] = singleProduct;
@@ -67,10 +71,48 @@ angular.module('ComparePrices.controllers', [])
         })
 
 
-        $scope.c.searchQueryEditProduct ="";
         $scope.c.clearSearch = function()
         {
-            $scope.c.searchQueryEditProduct = ""
+            $scope.c.searchQueryEditProduct = "";
+            $scope.c.allProductsFiltered = [];
+            $scope.c.numOfProductsToShow = ComparePricesConstants.NUM_OF_PRODUCTS_TO_SHOW_INIT;
+        };
+
+        $scope.$watch('c.searchQueryEditProduct', function() {
+            $scope.c.allProductsFiltered = [];
+            $scope.c.numOfProductsToShow = ComparePricesConstants.NUM_OF_PRODUCTS_TO_SHOW_INIT;
+            var numOfAllProducts                = $scope.c.allProducts.length;
+            var numOfProductsInFilteredArray    = 0;
+            for (var i=0; i < numOfAllProducts; i++) {
+                if ($scope.c.allProducts[i]['ItemName'].includes($scope.c.searchQueryEditProduct)) {
+                    $scope.c.allProductsFiltered.push($scope.c.allProducts[i]);
+
+                    numOfProductsInFilteredArray++;
+                    if (numOfProductsInFilteredArray == $scope.c.numOfProductsToShow) {
+                        break;
+                    }
+                }
+            }
+        });
+
+        $scope.c.LoadMoreProducts = function() {
+            var numOfProducts                   = $scope.c.allProducts.length;
+            var numOfProductsInFilteredArray    = 0;
+            $scope.c.numOfProductsToShow += ComparePricesConstants.NUM_OF_PRODUCTS_TO_LOAD_MORE;
+            $scope.c.allProductsFiltered = [];
+
+            for (var i=0; i < numOfProducts; i++) {
+                if ($scope.c.allProducts[i]['ItemName'].includes($scope.c.searchQueryEditProduct)) {
+                    numOfProductsInFilteredArray++;
+                    $scope.c.allProductsFiltered.push($scope.c.allProducts[i]);
+
+                    if (numOfProductsInFilteredArray == $scope.c.numOfProductsToShow)
+                    {
+                        break;
+                    }
+                }
+            }
+            $scope.$broadcast('scroll.infiniteScrollComplete');
         };
 
         // TODO: maybe there's a prettier way, no need to change the entire cart

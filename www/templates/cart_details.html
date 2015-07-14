@@ -34,7 +34,7 @@
             <label class="item-input-wrapper" ng-click="clearSearch()">
                 <!-- TODO: without the style="width it doesn't work -->
                 <i class="icon ion-ios-search placeholder-icon" style="width: 100%;"></i>
-                <input type="search" ng-model="c.searchQuery" placeholder="URL, #hashtag, @nickname">
+                <input type="search" ng-model="c.searchQuery" placeholder={{c.localize.strings['SearchQueryCartDetailsPlaceholder']}}>
                 <button class="button button-clear">X</button>
             </label>
         </div>

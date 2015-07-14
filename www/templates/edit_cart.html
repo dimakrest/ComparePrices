@@ -9,21 +9,24 @@
             <label class="item-input-wrapper" ng-click="c.clearSearch()">
                 <!-- TODO: without the style="width it doesn't work -->
                 <i class="icon ion-ios-search placeholder-icon" style="width: 100%;"></i>
-                <input type="search" ng-model="c.searchQueryEditProduct" placeholder="URL, #hashtag">
+                <input type="search" ng-model="c.searchQueryEditProduct" placeholder={{c.localize.strings['SearchQueryEditProductPlaceholder']}} ng-model-options="{debounce:500}">
                 <button class="button button-clear">X</button>
             </label>
         </div>
 
         <ion-list ng-if='c.searchQueryEditProduct != undefined && c.searchQueryEditProduct != ""'>
-            <li ng-repeat="product in c.allProducts | filter:c.searchQueryEditProduct">
-                <div class="item" ng-click="c.ItemWasClicked(product)">
-                    Name: {{product["ItemName"]}} Code: {{product["ItemCode"]}}
-                </div>
-            </li>
+            <ion-item class="item-avatar-right" ng-repeat="product in c.allProductsFiltered track by product.ItemCode" ng-click="c.ItemWasClicked(product)">
+                <img ng-src="img/schweppes_tonic_water.jpg">
+                <h2 style="float:right">{{product["ItemName"]}}</h2>
+            </ion-item>
         </ion-list>
-        <!--<ion-infinite-scroll ng-if="layout=='posts' && loadMoreTimes<=100"-->
-        <!-- TODO: it doesn't work -->
-        <ion-infinite-scroll ng-if='searchQuery != undefined && searchQuery != ""' on-infinite="loadMore()" distance="10%" immediate-check="true">
+
+        <ion-infinite-scroll
+                ng-if='c.searchQueryEditProduct != undefined && c.searchQueryEditProduct != ""'
+                icon="ion-loading-c"
+                on-infinite="c.LoadMoreProducts()"
+                distance="10%"
+                immediate-check=false>
         </ion-infinite-scroll>
     </ion-content>
 </ion-modal-view >
