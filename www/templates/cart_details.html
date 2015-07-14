@@ -44,7 +44,7 @@
             <ion-item ng-repeat="product in c.myCart | filter:c.searchQuery"
                       class="item-avatar-right">
 
-                <img ng-src="img/tabasco.jpg">
+                <img ng-src={{product['ItemImage']}}>
 
                 <h2 style="text-align:right">{{product.ItemName}}</h2>
                 <h2 style="text-align:right">{{c.localize.strings['Amount']}} {{product.Amount}}</h2>

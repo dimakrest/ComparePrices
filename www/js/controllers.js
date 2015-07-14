@@ -68,6 +68,13 @@ angular.module('ComparePrices.controllers', [])
             $scope.c.allProducts.forEach(function(singleProduct) {
                 $scope.c.allProductsByItemID[singleProduct['ItemCode']] = singleProduct;
             });
+
+            // TODO: download the images
+            var numOfProducts = $scope.c.allProducts.length;
+            for (var i=0; i < numOfProducts; i++) {
+                $scope.c.allProducts[i]['ItemImage'] = 'http://www.shufersal.co.il/_layouts/images/Shufersal/Images/Products_Large/z_' +
+                                                        $scope.c.allProducts[i]['ItemCode'] + '.PNG';
+            }
         })
 
 
@@ -84,7 +91,9 @@ angular.module('ComparePrices.controllers', [])
             var numOfAllProducts                = $scope.c.allProducts.length;
             var numOfProductsInFilteredArray    = 0;
             for (var i=0; i < numOfAllProducts; i++) {
-                if ($scope.c.allProducts[i]['ItemName'].includes($scope.c.searchQueryEditProduct)) {
+                // in two's compliment systems, -1 is represented in binary as all 1s (1111 1111 1111 1111 1111 1111 1111 1111 for 32 bit).
+                // The bitwise inverse (~) of this is all zeros, or just zero, and therefore falsy. That's why the squiggle trick works
+                if (~$scope.c.allProducts[i]['ItemName'].indexOf($scope.c.searchQueryEditProduct)) {
                     $scope.c.allProductsFiltered.push($scope.c.allProducts[i]);
 
                     numOfProductsInFilteredArray++;
@@ -102,7 +111,9 @@ angular.module('ComparePrices.controllers', [])
             $scope.c.allProductsFiltered = [];
 
             for (var i=0; i < numOfProducts; i++) {
-                if ($scope.c.allProducts[i]['ItemName'].includes($scope.c.searchQueryEditProduct)) {
+                // in two's compliment systems, -1 is represented in binary as all 1s (1111 1111 1111 1111 1111 1111 1111 1111 for 32 bit).
+                // The bitwise inverse (~) of this is all zeros, or just zero, and therefore falsy. That's why the squiggle trick works
+                if (~$scope.c.allProducts[i]['ItemName'].indexOf($scope.c.searchQueryEditProduct)) {
                     numOfProductsInFilteredArray++;
                     $scope.c.allProductsFiltered.push($scope.c.allProducts[i]);
 
@@ -126,9 +137,11 @@ angular.module('ComparePrices.controllers', [])
                 }
             }
             if (productIndex == -1) {
+                // TODO: download the images
                 var newItemInCart = {'CartID': $scope.c.cartID,
                                      'ItemCode': clickedItem['ItemCode'],
                                      'ItemName': clickedItem['ItemName'],
+                                     'ItemImage': 'http://www.shufersal.co.il/_layouts/images/Shufersal/Images/Products_Large/z_' + clickedItem['ItemCode'] + '.PNG',
                                      'Amount': 1};
                 $scope.c.myCart.push(newItemInCart)
             } else {
@@ -251,6 +264,13 @@ angular.module('ComparePrices.controllers', [])
         ComparePricesStorage.GetMyCart($scope.c.cartID, function(result) {
             $scope.$apply(function() {
                 $scope.c.myCart = result.rows
+
+                // TODO: download the images
+                var numOfProducts = $scope.c.myCart.length;
+                for (var i=0; i < numOfProducts;i ++) {
+                    $scope.c.myCart[i]['ItemImage'] = 'http://www.shufersal.co.il/_layouts/images/Shufersal/Images/Products_Large/z_' + $scope.c.myCart[i]['ItemCode']
+                                                       + '.PNG'
+                }
             });
         });
 

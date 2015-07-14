@@ -16,7 +16,7 @@
 
         <ion-list ng-if='c.searchQueryEditProduct != undefined && c.searchQueryEditProduct != ""'>
             <ion-item class="item-avatar-right" ng-repeat="product in c.allProductsFiltered track by product.ItemCode" ng-click="c.ItemWasClicked(product)">
-                <img ng-src="img/schweppes_tonic_water.jpg">
+                <img ng-src={{product['ItemImage']}}>
                 <h2 style="float:right">{{product["ItemName"]}}</h2>
             </ion-item>
         </ion-list>

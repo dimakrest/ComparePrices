@@ -39,7 +39,6 @@ angular.module('ComparePrices.services', ['ngResource'])
 
     }])
 
-
     .factory('ComparePricesStorage', ['Shop', '$q', function (Shop, $q) {
 
         var createUserCartsTbQuery = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID, ItemCode, Amount)';
@@ -47,21 +46,20 @@ angular.module('ComparePrices.services', ['ngResource'])
         var fileNameToTable = {'am_pm_products'     : 'tbAmPmProducts',
                                'mega_products'      : 'tbMegaProducts',
                                'supersal_products'  : 'tbSuperSalProducts'};
-
         // TODO: database size + don't want to call init every time
-        var db = openDatabase("ComparePricesDB", "1.0", "Global storage", 100 * 1024 * 1024);
-        db.transaction(initDB, errorCB, successCB); // creates tables for the first time if required
+        var db = openDatabase("ComparePricesDB", "1.0", "Global storage", 4 * 1024 * 1024);
 
+            db.transaction(initDB, errorCB, successCB); // creates tables for the first time if required
 
-        initProductList = localStorage.getItem('initProductList') || 1;
-        if (initProductList == 1) {
-            CreateTbProducts();
-            CreateStoresLocationTable();
-            CreateProductTablesForShops();
+            initProductList = localStorage.getItem('initProductList') || 1;
+            if (initProductList == 1) {
+                CreateTbProducts();
+                CreateStoresLocationTable();
+                CreateProductTablesForShops();
 
-            // For now do this only once
-            localStorage.setItem('initProductList', 0)
-        }
+                // For now do this only once
+                localStorage.setItem('initProductList', 0)
+            }
 
         // TODO: add index
         function CreateTbProducts()
