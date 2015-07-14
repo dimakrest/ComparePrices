@@ -2,31 +2,29 @@
 
     <div class="bar bar-header">
         <button class="button button-icon icon ion-minus-circled" ng-click="ToggleDeleteValue()"></button>
-        <div class="h1 title">Header Buttons</div>
-        <!--<button class="button button-clear button-positive" OnClick="location.href='#/tab/editCart'"> Edit </button>-->
-
-        <button class="button button-clear button-positive" ng-click="OpenProductsList()"> Edit </button>
+        <button class="button button-clear button-positive" ng-click="OpenProductsList()"> {{::c.localize.strings['EditButton']}} </button>
     </div>
 
 </ion-header-bar>
 
-        <!--    Drop down select menu
-                <div class="list">
+<!--    Drop down select menu
+<div class="list">
 
-                    <label class="item item-input item-select">
-                        <div class="input-label">
-                            Amount
-                        </div>
-                        <select>
-                            <option>Blue</option>
-                            <option selected>Green</option>
-                            <option>Red</option>
-                        </select>
-                    </label>
+    <label class="item item-input item-select">
+        <div class="input-label">
+            Amount
+        </div>
+        <select>
+            <option>Blue</option>
+            <option selected>Green</option>
+            <option>Red</option>
+        </select>
+    </label>
 
-                </div>
-                -->
-<ion-view view-title="My Cart">
+</div>
+-->
+
+<ion-view view-title="{{::c.localize.strings['MyCartTitle']}}">
 
     <ion-content class="content-bg">
 
@@ -34,7 +32,7 @@
             <label class="item-input-wrapper" ng-click="clearSearch()">
                 <!-- TODO: without the style="width it doesn't work -->
                 <i class="icon ion-ios-search placeholder-icon" style="width: 100%;"></i>
-                <input type="search" ng-model="c.searchQuery" placeholder={{c.localize.strings['SearchQueryCartDetailsPlaceholder']}}>
+                <input type="search" ng-model="c.searchQuery" placeholder={{::c.localize.strings['SearchQueryCartDetailsPlaceholder']}}>
                 <button class="button button-clear">X</button>
             </label>
         </div>

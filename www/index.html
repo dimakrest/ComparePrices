@@ -56,10 +56,10 @@
           <div class="bar bar-header item-input-inset">
               <label class="item-input-wrapper">
                   <i class="icon ion-ios-search placeholder-icon"></i>
-                  <input id="pac-input" type="text" placeholder={{c.localize.strings['AddressPlaceHolder']}}>
+                  <input id="pac-input" type="text" placeholder={{::c.localize.strings['AddressPlaceHolder']}}>
               </label>
               <button class="button button-clear" ng-click="c.FindLocation()">
-                  {{c.localize.strings['FindLocationButton']}}
+                  {{::c.localize.strings['FindLocationButton']}}
               </button>
           </div>
           <div class="item" style="color:#a3a3a3" ng-if="c.lastAddress != ''">

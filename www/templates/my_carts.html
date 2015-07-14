@@ -2,13 +2,12 @@
 
     <div class="bar bar-header">
         <button class="button button-icon icon ion-minus-circled" ng-click="ToggleDeleteValue()"></button>
-        <div class="h1 title">Header Buttons</div>
         <button class="button button-clear icon ion-plus-circled" ng-click="CreateNewCart()"></button>
     </div>
 
 </ion-header-bar>
 
-<ion-view view-title="My Carts">
+<ion-view view-title={{::c.localize.strings['MyCartsTitle']}}>
 
     <ion-content class="content-bg">
 
@@ -28,7 +27,7 @@
 
                 <ion-option-button class="button-positive"
                                    ng-click="FindNearestShopMyCarts(cartInfo['CartID'])">
-                    {{c.localize.strings['FindNearestShop']}}
+                    {{::c.localize.strings['FindNearestShop']}}
                 </ion-option-button>
 
                 <ion-delete-button class="ion-minus-circled"

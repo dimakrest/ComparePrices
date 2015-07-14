@@ -3,31 +3,35 @@
  */
 (function()
 {
-    document.localize = {}
+    document.localize = {};
 
     var heb = {
-        'Amount':'כמות:',
+        'Amount':':כמות',
         'AddedProduct': 'מוצר נוסף',
         'FindNearestShop':'מצא חנות קרובה',
         'AddressPlaceHolder': 'הכנס כתובת',
         'FindLocationButton': 'חפש',
         'SearchQueryEditProductPlaceholder': 'הקלד שם מוצר',
-        'SearchQueryCartDetailsPlaceholder': 'הקלד שם מוצר'
-    }
+        'SearchQueryCartDetailsPlaceholder': 'הקלד שם מוצר',
+        'EditCartHeader': 'עידכון',
+        'MyCartsTitle': 'סלים שלי',
+        'MyCartTitle': 'סל שלי',
+        'EditButton': 'עדכן'
+    };
 
     document.selectLanguage = function(lang)
     {
-        localStorage.setItem('lang',lang)
+        localStorage.setItem('lang',lang);
         switch(lang)
         {
             default:
-                document.localize.strings = heb
+                document.localize.strings = heb;
                 break;
         }
-    }
+    };
     document.getLanguage = function()
     {
         return localStorage.getItem('lang')
     }
-})()
-document.selectLanguage(localStorage.getItem('lang') || 'heb')
+})();
+document.selectLanguage(localStorage.getItem('lang') || 'heb');
