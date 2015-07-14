@@ -18,6 +18,28 @@ angular.module('ComparePrices.services', ['ngResource'])
             });
     }])
 
+    .factory('CalculatePriceForRecipes', ['ComparePricesStorage', 'MiscFunctions',
+        function(ComparePricesStorage, MiscFunctions){
+            return {
+                FindBestShop: function(products) {
+                    var productCodesInMyCart = [];
+                    var productsStructForCalculation = [];
+
+                    for (var itemCode in products)
+                    {
+                        productCodesInMyCart.push(itemCode);
+                        productsStructForCalculation.push({"ItemCode":itemCode,"Amount":products[itemCode]});
+                    }
+
+                    ComparePricesStorage.GetProductsForEachShopByItemCode(productCodesInMyCart, function(result) {
+                        MiscFunctions.CalculateBestShopValues(productsStructForCalculation, result)
+                    });
+                }
+            }
+
+    }])
+
+
     .factory('ComparePricesStorage', ['Shop', '$q', function (Shop, $q) {
 
         var createUserCartsTbQuery = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID, ItemCode, Amount)';

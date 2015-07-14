@@ -3,7 +3,7 @@
     <div class="thumb item item-thumbnail-left">
       <img ng-src="{{recipe.imageUrl}}">
       <h2>{{recipe.name}}</h2>
-      <p>{{recipe.description}}</p>
+      <p style="word-break: break-word; white-space: normal;">{{recipe.description}}</p>
     </div>
 
     <button ng-click="FindBestShop()" class="button button-outline button-positive icon-left ion-ios-compose-outline">Find best shop</button>
@@ -38,12 +38,36 @@
       </ion-item>
       <ion-item class="item-accordion"
                 ng-show="isGroupShown(1)">
-        <table style="width:95%">
-          <tr ng-repeat="productID in recipe.products">
-            <td align="right"> {{c.allProductsByItemID[productID]["ItemName"]}} </td>
+
+        <table class="bottomBorder" style="width:95%">
+          <tr>
+            <th>Product</th><th>Amount</th>
+          </tr>
+          <tr ng-repeat="(key, value) in recipe.products">
+            <td align="right"> {{c.allProductsByItemID[key]["ItemName"]}} </td> <td> {{ value }} </td>
           </tr>
         </table>
+
       </ion-item>
+
+      <ion-item class="item-stable"
+                ng-click="toggleGroup(2)"
+                ng-class="{active: isGroupShown(2)}">
+        <i class="icon" ng-class="isGroupShown(2) ? 'ion-minus' : 'ion-plus'"></i>
+        &nbsp;
+        Receipt
+      </ion-item>
+      <ion-item class="item-accordion"
+                ng-show="isGroupShown(2)">
+
+        <div ng-bind-html=recipe.htmlRecipe style="">
+        </div>
+
+      </ion-item>
+
+
+
+
 
     </ion-list>
 

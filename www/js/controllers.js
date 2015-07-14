@@ -311,12 +311,64 @@ angular.module('ComparePrices.controllers', [])
 
      })
 
-    .controller('RecipesListCtrl', function($scope, Recipes) {
-            $scope.recipes = Recipes.query();
+    .controller('RecipesListCtrl', function($scope, Recipes, CalculatePriceForRecipes) {
+            $scope.recipesSelected = [];
+            $scope.productsByRecipeId = [];
+            $scope.totalRecipesSelected = 0;
+            Recipes.query(function(result) {
+                $scope.recipes = result;
+                $scope.recipes.forEach(function(singleRecipe) {
+                    $scope.recipesSelected[singleRecipe.id] = 0;
+                    $scope.productsByRecipeId[singleRecipe.id] = singleRecipe["products"];
+                });
+            });
+
+            $scope.IncreaseRecipes = function(recipeID) {
+                if($scope.recipesSelected[recipeID] < 9)
+                {
+                    $scope.recipesSelected[recipeID]++;
+                    $scope.totalRecipesSelected++;
+                }
+            };
+
+            $scope.DecreaseRecipes = function(recipeID) {
+                if($scope.recipesSelected[recipeID] > 0)
+                {
+                    $scope.recipesSelected[recipeID]--;
+                    $scope.totalRecipesSelected--;
+                }
+            };
+
+            $scope.FindBestShop = function() {
+                var totalProducts = [];
+
+                for (var recipeId in $scope.recipesSelected)
+                {
+                    if ($scope.recipesSelected[recipeId] > 0)
+                    {
+
+                        for (var productId in $scope.productsByRecipeId[recipeId])
+                        {
+                            if (productId in totalProducts)
+                            {
+                                // amount of product per receipt multiplied by num od receipts
+                                totalProducts[productId] += $scope.productsByRecipeId[recipeId][productId] * $scope.recipesSelected[recipeId];
+                            }
+                            else
+                            {
+                                totalProducts[productId] = $scope.productsByRecipeId[recipeId][productId] * $scope.recipesSelected[recipeId];
+                            }
+                        }
+                    }
+                }
+                CalculatePriceForRecipes.FindBestShop(totalProducts);
+            }
+
     })
 
-    .controller('RecipeCtrl', function($scope, $stateParams, Recipes, ComparePricesStorage, MiscFunctions) {
+    .controller('RecipeCtrl', function($scope, $stateParams, Recipes, CalculatePriceForRecipes) {
             $scope.recipe = Recipes.get({recipe: $stateParams.recipe}, function() {});
+
 
             $scope.showGroup = [];
             for (var i=0; i<10; i++) {
@@ -335,18 +387,7 @@ angular.module('ComparePrices.controllers', [])
             };
 
             $scope.FindBestShop = function() {
-                // At first get from myCart only ItemCodes
-                var productCodesInMyCart = [];
-                var productsStructForCalculation = [];
-                $scope.recipe.products.forEach(function(itemCode) {
-                    productCodesInMyCart.push(itemCode);
-                    productsStructForCalculation.push({"ItemCode":itemCode,"Amount":1});
-                });
-
-
-                ComparePricesStorage.GetProductsForEachShopByItemCode(productCodesInMyCart, function(result) {
-                    MiscFunctions.CalculateBestShopValues(productsStructForCalculation, result)
-                });
+                CalculatePriceForRecipes.FindBestShop($scope.recipe.products);
             };
 
     })
