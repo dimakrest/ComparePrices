@@ -8,7 +8,9 @@
     var heb = {
         'Amount':'כמות:',
         'AddedProduct': 'מוצר נוסף',
-        'FindNearestShop':'מצא חנות קרובה'
+        'FindNearestShop':'מצא חנות קרובה',
+        'AddressPlaceHolder': 'הכנס כתובת',
+        'FindLocationButton': 'חפש'
     }
 
     document.selectLanguage = function(lang)
