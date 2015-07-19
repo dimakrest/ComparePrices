@@ -6,7 +6,7 @@
     document.localize = {};
 
     var heb = {
-        'Amount':':כמות',
+        'Amount':'כמות:',
         'AddedProduct': 'מוצר נוסף',
         'FindNearestShop':'מצא חנות קרובה',
         'AddressPlaceHolder': 'הכנס כתובת',
@@ -16,7 +16,11 @@
         'EditCartHeader': 'עידכון',
         'MyCartsTitle': 'סלים שלי',
         'MyCartTitle': 'סל שלי',
-        'EditButton': 'עדכן'
+        'EditButton': 'עדכן',
+        'CancelButton': 'בטל',
+        'SaveButton': 'שמור',
+        'EnterCartName': 'הכנס שם של סל',
+        'Cart': 'סל'
     };
 
     document.selectLanguage = function(lang)

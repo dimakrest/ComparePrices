@@ -1,28 +1,8 @@
 <ion-header-bar class="bar bar-subheader item-input-inset">
-
-    <div class="bar bar-header">
-        <button class="button button-icon icon ion-minus-circled" ng-click="ToggleDeleteValue()"></button>
-        <button class="button button-clear button-positive" ng-click="OpenProductsList()"> {{::c.localize.strings['EditButton']}} </button>
-    </div>
-
+    <button class="button button-icon icon ion-minus-circled" ng-click="ToggleDeleteValue()"></button>
+    <button class="button button-clear button-positive" ng-click="OpenProductsList()"> {{::c.localize.strings['EditButton']}} </button>
 </ion-header-bar>
 
-<!--    Drop down select menu
-<div class="list">
-
-    <label class="item item-input item-select">
-        <div class="input-label">
-            Amount
-        </div>
-        <select>
-            <option>Blue</option>
-            <option selected>Green</option>
-            <option>Red</option>
-        </select>
-    </label>
-
-</div>
--->
 
 <ion-view view-title="{{::c.localize.strings['MyCartTitle']}}">
 
@@ -47,7 +27,15 @@
                 <img ng-src={{product['ItemImage']}}>
 
                 <h2 style="text-align:right">{{product.ItemName}}</h2>
-                <h2 style="text-align:right">{{c.localize.strings['Amount']}} {{product.Amount}}</h2>
+                <h2 class="heb-selector-group" style="text-align:right; direction: rtl;">{{c.localize.strings['Amount']}}
+
+
+                        <select class="heb-select">
+                            <option>Blue</option>
+                            <option selected>Green</option>
+                            <option>Red</option>
+                        </select>
+                </h2>
 
                 <ion-option-button class="ion-minus-circled"
                                    ng-click="DeleteProduct(product)">

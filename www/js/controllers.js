@@ -77,7 +77,6 @@ angular.module('ComparePrices.controllers', [])
             }
         })
 
-
         $scope.c.clearSearch = function()
         {
             $scope.c.searchQueryEditProduct = "";
@@ -152,10 +151,10 @@ angular.module('ComparePrices.controllers', [])
 
             PopUpWithDuration(400, $scope.c.localize.strings['AddedProduct'])
         };
-
         ////////////////////////////////////////////////////////////////////////
 
-        // Location calculation + auto complete
+        //////////////// Location calculation + auto complete /////////////////
+        // TODO: make directive
         var input = /** @type {HTMLInputElement} */(
             document.getElementById('pac-input'));
         var autocomplete = new google.maps.places.Autocomplete(input);
@@ -174,17 +173,20 @@ angular.module('ComparePrices.controllers', [])
             $scope.c.lastAddress = place.formatted_address;
             localStorage.setItem('lastAddress', $scope.c.lastAddress)
             });
+            ////////////////////////////////////////////////////////////////////////
     })
 
     .controller('SuggestedCtrl', function() {
         console.log("Here")
     })
 
-    .controller('MyCartsCtrl', function($scope, ComparePricesStorage, MiscFunctions) {
+    .controller('MyCartsCtrl', function($scope, $ionicPopup, ComparePricesStorage, MiscFunctions) {
         // ionic related variables. Used to create advanced  <ion-list>
         $scope.shouldShowDelete = false;
         $scope.shouldShowReorder = false;
         $scope.listCanSwipe = true;
+
+        $scope.newCartName = "";
 
         ComparePricesStorage.GetAllCarts(function(result) {
             $scope.$apply(function() {
@@ -195,15 +197,7 @@ angular.module('ComparePrices.controllers', [])
         $scope.lastCartID = localStorage.getItem('lastCartID') || "1";
 
         $scope.CreateNewCart = function() {
-            var newCartInfo = {'CartID'  : $scope.lastCartID,
-                               'CartName': "Cart_" + $scope.lastCartID};
-
-            $scope.myCartsInfo.push(newCartInfo);
-            ComparePricesStorage.UpdateCartsList(newCartInfo);
-
-            $scope.lastCartID = String(parseInt($scope.lastCartID) + 1);
-
-            localStorage.setItem('lastCartID', $scope.lastCartID)
+            $scope.AskForCartName();
         };
 
         $scope.DeleteCart = function(cartID) {
@@ -245,7 +239,52 @@ angular.module('ComparePrices.controllers', [])
                     MiscFunctions.CalculateBestShopValues(myCart, result)
                 });
             })
-        }
+        };
+
+        $scope.AskForCartName = function() {
+            // An elaborate, custom popup
+            $scope.popupData = {};
+            $scope.popupData.newCartName = "";
+            var placeHolder = $scope.c.localize.strings['Cart'] + ' ' + $scope.lastCartID;
+            console.log("Placeholder value = " + placeHolder);
+            var myPopup = $ionicPopup.show({
+                template: '<input type="text" ng-model="popupData.newCartName", placeholder=' + placeHolder + '>',
+                title: $scope.c.localize.strings['EnterCartName'],
+                scope: $scope,
+                buttons: [
+                    { text: $scope.c.localize.strings['CancelButton'],
+                      onTap: function(e) {
+                          return 'CancelButtonPressed';
+                      }
+                    },
+                    { text: '<b>' + $scope.c.localize.strings['SaveButton'] + '</b>',
+                      type: 'button-positive',
+                      onTap: function(e) {
+                        if ($scope.popupData.newCartName == "") {
+                            //don't allow the user to close unless he enters wifi password
+                            return placeHolder;
+                        } else {
+                            return $scope.popupData.newCartName;
+                        }
+                      }
+                    }
+                ]
+            });
+            myPopup.then(function(res) {
+                if (res == 'CancelButtonPressed') {
+                    return;
+                }
+
+                var newCartInfo = {'CartID'  : $scope.lastCartID,
+                                   'CartName': res};
+                $scope.myCartsInfo.push(newCartInfo);
+                ComparePricesStorage.UpdateCartsList(newCartInfo);
+
+                $scope.lastCartID = String(parseInt($scope.lastCartID) + 1);
+
+                localStorage.setItem('lastCartID', $scope.lastCartID)
+            });
+        };
     })
 
     .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicModal, ComparePricesStorage, MiscFunctions) {
