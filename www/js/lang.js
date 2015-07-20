@@ -15,7 +15,6 @@
         'SearchQueryCartDetailsPlaceholder': 'הקלד שם מוצר',
         'EditCartHeader': 'עידכון',
         'MyCartsTitle': 'סלים שלי',
-        'MyCartTitle': 'סל שלי',
         'EditButton': 'עדכן',
         'CancelButton': 'בטל',
         'SaveButton': 'שמור',

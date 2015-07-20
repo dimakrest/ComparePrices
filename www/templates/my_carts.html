@@ -12,7 +12,7 @@
                   show-reorder="shouldShowReorder"
                   can-swipe="listCanSwipe">
             <ion-item ng-repeat="cartInfo in myCartsInfo"
-                      class="item-avatar-right" ng-click="OpenCartDetails(cartInfo['CartID'])">
+                      class="item-avatar-right" ng-click="OpenCartDetails(cartInfo['CartID'], cartInfo['CartName'])">
 
                 <img ng-src="img/tabasco.jpg">
                 <h2 style="float:right">{{cartInfo['CartName']}}</h2>

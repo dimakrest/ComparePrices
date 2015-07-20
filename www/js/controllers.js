@@ -54,6 +54,8 @@ angular.module('ComparePrices.controllers', [])
 
         $scope.c.searchQuery = "";
         $scope.c.searchQueryEditProduct = "";
+        // TODO: Not the best code, to keep the cart name in this way
+        $scope.c.currentCartName = "";
 
         // init localization array
         $scope.c.localize = document.localize;
@@ -220,9 +222,10 @@ angular.module('ComparePrices.controllers', [])
             $scope.shouldShowDelete = !$scope.shouldShowDelete;
         };
 
-        $scope.OpenCartDetails = function(cartID) {
+        $scope.OpenCartDetails = function(cartID, cartName) {
             setTimeout(function()
             {
+                $scope.c.currentCartName = cartName;
                 location.href="#/tab/myCarts/cartDetails/" + cartID
             },100)
         };
@@ -248,7 +251,7 @@ angular.module('ComparePrices.controllers', [])
             var placeHolder = $scope.c.localize.strings['Cart'] + ' ' + $scope.lastCartID;
             console.log("Placeholder value = " + placeHolder);
             var myPopup = $ionicPopup.show({
-                template: '<input type="text" ng-model="popupData.newCartName", placeholder=' + placeHolder + '>',
+                template: '<input style="text-align:right" type="text" ng-model="popupData.newCartName", placeholder="' + placeHolder + '">',
                 title: $scope.c.localize.strings['EnterCartName'],
                 scope: $scope,
                 buttons: [
