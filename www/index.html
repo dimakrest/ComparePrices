@@ -54,10 +54,7 @@
       <ion-side-menu side="right">
 
           <div class="bar bar-header item-input-inset">
-              <label class="item-input-wrapper">
-                  <i class="icon ion-ios-search placeholder-icon"></i>
-                  <input id="pac-input" type="text" placeholder={{::c.localize.strings['AddressPlaceHolder']}}>
-              </label>
+              <google-autocomplete></google-autocomplete>
               <button class="button button-clear" ng-click="c.FindLocation()">
                   {{::c.localize.strings['FindLocationButton']}}
               </button>

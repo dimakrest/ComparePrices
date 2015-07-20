@@ -20,6 +20,33 @@ angular.module('ComparePrices', ['ionic', 'ComparePrices.controllers', 'CompareP
   });
 })
 
+    //////////////// Location calculation + auto complete /////////////////
+.directive('googleAutocomplete', ['$rootScope', 'ComparePricesStorage', function($rootScope, ComparePricesStorage) {
+    return {
+        restrict: 'E',
+        replace: 'false',
+        templateUrl: 'templates/google_autocomplete.html',
+        link: function($scope, elm, attrs) {
+            var input = elm.children()[1]
+            var autocomplete = new google.maps.places.Autocomplete(input);
+            google.maps.event.addListener(autocomplete, 'place_changed', function () {
+                var place = autocomplete.getPlace();
+
+                console.log(place)
+                if (!place.geometry) {
+                    // TODO: chamge error message
+                    window.alert("Autocomplete's returned place contains no geometry");
+                    return;
+                }
+
+                ComparePricesStorage.UpdateStoreRadiusFromLocations(place.geometry.location.A,
+                    place.geometry.location.F);
+                $scope.c.lastAddress = place.formatted_address;
+                localStorage.setItem('lastAddress', $scope.c.lastAddress)
+            });
+        }
+    }
+}])
 
     // Need to add myCart -> this is a default page
 .config(function($stateProvider, $urlRouterProvider) {

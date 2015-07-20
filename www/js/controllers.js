@@ -153,29 +153,6 @@ angular.module('ComparePrices.controllers', [])
 
             PopUpWithDuration(400, $scope.c.localize.strings['AddedProduct'])
         };
-        ////////////////////////////////////////////////////////////////////////
-
-        //////////////// Location calculation + auto complete /////////////////
-        // TODO: make directive
-        var input = /** @type {HTMLInputElement} */(
-            document.getElementById('pac-input'));
-        var autocomplete = new google.maps.places.Autocomplete(input);
-        google.maps.event.addListener(autocomplete, 'place_changed', function() {
-            var place = autocomplete.getPlace();
-
-            console.log(place)
-            if (!place.geometry) {
-                // TODO: chamge error message
-                window.alert("Autocomplete's returned place contains no geometry");
-                return;
-            }
-
-            ComparePricesStorage.UpdateStoreRadiusFromLocations(place.geometry.location.A,
-                                                                place.geometry.location.F);
-            $scope.c.lastAddress = place.formatted_address;
-            localStorage.setItem('lastAddress', $scope.c.lastAddress)
-            });
-            ////////////////////////////////////////////////////////////////////////
     })
 
     .controller('SuggestedCtrl', function() {
