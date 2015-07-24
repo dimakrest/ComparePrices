@@ -55,7 +55,7 @@ angular.module('ComparePrices.services', ['ngResource'])
             if (initProductList == 1) {
                 CreateTbProducts();
                 CreateStoresLocationTable();
-                CreateProductTablesForShops();
+                CreateProductTablesForShops(); // TODO: call doesn't match the function declaration
 
                 // For now do this only once
                 localStorage.setItem('initProductList', 0)
@@ -228,14 +228,6 @@ angular.module('ComparePrices.services', ['ngResource'])
                             'VALUES ("' + singleProduct['CartID'] + '", "' + singleProduct['ItemCode'] + '", "' + singleProduct['Amount'] + '")')
                     });
                 });
-            },
-
-            ClearMyCart: function () {
-                console.log("Clear my cart");
-                db.transaction(function (tx) {
-                    tx.executeSql('DROP TABLE IF EXISTS tbUserCarts');
-                    tx.executeSql(createUserCartsTbQuery)
-                }, logError())
             },
 
             GetMyCart: function (cartID, success, error) {

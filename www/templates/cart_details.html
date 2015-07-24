@@ -9,10 +9,10 @@
     <ion-content class="content-bg">
 
         <div class="item item-input-inset">
-            <label class="item-input-wrapper" ng-click="clearSearch()">
+            <label class="item-input-wrapper" ng-click="ClearSearchCartDetails()">
                 <!-- TODO: without the style="width it doesn't work -->
                 <i class="icon ion-ios-search placeholder-icon" style="width: 100%;"></i>
-                <input type="search" ng-model="c.searchQuery" placeholder={{::c.localize.strings['SearchQueryCartDetailsPlaceholder']}}>
+                <input type="search" ng-model="struct.searchQueryCartDetails" placeholder={{::c.localize.strings['SearchQueryCartDetailsPlaceholder']}}>
                 <button class="button button-clear">X</button>
             </label>
         </div>
@@ -21,7 +21,7 @@
         <ion-list show-delete="shouldShowDelete"
                   show-reorder="shouldShowReorder"
                   can-swipe="listCanSwipe">
-            <ion-item ng-repeat="product in c.myCart | filter:c.searchQuery"
+            <ion-item ng-repeat="product in myCart | filter:struct.searchQueryCartDetails"
                       class="item-avatar-right">
 
                 <img ng-src={{product['ItemImage']}}>
@@ -30,13 +30,13 @@
                 <!--<h2 style="text-align:right; direction: rtl;">{{c.localize.strings['Amount']}} {{product.Amount}}</h2>-->
 
                 <div class="col" style="text-align:right; direction: rtl;">
-                    <button ng-click="c.UpdateProductAmount(product, 1); $event.stopPropagation()" class="button button-outline button-positive item item-input-inset" style="display:inline-block">
+                    <button ng-click="UpdateProductAmount(product, 1); $event.stopPropagation()" class="button button-outline button-positive item item-input-inset" style="display:inline-block">
                         +
                     </button>
 
                     {{c.localize.strings['Amount']}} {{product["Amount"]}}
 
-                    <button ng-click="c.UpdateProductAmount(product, -1); $event.stopPropagation()" class="button button-outline button-positive item item-input-inset" style="display:inline-block">
+                    <button ng-click="UpdateProductAmount(product, -1); $event.stopPropagation()" class="button button-outline button-positive item item-input-inset" style="display:inline-block">
                         -
                     </button>
 
@@ -62,8 +62,6 @@
         </ion-list>
 
         <div>
-            <button ng-click="ClearMyCart()" class="button button-outline button-positive icon-left ion-ios-compose-outline">Clear my cart</button>
-
             <button ng-click="FindBestShop()" class="button button-outline button-positive icon-left ion-ios-compose-outline">Find best shop</button>
         </div>
     </ion-content>

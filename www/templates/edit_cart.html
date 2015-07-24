@@ -1,31 +1,31 @@
 <ion-modal-view >
     <ion-header-bar class="positive-bg text-center">
         <div class="h1 title light">{{::c.localize.strings['EditCartHeader']}}</div>
-        <button class="button button-icon icon ion-ios-close-empty light" ng-click="c.editProduct.close()"></button>
+        <button class="button button-icon icon ion-ios-close-empty light" ng-click="editProduct.close()"></button>
     </ion-header-bar>
 
     <ion-content class="content-bg">
         <div class="item item-input-inset">
-            <label class="item-input-wrapper" ng-click="c.clearSearch()">
+            <label class="item-input-wrapper" ng-click="ClearSearchEditProduct()">
                 <!-- TODO: without the style="width it doesn't work -->
                 <i class="icon ion-ios-search placeholder-icon" style="width: 100%;"></i>
-                <input type="search" ng-model="c.searchQueryEditProduct" placeholder={{::c.localize.strings['SearchQueryEditProductPlaceholder']}} ng-model-options="{debounce:500}">
+                <input type="search" ng-model="struct.searchQueryEditProduct" placeholder={{::c.localize.strings['SearchQueryEditProductPlaceholder']}} ng-model-options="{debounce:500}">
                 <button class="button button-clear">X</button>
             </label>
         </div>
 
-        <ion-list ng-if='c.searchQueryEditProduct != undefined && c.searchQueryEditProduct != ""'>
-            <ion-item class="item-avatar-right" ng-repeat="product in c.allProductsFiltered track by product.ItemCode" ng-click="c.ItemWasClicked(product)">
+        <ion-list ng-if='struct.searchQueryEditProduct != undefined && struct.searchQueryEditProduct != ""'>
+            <ion-item class="item-avatar-right" ng-repeat="product in allProductsFiltered track by product.ItemCode" ng-click="ItemWasClicked(product)">
                 <img ng-src={{product['ItemImage']}}>
                 <h2 style="text-align:right">{{product["ItemName"]}}</h2>
                 <div class="col" style="text-align:right; direction: rtl;" ng-if="product['Amount'] != 0">
-                    <button ng-click="c.UpdateProductAmount(product, 1); $event.stopPropagation()" class="button button-outline button-positive item item-input-inset" style="display:inline-block">
+                    <button ng-click="UpdateProductAmount(product, 1); $event.stopPropagation()" class="button button-outline button-positive item item-input-inset" style="display:inline-block">
                         +
                     </button>
 
                     {{c.localize.strings['Amount']}} {{product["Amount"]}}
 
-                    <button ng-click="c.UpdateProductAmount(product, -1); $event.stopPropagation()" class="button button-outline button-positive item item-input-inset" style="display:inline-block">
+                    <button ng-click="UpdateProductAmount(product, -1); $event.stopPropagation()" class="button button-outline button-positive item item-input-inset" style="display:inline-block">
                         -
                     </button>
                 </div>
@@ -33,9 +33,9 @@
         </ion-list>
 
         <ion-infinite-scroll
-                ng-if='c.searchQueryEditProduct != undefined && c.searchQueryEditProduct != ""'
+                ng-if='struct.searchQueryEditProduct != undefined && struct.searchQueryEditProduct != ""'
                 icon="ion-loading-c"
-                on-infinite="c.LoadMoreProducts()"
+                on-infinite="LoadMoreProducts()"
                 distance="10%"
                 immediate-check=false>
         </ion-infinite-scroll>

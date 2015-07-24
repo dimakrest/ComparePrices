@@ -41,19 +41,12 @@ angular.module('ComparePrices.controllers', [])
       };
     })
 
-    .controller('RootCtrl', function($scope, ComparePricesStorage, PopUpWithDuration, ComparePricesConstants) {
+    .controller('RootCtrl', function($scope, ComparePricesStorage) {
         $scope.c = {};
 
-        $scope.c.myCart      = [];
         $scope.c.allProducts = [];
-        $scope.c.allProductsFiltered = [];
         $scope.c.allProductsByItemID = [];
 
-        $scope.c.cartID = -1;
-        $scope.c.numOfProductsToShow = ComparePricesConstants.NUM_OF_PRODUCTS_TO_SHOW_INIT;
-
-        $scope.c.searchQuery = "";
-        $scope.c.searchQueryEditProduct = "";
         // TODO: Not the best code, to keep the cart name in this way
         $scope.c.currentCartName = "";
 
@@ -77,105 +70,7 @@ angular.module('ComparePrices.controllers', [])
                 $scope.c.allProducts[i]['ItemImage'] = 'http://www.shufersal.co.il/_layouts/images/Shufersal/Images/Products_Large/z_' +
                                                         $scope.c.allProducts[i]['ItemCode'] + '.PNG';
             }
-        })
-
-        $scope.c.clearSearch = function()
-        {
-            $scope.c.searchQueryEditProduct = "";
-            $scope.c.allProductsFiltered = [];
-            $scope.c.numOfProductsToShow = ComparePricesConstants.NUM_OF_PRODUCTS_TO_SHOW_INIT;
-        };
-
-        $scope.$watch('c.searchQueryEditProduct', function() {
-            $scope.c.allProductsFiltered = [];
-            $scope.c.numOfProductsToShow = ComparePricesConstants.NUM_OF_PRODUCTS_TO_SHOW_INIT;
-
-            var numOfAllProducts                = $scope.c.allProducts.length;
-            var numOfProductsInFilteredArray    = 0;
-            for (var i=0; i < numOfAllProducts; i++) {
-                // in two's compliment systems, -1 is represented in binary as all 1s (1111 1111 1111 1111 1111 1111 1111 1111 for 32 bit).
-                // The bitwise inverse (~) of this is all zeros, or just zero, and therefore falsy. That's why the squiggle trick works
-                if (~$scope.c.allProducts[i]['ItemName'].indexOf($scope.c.searchQueryEditProduct)) {
-                    var product = $scope.c.allProducts[i];
-                    product['Amount'] = 0;
-
-                    var numOfProductsInMyCart = $scope.c.myCart.length;
-                    for (var j=0; j < numOfProductsInMyCart; j++) {
-                        if ($scope.c.myCart[j]['ItemCode'] == product['ItemCode']) {
-                            product['Amount'] = $scope.c.myCart[j]['Amount'];
-                            break;
-                        }
-                    }
-
-                    $scope.c.allProductsFiltered.push(product);
-
-                    numOfProductsInFilteredArray++;
-                    if (numOfProductsInFilteredArray == $scope.c.numOfProductsToShow) {
-                        break;
-                    }
-                }
-            }
         });
-
-        $scope.c.LoadMoreProducts = function() {
-            var numOfProducts                   = $scope.c.allProducts.length;
-            var numOfProductsInFilteredArray    = 0;
-            $scope.c.numOfProductsToShow += ComparePricesConstants.NUM_OF_PRODUCTS_TO_LOAD_MORE;
-            $scope.c.allProductsFiltered = [];
-
-            for (var i=0; i < numOfProducts; i++) {
-                // in two's compliment systems, -1 is represented in binary as all 1s (1111 1111 1111 1111 1111 1111 1111 1111 for 32 bit).
-                // The bitwise inverse (~) of this is all zeros, or just zero, and therefore falsy. That's why the squiggle trick works
-                if (~$scope.c.allProducts[i]['ItemName'].indexOf($scope.c.searchQueryEditProduct)) {
-                    numOfProductsInFilteredArray++;
-                    $scope.c.allProductsFiltered.push($scope.c.allProducts[i]);
-
-                    if (numOfProductsInFilteredArray == $scope.c.numOfProductsToShow)
-                    {
-                        break;
-                    }
-                }
-            }
-            $scope.$broadcast('scroll.infiniteScrollComplete');
-        };
-
-        // TODO: check if amount is 0 and delete
-        $scope.c.UpdateProductAmount = function(itemInfo, amountToAdd) {
-            var numOfProductsInCart = $scope.c.myCart.length;
-            var productIndex        = -1;
-            for (var i=0; i < numOfProductsInCart; i++) {
-                if ($scope.c.myCart[i]['ItemCode'] == itemInfo['ItemCode']) {
-                    productIndex = i;
-                    break;
-                }
-            }
-            if (productIndex == -1) {
-                // TODO: download the images
-                var newItemInCart = {'CartID': $scope.c.cartID,
-                    'ItemCode': itemInfo['ItemCode'],
-                    'ItemName': itemInfo['ItemName'],
-                    'ItemImage': 'http://www.shufersal.co.il/_layouts/images/Shufersal/Images/Products_Large/z_' + itemInfo['ItemCode'] + '.PNG',
-                    'Amount': parseInt(amountToAdd)};
-                $scope.c.myCart.push(newItemInCart)
-            } else {
-                $scope.c.myCart[i]['Amount'] += parseInt(amountToAdd);
-            }
-
-            // TODO: is there a better way?
-            var numOfFilteredProducts = $scope.c.allProductsFiltered.length;
-            for (var i=0; i < numOfFilteredProducts; i++) {
-                if ($scope.c.allProductsFiltered[i]['ItemCode'] == itemInfo['ItemCode']) {
-                    $scope.c.allProductsFiltered[i]['Amount'] += parseInt(amountToAdd);
-                }
-            }
-            ComparePricesStorage.UpdateCart($scope.c.cartID, $scope.c.myCart);
-        }
-
-        // TODO: maybe there's a prettier way, no need to change the entire cart
-        $scope.c.ItemWasClicked = function(clickedItem) {
-            $scope.c.UpdateProductAmount(clickedItem, 1);
-            PopUpWithDuration(400, $scope.c.localize.strings['AddedProduct'])
-        };
     })
 
     .controller('SuggestedCtrl', function() {
@@ -289,27 +184,36 @@ angular.module('ComparePrices.controllers', [])
         };
     })
 
-    .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicModal, ComparePricesStorage, MiscFunctions) {
+    .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicModal, ComparePricesStorage, MiscFunctions, PopUpWithDuration, ComparePricesConstants) {
         // ionic related variables. Used to create advanced  <ion-list>
         $scope.shouldShowDelete = false;
         $scope.shouldShowReorder = false;
         $scope.listCanSwipe = true;
 
-        $scope.c.cartID = $stateParams.cartID;
+        $scope.myCart      = [];
+        $scope.cartID = $stateParams.cartID;
 
-        $scope.clearSearch = function()
+        // WA for ionic bug
+        $scope.struct = {};
+        $scope.struct.searchQueryCartDetails = "";
+        $scope.struct.searchQueryEditProduct = "";
+
+        $scope.allProductsFiltered = [];
+        $scope.numOfProductsToShow = ComparePricesConstants.NUM_OF_PRODUCTS_TO_SHOW_INIT;
+
+        $scope.ClearSearchCartDetails = function()
         {
-            $scope.c.searchQuery = ""
+            $scope.struct.searchQueryCartDetails = "";
         };
 
-        ComparePricesStorage.GetMyCart($scope.c.cartID, function(result) {
+        ComparePricesStorage.GetMyCart($scope.cartID, function(result) {
             $scope.$apply(function() {
-                $scope.c.myCart = result.rows;
+                $scope.myCart = result.rows;
 
                 // TODO: download the images
-                var numOfProducts = $scope.c.myCart.length;
+                var numOfProducts = $scope.myCart.length;
                 for (var i=0; i < numOfProducts;i ++) {
-                    $scope.c.myCart[i]['ItemImage'] = 'http://www.shufersal.co.il/_layouts/images/Shufersal/Images/Products_Large/z_' + $scope.c.myCart[i]['ItemCode']
+                    $scope.myCart[i]['ItemImage'] = 'http://www.shufersal.co.il/_layouts/images/Shufersal/Images/Products_Large/z_' + $scope.myCart[i]['ItemCode']
                                                        + '.PNG'
                 }
             });
@@ -318,33 +222,28 @@ angular.module('ComparePrices.controllers', [])
         $scope.FindBestShop = function() {
             // At first get from myCart only ItemCodes
             var productCodesInMyCart = [];
-            $scope.c.myCart.forEach(function(singleItem) {
+            $scope.myCart.forEach(function(singleItem) {
                 productCodesInMyCart.push(singleItem['ItemCode'])
             });
 
             ComparePricesStorage.GetProductsForEachShopByItemCode(productCodesInMyCart, function(result) {
-                MiscFunctions.CalculateBestShopValues($scope.c.myCart, result)
+                MiscFunctions.CalculateBestShopValues($scope.myCart, result)
             });
         };
 
-        $scope.ClearMyCart = function() {
-            $scope.c.myCart = [];
-            ComparePricesStorage.ClearMyCart()
-        };
-
         $scope.DeleteProduct = function(product) {
-            var numOfProductsInCart = $scope.c.myCart.length;
+            var numOfProductsInCart = $scope.myCart.length;
             var productIndex        = -1;
             for (var i=0; i < numOfProductsInCart; i++) {
-                if ($scope.c.myCart[i]['ItemCode'] == product['ItemCode']) {
+                if ($scope.myCart[i]['ItemCode'] == product['ItemCode']) {
                     productIndex = i;
                     break;
                 }
             }
             if (productIndex != -1) {
-                $scope.c.myCart.splice(productIndex, 1)
+                $scope.myCart.splice(productIndex, 1)
             }
-            ComparePricesStorage.UpdateCart($scope.c.cartID, $scope.c.myCart)
+            ComparePricesStorage.UpdateCart($scope.cartID, $scope.myCart)
         };
 
         $scope.ToggleDeleteValue = function() {
@@ -360,16 +259,123 @@ angular.module('ComparePrices.controllers', [])
                 hardwareBackButtonClose: true
             }).then(function(modal)
             {
-                $scope.c.editProduct = modal;
-                $scope.c.editProduct.show();
+                $scope.editProduct = modal;
+                $scope.editProduct.show();
 
-                $scope.c.editProduct.close = function()
+                $scope.editProduct.close = function()
                 {
-                    $scope.c.editProduct.remove()
+                    $scope.editProduct.remove()
                 }
             })
-        }
+        };
 
+        $scope.ClearSearchEditProduct = function()
+        {
+            $scope.struct.searchQueryEditProduct = "";
+            $scope.allProductsFiltered = [];
+            $scope.numOfProductsToShow = ComparePricesConstants.NUM_OF_PRODUCTS_TO_SHOW_INIT;
+        };
+
+        $scope.$watch('struct.searchQueryEditProduct', function() {
+            $scope.allProductsFiltered = [];
+            $scope.numOfProductsToShow = ComparePricesConstants.NUM_OF_PRODUCTS_TO_SHOW_INIT;
+
+            var numOfAllProducts                = $scope.c.allProducts.length;
+            var numOfProductsInFilteredArray    = 0;
+            for (var i=0; i < numOfAllProducts; i++) {
+                // in two's compliment systems, -1 is represented in binary as all 1s (1111 1111 1111 1111 1111 1111 1111 1111 for 32 bit).
+                // The bitwise inverse (~) of this is all zeros, or just zero, and therefore falsy. That's why the squiggle trick works
+                if (~$scope.c.allProducts[i]['ItemName'].indexOf($scope.struct.searchQueryEditProduct)) {
+                    var product = $scope.c.allProducts[i];
+                    product['Amount'] = 0;
+
+                    var numOfProductsInMyCart = $scope.myCart.length;
+                    for (var j=0; j < numOfProductsInMyCart; j++) {
+                        if ($scope.myCart[j]['ItemCode'] == product['ItemCode']) {
+                            product['Amount'] = $scope.myCart[j]['Amount'];
+                            break;
+                        }
+                    }
+
+                    $scope.allProductsFiltered.push(product);
+
+                    numOfProductsInFilteredArray++;
+                    if (numOfProductsInFilteredArray == $scope.numOfProductsToShow) {
+                        break;
+                    }
+                }
+            }
+        });
+
+        $scope.LoadMoreProducts = function() {
+            var numOfProducts                   = $scope.c.allProducts.length;
+            var numOfProductsInFilteredArray    = 0;
+            $scope.numOfProductsToShow += ComparePricesConstants.NUM_OF_PRODUCTS_TO_LOAD_MORE;
+            $scope.allProductsFiltered = [];
+
+            for (var i=0; i < numOfProducts; i++) {
+                // in two's compliment systems, -1 is represented in binary as all 1s (1111 1111 1111 1111 1111 1111 1111 1111 for 32 bit).
+                // The bitwise inverse (~) of this is all zeros, or just zero, and therefore falsy. That's why the squiggle trick works
+                if (~$scope.c.allProducts[i]['ItemName'].indexOf($scope.struct.searchQueryEditProduct)) {
+                    var product = $scope.c.allProducts[i];
+                    product['Amount'] = 0;
+
+                    var numOfProductsInMyCart = $scope.myCart.length;
+                    for (var j=0; j < numOfProductsInMyCart; j++) {
+                        if ($scope.myCart[j]['ItemCode'] == product['ItemCode']) {
+                            product['Amount'] = $scope.myCart[j]['Amount'];
+                            break;
+                        }
+                    }
+
+                    $scope.allProductsFiltered.push(product);
+
+                    numOfProductsInFilteredArray++;
+                    if (numOfProductsInFilteredArray == $scope.numOfProductsToShow) {
+                        break;
+                    }
+                }
+            }
+            $scope.$broadcast('scroll.infiniteScrollComplete');
+        };
+
+        // TODO: check if amount is 0 and delete
+        $scope.UpdateProductAmount = function(itemInfo, amountToAdd) {
+            var numOfProductsInCart = $scope.myCart.length;
+            var productIndex        = -1;
+            for (var i=0; i < numOfProductsInCart; i++) {
+                if ($scope.myCart[i]['ItemCode'] == itemInfo['ItemCode']) {
+                    productIndex = i;
+                    break;
+                }
+            }
+            if (productIndex == -1) {
+                // TODO: download the images
+                var newItemInCart = {'CartID': $scope.cartID,
+                    'ItemCode': itemInfo['ItemCode'],
+                    'ItemName': itemInfo['ItemName'],
+                    'ItemImage': 'http://www.shufersal.co.il/_layouts/images/Shufersal/Images/Products_Large/z_' + itemInfo['ItemCode'] + '.PNG',
+                    'Amount': parseInt(amountToAdd)};
+                $scope.myCart.push(newItemInCart)
+            } else {
+                $scope.myCart[i]['Amount'] += parseInt(amountToAdd);
+            }
+
+            // TODO: is there a better way?
+            var numOfFilteredProducts = $scope.allProductsFiltered.length;
+            for (var i=0; i < numOfFilteredProducts; i++) {
+                if ($scope.allProductsFiltered[i]['ItemCode'] == itemInfo['ItemCode']) {
+                    $scope.allProductsFiltered[i]['Amount'] += parseInt(amountToAdd);
+                }
+            }
+            ComparePricesStorage.UpdateCart($scope.cartID, $scope.myCart);
+        };
+
+        // TODO: maybe there's a prettier way, no need to change the entire cart
+        $scope.ItemWasClicked = function(clickedItem) {
+            $scope.UpdateProductAmount(clickedItem, 1);
+            PopUpWithDuration(400, $scope.c.localize.strings['AddedProduct'])
+        };
      })
 
     .controller('RecipesListCtrl', function($scope, Recipes, CalculatePriceForRecipes) {
