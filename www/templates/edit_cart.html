@@ -17,7 +17,18 @@
         <ion-list ng-if='c.searchQueryEditProduct != undefined && c.searchQueryEditProduct != ""'>
             <ion-item class="item-avatar-right" ng-repeat="product in c.allProductsFiltered track by product.ItemCode" ng-click="c.ItemWasClicked(product)">
                 <img ng-src={{product['ItemImage']}}>
-                <h2 style="float:right">{{product["ItemName"]}}</h2>
+                <h2 style="text-align:right">{{product["ItemName"]}}</h2>
+                <div class="col" style="text-align:right; direction: rtl;" ng-if="product['Amount'] != 0">
+                    <button ng-click="c.UpdateProductAmount(product, 1); $event.stopPropagation()" class="button button-outline button-positive item item-input-inset" style="display:inline-block">
+                        +
+                    </button>
+
+                    {{c.localize.strings['Amount']}} {{product["Amount"]}}
+
+                    <button ng-click="c.UpdateProductAmount(product, -1); $event.stopPropagation()" class="button button-outline button-positive item item-input-inset" style="display:inline-block">
+                        -
+                    </button>
+                </div>
             </ion-item>
         </ion-list>
 

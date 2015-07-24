@@ -252,8 +252,11 @@ angular.module('ComparePrices.services', ['ngResource'])
                         // TODO: do I need the rows thing? if yes wrap this code in some kind of a function
                         var len = rawresults.rows.length;
                         console.log("GetMyCart: " + len + " rows found.");
+                        // TODO: can I store Amount as int and skip this step?
                         for (var i = 0; i < len; i++) {
-                            response.rows.push(rawresults.rows.item(i));
+                            var rawToPush       = rawresults.rows.item(i);
+                            rawToPush['Amount'] = parseInt(rawresults.rows.item(i)['Amount']);
+                            response.rows.push(rawToPush);
                         }
                         if (success) {
                             success(response)

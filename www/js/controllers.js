@@ -89,13 +89,25 @@ angular.module('ComparePrices.controllers', [])
         $scope.$watch('c.searchQueryEditProduct', function() {
             $scope.c.allProductsFiltered = [];
             $scope.c.numOfProductsToShow = ComparePricesConstants.NUM_OF_PRODUCTS_TO_SHOW_INIT;
+
             var numOfAllProducts                = $scope.c.allProducts.length;
             var numOfProductsInFilteredArray    = 0;
             for (var i=0; i < numOfAllProducts; i++) {
                 // in two's compliment systems, -1 is represented in binary as all 1s (1111 1111 1111 1111 1111 1111 1111 1111 for 32 bit).
                 // The bitwise inverse (~) of this is all zeros, or just zero, and therefore falsy. That's why the squiggle trick works
                 if (~$scope.c.allProducts[i]['ItemName'].indexOf($scope.c.searchQueryEditProduct)) {
-                    $scope.c.allProductsFiltered.push($scope.c.allProducts[i]);
+                    var product = $scope.c.allProducts[i];
+                    product['Amount'] = 0;
+
+                    var numOfProductsInMyCart = $scope.c.myCart.length;
+                    for (var j=0; j < numOfProductsInMyCart; j++) {
+                        if ($scope.c.myCart[j]['ItemCode'] == product['ItemCode']) {
+                            product['Amount'] = $scope.c.myCart[j]['Amount'];
+                            break;
+                        }
+                    }
+
+                    $scope.c.allProductsFiltered.push(product);
 
                     numOfProductsInFilteredArray++;
                     if (numOfProductsInFilteredArray == $scope.c.numOfProductsToShow) {
@@ -127,12 +139,12 @@ angular.module('ComparePrices.controllers', [])
             $scope.$broadcast('scroll.infiniteScrollComplete');
         };
 
-        // TODO: maybe there's a prettier way, no need to change the entire cart
-        $scope.c.ItemWasClicked = function(clickedItem) {
+        // TODO: check if amount is 0 and delete
+        $scope.c.UpdateProductAmount = function(itemInfo, amountToAdd) {
             var numOfProductsInCart = $scope.c.myCart.length;
             var productIndex        = -1;
             for (var i=0; i < numOfProductsInCart; i++) {
-                if ($scope.c.myCart[i]['ItemCode'] == clickedItem['ItemCode']) {
+                if ($scope.c.myCart[i]['ItemCode'] == itemInfo['ItemCode']) {
                     productIndex = i;
                     break;
                 }
@@ -140,17 +152,28 @@ angular.module('ComparePrices.controllers', [])
             if (productIndex == -1) {
                 // TODO: download the images
                 var newItemInCart = {'CartID': $scope.c.cartID,
-                                     'ItemCode': clickedItem['ItemCode'],
-                                     'ItemName': clickedItem['ItemName'],
-                                     'ItemImage': 'http://www.shufersal.co.il/_layouts/images/Shufersal/Images/Products_Large/z_' + clickedItem['ItemCode'] + '.PNG',
-                                     'Amount': 1};
+                    'ItemCode': itemInfo['ItemCode'],
+                    'ItemName': itemInfo['ItemName'],
+                    'ItemImage': 'http://www.shufersal.co.il/_layouts/images/Shufersal/Images/Products_Large/z_' + itemInfo['ItemCode'] + '.PNG',
+                    'Amount': parseInt(amountToAdd)};
                 $scope.c.myCart.push(newItemInCart)
             } else {
-                $scope.c.myCart[i]['Amount']++
+                $scope.c.myCart[i]['Amount'] += parseInt(amountToAdd);
             }
 
+            // TODO: is there a better way?
+            var numOfFilteredProducts = $scope.c.allProductsFiltered.length;
+            for (var i=0; i < numOfFilteredProducts; i++) {
+                if ($scope.c.allProductsFiltered[i]['ItemCode'] == itemInfo['ItemCode']) {
+                    $scope.c.allProductsFiltered[i]['Amount'] += parseInt(amountToAdd);
+                }
+            }
             ComparePricesStorage.UpdateCart($scope.c.cartID, $scope.c.myCart);
+        }
 
+        // TODO: maybe there's a prettier way, no need to change the entire cart
+        $scope.c.ItemWasClicked = function(clickedItem) {
+            $scope.c.UpdateProductAmount(clickedItem, 1);
             PopUpWithDuration(400, $scope.c.localize.strings['AddedProduct'])
         };
     })
@@ -226,7 +249,6 @@ angular.module('ComparePrices.controllers', [])
             $scope.popupData = {};
             $scope.popupData.newCartName = "";
             var placeHolder = $scope.c.localize.strings['Cart'] + ' ' + $scope.lastCartID;
-            console.log("Placeholder value = " + placeHolder);
             var myPopup = $ionicPopup.show({
                 template: '<input style="text-align:right" type="text" ng-model="popupData.newCartName", placeholder="' + placeHolder + '">',
                 title: $scope.c.localize.strings['EnterCartName'],
@@ -282,7 +304,7 @@ angular.module('ComparePrices.controllers', [])
 
         ComparePricesStorage.GetMyCart($scope.c.cartID, function(result) {
             $scope.$apply(function() {
-                $scope.c.myCart = result.rows
+                $scope.c.myCart = result.rows;
 
                 // TODO: download the images
                 var numOfProducts = $scope.c.myCart.length;

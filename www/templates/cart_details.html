@@ -27,15 +27,28 @@
                 <img ng-src={{product['ItemImage']}}>
 
                 <h2 style="text-align:right">{{product.ItemName}}</h2>
-                <h2 class="heb-selector-group" style="text-align:right; direction: rtl;">{{c.localize.strings['Amount']}}
+                <!--<h2 style="text-align:right; direction: rtl;">{{c.localize.strings['Amount']}} {{product.Amount}}</h2>-->
+
+                <div class="col" style="text-align:right; direction: rtl;">
+                    <button ng-click="c.UpdateProductAmount(product, 1); $event.stopPropagation()" class="button button-outline button-positive item item-input-inset" style="display:inline-block">
+                        +
+                    </button>
+
+                    {{c.localize.strings['Amount']}} {{product["Amount"]}}
+
+                    <button ng-click="c.UpdateProductAmount(product, -1); $event.stopPropagation()" class="button button-outline button-positive item item-input-inset" style="display:inline-block">
+                        -
+                    </button>
+
+                <!--<h2 class="heb-selector-group" style="text-align:right; direction: rtl;">{{c.localize.strings['Amount']}}-->
 
 
-                        <select class="heb-select">
-                            <option>Blue</option>
-                            <option selected>Green</option>
-                            <option>Red</option>
-                        </select>
-                </h2>
+                        <!--<select class="heb-select">-->
+                            <!--<option>Blue</option>-->
+                            <!--<option selected>Green</option>-->
+                            <!--<option>Red</option>-->
+                        <!--</select>-->
+                <!--</h2>-->
 
                 <ion-option-button class="ion-minus-circled"
                                    ng-click="DeleteProduct(product)">
