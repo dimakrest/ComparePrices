@@ -15,17 +15,17 @@
         </div>
 
         <ion-list ng-if='struct.searchQueryEditProduct != undefined && struct.searchQueryEditProduct != ""'>
-            <ion-item class="item-avatar-right" ng-repeat="product in allProductsFiltered track by product.ItemCode" ng-click="ItemWasClicked(product)">
+            <ion-item class="item-avatar-right" ng-repeat="product in allProductsFiltered track by product.ItemCode" ng-click="ItemWasClickedInEditCart(product)">
                 <img ng-src={{product['ItemImage']}}>
                 <h2 style="text-align:right">{{product["ItemName"]}}</h2>
                 <div class="col" style="text-align:right; direction: rtl;" ng-if="product['Amount'] != 0">
-                    <button ng-click="UpdateProductAmount(product, 1); $event.stopPropagation()" class="button button-outline button-positive item item-input-inset" style="display:inline-block">
+                    <button ng-click="UpdateProductAmountFromEditCart(product, 1); $event.stopPropagation()" class="button button-outline button-positive item item-input-inset" style="display:inline-block">
                         +
                     </button>
 
                     {{c.localize.strings['Amount']}} {{product["Amount"]}}
 
-                    <button ng-click="UpdateProductAmount(product, -1); $event.stopPropagation()" class="button button-outline button-positive item item-input-inset" style="display:inline-block">
+                    <button ng-click="UpdateProductAmountFromEditCart(product, -1); $event.stopPropagation()" class="button button-outline button-positive item item-input-inset" style="display:inline-block">
                         -
                     </button>
                 </div>

@@ -19,7 +19,11 @@
         'CancelButton': 'בטל',
         'SaveButton': 'שמור',
         'EnterCartName': 'הכנס שם של סל',
-        'Cart': 'סל'
+        'Cart': 'סל',
+        'AreYouSureWantToDeleteProductTitle': 'למחוק מוצר',
+        'AreYouSureWantToDeleteProductText': '?אתה בטוח שאתה רוצה למחוק את המוצר',
+        'YesButton': 'כן',
+        'NoButton': 'לא'
     };
 
     document.selectLanguage = function(lang)

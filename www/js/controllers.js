@@ -139,6 +139,7 @@ angular.module('ComparePrices.controllers', [])
             })
         };
 
+        // TODO: return my popup and handle the response in calling function. same way as in confirm delete product
         $scope.AskForCartName = function() {
             // An elaborate, custom popup
             $scope.popupData = {};
@@ -184,7 +185,7 @@ angular.module('ComparePrices.controllers', [])
         };
     })
 
-    .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicModal, ComparePricesStorage, MiscFunctions, PopUpWithDuration, ComparePricesConstants) {
+    .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicModal, $ionicPopup, ComparePricesStorage, MiscFunctions, PopUpWithDuration, ComparePricesConstants) {
         // ionic related variables. Used to create advanced  <ion-list>
         $scope.shouldShowDelete = false;
         $scope.shouldShowReorder = false;
@@ -339,8 +340,24 @@ angular.module('ComparePrices.controllers', [])
             $scope.$broadcast('scroll.infiniteScrollComplete');
         };
 
-        // TODO: check if amount is 0 and delete
-        $scope.UpdateProductAmount = function(itemInfo, amountToAdd) {
+        $scope.UpdateProductAmountFromCartDetails = function(itemInfo, amountToAdd) {
+            $scope.UpdateProductAmountInMyCart(itemInfo, amountToAdd, true);
+        };
+
+        $scope.UpdateProductAmountFromEditCart = function(itemInfo, amountToAdd) {
+            $scope.UpdateProductAmountInMyCart(itemInfo, amountToAdd, false);
+
+            // TODO: is there a better way?
+            var numOfFilteredProducts = $scope.allProductsFiltered.length;
+            for (var i=0; i < numOfFilteredProducts; i++) {
+                if ($scope.allProductsFiltered[i]['ItemCode'] == itemInfo['ItemCode']) {
+                    $scope.allProductsFiltered[i]['Amount'] += parseInt(amountToAdd);
+                    break;
+                }
+            }
+        };
+
+        $scope.UpdateProductAmountInMyCart = function(itemInfo, amountToAdd, showConfirmationPopUp) {
             var numOfProductsInCart = $scope.myCart.length;
             var productIndex        = -1;
             for (var i=0; i < numOfProductsInCart; i++) {
@@ -357,23 +374,48 @@ angular.module('ComparePrices.controllers', [])
                     'ItemImage': 'http://www.shufersal.co.il/_layouts/images/Shufersal/Images/Products_Large/z_' + itemInfo['ItemCode'] + '.PNG',
                     'Amount': parseInt(amountToAdd)};
                 $scope.myCart.push(newItemInCart)
+                ComparePricesStorage.UpdateCart($scope.cartID, $scope.myCart);
             } else {
-                $scope.myCart[i]['Amount'] += parseInt(amountToAdd);
-            }
-
-            // TODO: is there a better way?
-            var numOfFilteredProducts = $scope.allProductsFiltered.length;
-            for (var i=0; i < numOfFilteredProducts; i++) {
-                if ($scope.allProductsFiltered[i]['ItemCode'] == itemInfo['ItemCode']) {
-                    $scope.allProductsFiltered[i]['Amount'] += parseInt(amountToAdd);
+                // if amount is 0, delete the product
+                var newAmount = $scope.myCart[productIndex]['Amount'] + parseInt(amountToAdd);
+                if (newAmount == 0) {
+                    if (showConfirmationPopUp) {
+                        $scope.ConfirmProductDelete().then(function(confirmed) {
+                            if(confirmed) {
+                                $scope.myCart.splice(productIndex, 1)
+                                ComparePricesStorage.UpdateCart($scope.cartID, $scope.myCart);
+                            }
+                        });
+                    }
+                } else {
+                    $scope.myCart[productIndex]['Amount'] = newAmount;
                 }
             }
-            ComparePricesStorage.UpdateCart($scope.cartID, $scope.myCart);
+        };
+
+        $scope.ConfirmProductDelete = function() {
+            return $ionicPopup.confirm({
+                title: $scope.c.localize.strings['AreYouSureWantToDeleteProductTitle'],
+                template: '<div style="text-align:right">' + $scope.c.localize.strings['AreYouSureWantToDeleteProductText'] + '</div>',
+                buttons: [
+                    { text: $scope.c.localize.strings['NoButton'],
+                        onTap: function(e) {
+                            return false;
+                        }
+                    },
+                    { text: '<b>' + $scope.c.localize.strings['YesButton'] + '</b>',
+                        type: 'button-positive',
+                        onTap: function(e) {
+                            return true
+                        }
+                    }
+                ]
+            });
         };
 
         // TODO: maybe there's a prettier way, no need to change the entire cart
-        $scope.ItemWasClicked = function(clickedItem) {
-            $scope.UpdateProductAmount(clickedItem, 1);
+        $scope.ItemWasClickedInEditCart = function(clickedItem) {
+            $scope.UpdateProductAmountFromEditCart(clickedItem, 1);
             PopUpWithDuration(400, $scope.c.localize.strings['AddedProduct'])
         };
      })
