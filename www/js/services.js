@@ -66,7 +66,7 @@ angular.module('ComparePrices.services', ['ngResource'])
         {
             db.transaction(function(tx) {
                 tx.executeSql('DROP TABLE IF EXISTS tbProducts');
-                tx.executeSql('CREATE TABLE IF NOT EXISTS tbProducts (ItemCode, ItemName)')
+                tx.executeSql('CREATE TABLE IF NOT EXISTS tbProducts (ItemCode, ItemName, ImagePath)')
             }, errorCB, successCB);
 
             Shop.query({shopName:'all_products'}, function (products) {
@@ -77,7 +77,8 @@ angular.module('ComparePrices.services', ['ngResource'])
                         var singleProduct = products[i];
                         var sqlQuery = 'INSERT INTO tbProducts VALUES ("' +
                             singleProduct['ItemCode'] + '", "' +
-                            singleProduct['ItemName'].replace(/\"/g, "\'\'") + '")';
+                            singleProduct['ItemName'].replace(/\"/g, "\'\'") + '", "' +
+                            singleProduct['ImagePath'] + '")';
                         tx.executeSql(sqlQuery)
                     }
                 }, errorCB, successCB)
@@ -237,6 +238,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 db.transaction(function (tx) {
                     tx.executeSql('SELECT tbProducts.ItemCode AS ItemCode, ' +
                         'tbProducts.ItemName AS ItemName,' +
+                        'tbProducts.ImagePath AS ImagePath,' +
                         'tbUserCarts.Amount AS Amount, ' +
                         'tbUserCarts.CartID AS CartID ' +
                         'FROM tbProducts JOIN tbUserCarts ON tbProducts.ItemCode=tbUserCarts.ItemCode ' +

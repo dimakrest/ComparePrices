@@ -63,13 +63,6 @@ angular.module('ComparePrices.controllers', [])
             $scope.c.allProducts.forEach(function(singleProduct) {
                 $scope.c.allProductsByItemID[singleProduct['ItemCode']] = singleProduct;
             });
-
-            // TODO: download the images
-            var numOfProducts = $scope.c.allProducts.length;
-            for (var i=0; i < numOfProducts; i++) {
-                $scope.c.allProducts[i]['ItemImage'] = 'http://www.shufersal.co.il/_layouts/images/Shufersal/Images/Products_Large/z_' +
-                                                        $scope.c.allProducts[i]['ItemCode'] + '.PNG';
-            }
         });
     })
 
@@ -210,13 +203,6 @@ angular.module('ComparePrices.controllers', [])
         ComparePricesStorage.GetMyCart($scope.cartID, function(result) {
             $scope.$apply(function() {
                 $scope.myCart = result.rows;
-
-                // TODO: download the images
-                var numOfProducts = $scope.myCart.length;
-                for (var i=0; i < numOfProducts;i ++) {
-                    $scope.myCart[i]['ItemImage'] = 'http://www.shufersal.co.il/_layouts/images/Shufersal/Images/Products_Large/z_' + $scope.myCart[i]['ItemCode']
-                                                       + '.PNG'
-                }
             });
         });
 
@@ -367,11 +353,10 @@ angular.module('ComparePrices.controllers', [])
                 }
             }
             if (productIndex == -1) {
-                // TODO: download the images
                 var newItemInCart = {'CartID': $scope.cartID,
                     'ItemCode': itemInfo['ItemCode'],
                     'ItemName': itemInfo['ItemName'],
-                    'ItemImage': 'http://www.shufersal.co.il/_layouts/images/Shufersal/Images/Products_Large/z_' + itemInfo['ItemCode'] + '.PNG',
+                    'ImagePath': itemInfo['ImagePath'],
                     'Amount': parseInt(amountToAdd)};
                 $scope.myCart.push(newItemInCart)
                 ComparePricesStorage.UpdateCart($scope.cartID, $scope.myCart);
