@@ -4,7 +4,6 @@
 
 angular.module('ComparePrices.services', ['ngResource'])
 
-    // TODO: read about resources
     .factory('Shop', ['$resource',
         function($resource){
             return $resource('resources/:shopName.json', {}, {
@@ -36,7 +35,6 @@ angular.module('ComparePrices.services', ['ngResource'])
                     });
                 }
             }
-
     }])
 
     .factory('ComparePricesStorage', ['Shop', '$q', function (Shop, $q) {
@@ -167,7 +165,7 @@ angular.module('ComparePrices.services', ['ngResource'])
             console.log("Db connection success!");
         }
 
-        function IsssueSelectQuery(productCodes, tableName) {
+        function IssueProductsSelectQuery(productCodes, tableName) {
             var d = $q.defer();
 
             var response = {};
@@ -182,6 +180,26 @@ angular.module('ComparePrices.services', ['ngResource'])
                 }
             }
             selectQuery += ')';
+
+            db.transaction(function (tx) {
+                tx.executeSql(selectQuery, [], function (tx, rawresults) {
+                    var len = rawresults.rows.length;
+                    for (var i = 0; i < len; i++) {
+                        response.rows.push(rawresults.rows.item(i));
+                    }
+                    d.resolve(response)
+                });
+            });
+
+            return d.promise
+        }
+
+        function IssueShopsInRadiusQuery(radius) {
+            var d = $q.defer();
+
+            var response = {};
+            response.rows = [];
+            var selectQuery = "SELECT * FROM tbStoresLocation WHERE Distance < " + radius;
 
             db.transaction(function (tx) {
                 tx.executeSql(selectQuery, [], function (tx, rawresults) {
@@ -218,9 +236,6 @@ angular.module('ComparePrices.services', ['ngResource'])
                 return response
             },
 
-            // DELETE FROM table_name
-            // WHERE some_column=some_value;
-            // TODO: for now I assume single cart
             UpdateCart: function (cartID, newCart) {
                 db.transaction(function (tx) {
                     tx.executeSql('DELETE FROM tbUserCarts WHERE CartID = "' + cartID + '"');
@@ -262,9 +277,9 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             GetProductsForEachShopByItemCode: function (productCodes, success) {
                 $q.all([
-                    IsssueSelectQuery(productCodes, 'tbAmPmProducts'),
-                    IsssueSelectQuery(productCodes, 'tbMegaProducts'),
-                    IsssueSelectQuery(productCodes, 'tbSuperSalProducts')]).then(function (data) {
+                    IssueProductsSelectQuery(productCodes, 'tbAmPmProducts'),
+                    IssueProductsSelectQuery(productCodes, 'tbMegaProducts'),
+                    IssueProductsSelectQuery(productCodes, 'tbSuperSalProducts')]).then(function (data) {
 
                     // TODO: is there a way to do this prettier?
                     if (success) {
@@ -276,8 +291,26 @@ angular.module('ComparePrices.services', ['ngResource'])
                 });
             },
 
-            GetStoresInRadius: function ($radius, success) {
-                var sqlQuery = "SELECT * FROM tbStoresLocation WHERE Distance < " + $radius;
+            GetProductsPerShopAndShops : function (productCodes, radius, success) {
+                $q.all([
+                    IssueProductsSelectQuery(productCodes, 'tbAmPmProducts'),
+                    IssueProductsSelectQuery(productCodes, 'tbMegaProducts'),
+                    IssueProductsSelectQuery(productCodes, 'tbSuperSalProducts'),
+                    IssueShopsInRadiusQuery(radius)]).then(function (data) {
+
+                    // TODO: is there a way to do this prettier?
+                    if (success) {
+                        dataAdjusted = {'AM_PM': data[0],
+                                        'Mega': data[1],
+                                        'SuperSal': data[2],
+                                        'Shops': data[3]};
+                        success(dataAdjusted)
+                    }
+                });
+            },
+
+            GetStoresInRadius: function (radius, success) {
+                var sqlQuery = "SELECT * FROM tbStoresLocation WHERE Distance < " + radius;
                 var response = {};
                 response.rows = [];
                 db.transaction(function (tx) {
@@ -338,7 +371,7 @@ angular.module('ComparePrices.services', ['ngResource'])
             },
 
             UpdateStoreRadiusFromLocations: function (myLat, myLon) {
-                var sqlQuery = "SELECT ChainID, StoreID, Lat, Lon FROM tbStoresLocation;"
+                var sqlQuery = "SELECT ChainID, StoreID, Lat, Lon FROM tbStoresLocation;";
                 db.transaction(function (tx) {
                     tx.executeSql(sqlQuery, [], function (tx, rawresults) {
                         // TODO: do I need the rows thing? if yes wrap this code in some kind of a function
@@ -365,6 +398,65 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
     }])
 
+    // TODO: Using different code for same thing, Slava check and delete this factory
+    // + check which functions are not used
+    .factory('MiscFunctions', ['ComparePricesStorage', function(ComparePricesStorage) {
+        return {
+            CalculateBestShopValues: function (productCart, productPricesInStore) {
+                var priceInAmPM = 0.0;
+                productPricesInStore['AM_PM'].rows.forEach(function (product) {
+                    var numOfProductsInCart = productCart.length;
+                    var amount = 0;
+                    for (var i = 0; i < numOfProductsInCart; i++) {
+                        if (productCart[i]['ItemCode'] == product['ItemCode']) {
+                            amount = parseInt(productCart[i]['Amount']);
+                            break;
+                        }
+                    }
+                    priceInAmPM += parseFloat(product['ItemPrice']) * amount
+                });
+
+                var priceInMega = 0.0;
+                productPricesInStore['Mega'].rows.forEach(function (product) {
+                    var numOfProductsInCart = productCart.length;
+                    var amount = 0;
+                    for (var i = 0; i < numOfProductsInCart; i++) {
+                        if (productCart[i]['ItemCode'] == product['ItemCode']) {
+                            amount = parseInt(productCart[i]['Amount']);
+                            break;
+                        }
+                    }
+                    priceInMega += parseFloat(product['ItemPrice']) * amount
+                });
+
+                var priceInSuperSal = 0.0;
+                productPricesInStore['SuperSal'].rows.forEach(function (product) {
+                    var numOfProductsInCart = productCart.length;
+                    var amount = 0;
+                    for (var i = 0; i < numOfProductsInCart; i++) {
+                        if (productCart[i]['ItemCode'] == product['ItemCode']) {
+                            amount = parseInt(productCart[i]['Amount']);
+                            break;
+                        }
+                    }
+                    priceInSuperSal += parseFloat(product['ItemPrice']) * amount
+                });
+
+                ComparePricesStorage.GetStoresInRadius(15, function (storesInRadius) {
+                    var alertMessage = "AM_PM Price: " + priceInAmPM + "\n" +
+                        "Mega Price: " + priceInMega + "\n" +
+                        "SuperSal Price: " + priceInSuperSal + "\nStores near you: \n";
+
+
+                    storesInRadius.rows.forEach(function (singleStore) {
+                        alertMessage += "Name " + singleStore['StoreName'] + "Address " + singleStore['Address'] + ", Distance: " + singleStore['Distance'] + "\n"
+                    });
+                    alert(alertMessage)
+                })
+            }
+        }
+    }])
+
     .factory('PopUpWithDuration', ['$ionicLoading', function($ionicLoading) {
         return function(duration, message)
             {
@@ -377,59 +469,74 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
     }])
 
-    .factory('MiscFunctions', ['ComparePricesStorage', function(ComparePricesStorage) {
-        return {
-            CalculateBestShopValues: function(productCart, productPricesInStore) {
-                var priceInAmPM = 0.0;
-                productPricesInStore['AM_PM'].rows.forEach(function(product) {
-                    var numOfProductsInCart = productCart.length;
-                    var amount = 0;
-                    for (var i=0; i < numOfProductsInCart; i++) {
-                        if (productCart[i]['ItemCode'] == product['ItemCode']) {
-                            amount = parseInt(productCart[i]['Amount']);
-                            break;
-                        }
+    .factory('ShowModal', ['$ionicModal', function($ionicModal) {
+        return function($scope, templateURL) {
+            $ionicModal.fromTemplateUrl(templateURL, {
+                scope: $scope,
+                animation: 'slide-in-up',
+                backdropClickToClose: true,
+                hardwareBackButtonClose: true
+            }).then(function (modal) {
+                $scope.modal = modal;
+                $scope.modal.show();
+
+                $scope.modal.close = function () {
+                    $scope.modal.remove()
+                };
+            });
+        }
+    }])
+
+    .factory('FindBestShops', ['ComparePricesStorage', '$q', function(ComparePricesStorage, $q) {
+
+        function CalculatePriceForShop(productCart, productPriceInStore) {
+            var totalPrice = 0.0;
+            productPriceInStore.forEach(function(product) {
+                var numOfProductsInCart = productCart.length;
+                var amount = 0;
+                for (var i=0; i < numOfProductsInCart; i++) {
+                    if (productCart[i]['ItemCode'] == product['ItemCode']) {
+                        amount = parseInt(productCart[i]['Amount']);
+                        break;
                     }
-                    priceInAmPM += parseFloat(product['ItemPrice']) * amount
-                });
+                }
+                totalPrice += parseFloat(product['ItemPrice']) * amount
+            });
+            return Math.round(totalPrice);
+        }
 
-                var priceInMega = 0.0;
-                productPricesInStore['Mega'].rows.forEach(function(product) {
-                    var numOfProductsInCart = productCart.length;
-                    var amount = 0;
-                    for (var i=0; i < numOfProductsInCart; i++) {
-                        if (productCart[i]['ItemCode'] == product['ItemCode']) {
-                            amount = parseInt(productCart[i]['Amount']);
-                            break;
-                        }
+        return function($scope, cart) {
+            var d = $q.defer();
+
+            // At first get from myCart only ItemCodes
+            var productCodesInMyCart = [];
+            cart.forEach(function(singleItem) {
+                productCodesInMyCart.push(singleItem['ItemCode'])
+            });
+
+            ComparePricesStorage.GetProductsPerShopAndShops(productCodesInMyCart, 150, function(result) {
+                var priceInAmPm     = CalculatePriceForShop(cart, result['AM_PM'].rows);
+                var priceInMega     = CalculatePriceForShop(cart, result['Mega'].rows);
+                var priceInSuperSal = CalculatePriceForShop(cart, result['SuperSal'].rows);
+                var minimumPrice    = Math.min(priceInAmPm, priceInMega, priceInSuperSal);
+
+                // TODO: sort rhe shops near array to show at first shops that match the best))
+                result['Shops'].rows.forEach(function(shopInfo) {
+                    var shopInfoWithPrice = shopInfo;
+                    if (shopInfo['StoreName'] == 'AM_PM') {
+                        shopInfoWithPrice['Price'] = priceInAmPm;
+                        shopInfoWithPrice['IsChecked'] = (priceInAmPm == minimumPrice);
+                    } else if (shopInfo['StoreName'] == 'Mega') {
+                        shopInfoWithPrice['Price'] = priceInMega;
+                        shopInfoWithPrice['IsChecked'] = (priceInMega == minimumPrice);
+                    } else {
+                        shopInfoWithPrice['Price'] = priceInSuperSal;
+                        shopInfoWithPrice['IsChecked'] = (priceInSuperSal == minimumPrice);
                     }
-                    priceInMega += parseFloat(product['ItemPrice']) * amount
+                    $scope.shopsNear.push(shopInfoWithPrice);
+                    d.resolve()
                 });
-
-                var priceInSuperSal = 0.0;
-                productPricesInStore['SuperSal'].rows.forEach(function(product) {
-                    var numOfProductsInCart = productCart.length;
-                    var amount = 0;
-                    for (var i=0; i < numOfProductsInCart; i++) {
-                        if (productCart[i]['ItemCode'] == product['ItemCode']) {
-                            amount = parseInt(productCart[i]['Amount']);
-                            break;
-                        }
-                    }
-                    priceInSuperSal += parseFloat(product['ItemPrice']) * amount
-                });
-
-                ComparePricesStorage.GetStoresInRadius(15, function(storesInRadius) {
-                    var alertMessage = "AM_PM Price: " + priceInAmPM + "\n" +
-                        "Mega Price: " + priceInMega + "\n" +
-                        "SuperSal Price: " + priceInSuperSal + "\nStores near you: \n";
-
-
-                    storesInRadius.rows.forEach(function(singleStore) {
-                        alertMessage += "Name " + singleStore['StoreName'] + "Address " + singleStore['Address'] + ", Distance: " + singleStore['Distance'] + "\n"
-                    });
-                    alert(alertMessage)
-                })
-            }
+            });
+            return d.promise
         }
     }]);

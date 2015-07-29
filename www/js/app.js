@@ -39,8 +39,8 @@ angular.module('ComparePrices', ['ionic', 'ComparePrices.controllers', 'CompareP
                     return;
                 }
 
-                ComparePricesStorage.UpdateStoreRadiusFromLocations(place.geometry.location.A,
-                    place.geometry.location.F);
+                ComparePricesStorage.UpdateStoreRadiusFromLocations(place.geometry.location.G,
+                    place.geometry.location.K);
                 $scope.c.lastAddress = place.formatted_address;
                 localStorage.setItem('lastAddress', $scope.c.lastAddress)
             });

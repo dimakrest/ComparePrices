@@ -1,0 +1,25 @@
+<ion-modal-view >
+    <ion-header-bar class="positive-bg text-center">
+        <div class="h1 title light">{{::c.localize.strings['ShareHeader']}}</div>
+        <button class="button button-icon icon ion-ios-upload-outline light" ng-click="ShareCartAndShopDetails()"></button>
+        <button class="button button-icon icon ion-ios-close-empty light" ng-click="modal.close()"></button>
+    </ion-header-bar>
+
+    <ion-content class="content-bg">
+
+        <ion-list>
+            <!--TODO: add track by something-->
+            <ion-item class="item item-avatar-right item-checkbox" ng-repeat="shop in shopsNear">
+                <img ng-src={{product['ImagePath']}}> <!-- TODO: put an image -->
+                <label class="checkbox">
+                    <input type="checkbox" ng-checked="shop.IsChecked" ng-model="shop.IsChecked">
+                </label>
+                <h2 style="text-align:right">Store Name: {{shop["StoreName"]}}</h2>
+                <h2 style="text-align:right">Price in Store: {{shop["Price"]}}</h2>
+                <h2 style="text-align:right">Store Address: {{shop["Address"]}}</h2>
+                <h2 style="text-align:right">Distance to Store: {{shop["Distance"]}}</h2>
+            </ion-item>
+        </ion-list>
+    </ion-content>
+</ion-modal-view>
+

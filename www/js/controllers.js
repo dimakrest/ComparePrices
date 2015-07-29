@@ -43,8 +43,6 @@ angular.module('ComparePrices.controllers', [])
 
     .controller('RootCtrl', function($scope, ComparePricesStorage) {
         $scope.c = {};
-
-        $scope.c.allProducts = [];
         $scope.c.allProductsByItemID = [];
 
         // TODO: Not the best code, to keep the cart name in this way
@@ -56,11 +54,10 @@ angular.module('ComparePrices.controllers', [])
 
         $scope.c.lastAddress = localStorage.getItem('lastAddress') || "";
 
-        //////////// Edit cart related variables and methods ////////////
+        // TODO: Slava Think if you can move it
         ComparePricesStorage.GetAllProducts(function(result) {
-            $scope.c.allProducts = result.rows;
             // TODO: may be to replace allProducts with allProductsByItemID in the whole code?
-            $scope.c.allProducts.forEach(function(singleProduct) {
+            result.rows.forEach(function(singleProduct) {
                 $scope.c.allProductsByItemID[singleProduct['ItemCode']] = singleProduct;
             });
         });
@@ -70,13 +67,15 @@ angular.module('ComparePrices.controllers', [])
         console.log("Here")
     })
 
-    .controller('MyCartsCtrl', function($scope, $ionicPopup, ComparePricesStorage, MiscFunctions) {
+    .controller('MyCartsCtrl', function($scope, $ionicPopup, ComparePricesStorage, FindBestShops, ShowModal) {
         // ionic related variables. Used to create advanced  <ion-list>
         $scope.shouldShowDelete = false;
         $scope.shouldShowReorder = false;
         $scope.listCanSwipe = true;
 
         $scope.newCartName = "";
+
+        $scope.shopsNear = [];
 
         ComparePricesStorage.GetAllCarts(function(result) {
             $scope.$apply(function() {
@@ -118,21 +117,34 @@ angular.module('ComparePrices.controllers', [])
             },100)
         };
 
-        $scope.FindNearestShopMyCarts = function(cartID) {
+        $scope.FindBestShop = function(cartID) {
+            $scope.shopsNear = [];
             ComparePricesStorage.GetMyCart(cartID, function(myCart) {
-                myCart = myCart.rows;
-                // At first get from myCart only ItemCodes
-                var productCodesInMyCart = [];
-                myCart.forEach(function(singleItem) {
-                    productCodesInMyCart.push(singleItem['ItemCode'])
+                FindBestShops($scope, myCart.rows).then(function() {
+                    ShowModal($scope, 'templates/best_shops.html');
                 });
-                ComparePricesStorage.GetProductsForEachShopByItemCode(productCodesInMyCart, function(result) {
-                    MiscFunctions.CalculateBestShopValues(myCart, result)
-                });
-            })
+            });
+        };
+
+        // TODO: need to restructure this, need to print the list in a pretty way
+        $scope.ShareCartAndShopDetails = function() {
+            var subject = 'Products List and shops info';
+            var message = '';
+
+            $scope.shopsNear.forEach(function(singleShop) {
+                if (singleShop['IsChecked']) {
+                    message += 'Info about shop: \n';
+                    message += 'Store Name: ' + singleShop["StoreName"] + '\n';
+                    message += 'Price in Store: ' + singleShop["Price"] + '\n';
+                    message += 'Store Address: ' + singleShop["Address"] + '\n';
+                    message += 'Distance to Store: ' + singleShop["Distance"] + '\n';
+                }
+            });
+            window.plugins.socialsharing.share(message, subject);
         };
 
         // TODO: return my popup and handle the response in calling function. same way as in confirm delete product
+        // TODO: make pop-ups as service?
         $scope.AskForCartName = function() {
             // An elaborate, custom popup
             $scope.popupData = {};
@@ -178,7 +190,7 @@ angular.module('ComparePrices.controllers', [])
         };
     })
 
-    .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicModal, $ionicPopup, ComparePricesStorage, MiscFunctions, PopUpWithDuration, ComparePricesConstants) {
+    .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicPopup, ComparePricesStorage, FindBestShops, PopUpWithDuration, ComparePricesConstants, ShowModal) {
         // ionic related variables. Used to create advanced  <ion-list>
         $scope.shouldShowDelete = false;
         $scope.shouldShowReorder = false;
@@ -192,8 +204,11 @@ angular.module('ComparePrices.controllers', [])
         $scope.struct.searchQueryCartDetails = "";
         $scope.struct.searchQueryEditProduct = "";
 
-        $scope.allProductsFiltered = [];
-        $scope.numOfProductsToShow = ComparePricesConstants.NUM_OF_PRODUCTS_TO_SHOW_INIT;
+        $scope.allProducts          = [];
+        $scope.allProductsFiltered  = [];
+        $scope.numOfProductsToShow  = ComparePricesConstants.NUM_OF_PRODUCTS_TO_SHOW_INIT;
+
+        $scope.shopsNear = [];
 
         $scope.ClearSearchCartDetails = function()
         {
@@ -207,16 +222,25 @@ angular.module('ComparePrices.controllers', [])
         });
 
         $scope.FindBestShop = function() {
-            // At first get from myCart only ItemCodes
-            var productCodesInMyCart = [];
-            $scope.myCart.forEach(function(singleItem) {
-                productCodesInMyCart.push(singleItem['ItemCode'])
-            });
-
-            ComparePricesStorage.GetProductsForEachShopByItemCode(productCodesInMyCart, function(result) {
-                MiscFunctions.CalculateBestShopValues($scope.myCart, result)
-            });
+            $scope.shopsNear = [];
+            FindBestShops($scope, $scope.myCart).then(ShowModal($scope, 'templates/best_shops.html'));
         };
+
+        $scope.ShareCartAndShopDetails = function() {
+            var subject = 'Products List and shops info';
+            var message = '';
+
+            $scope.shopsNear.forEach(function(singleShop) {
+                if (singleShop['IsChecked']) {
+                    message += 'Info about shop: \n';
+                    message += 'Store Name: ' + singleShop["StoreName"] + '\n';
+                    message += 'Price in Store: ' + singleShop["Price"] + '\n';
+                    message += 'Store Address: ' + singleShop["Address"] + '\n';
+                    message += 'Distance to Store: ' + singleShop["Distance"] + '\n';
+                }
+            });
+            window.plugins.socialsharing.share(message, subject);
+        }
 
         $scope.DeleteProduct = function(product) {
             var numOfProductsInCart = $scope.myCart.length;
@@ -239,21 +263,10 @@ angular.module('ComparePrices.controllers', [])
 
         $scope.OpenProductsList = function()
         {
-            $ionicModal.fromTemplateUrl('templates/edit_cart.html', {
-                scope: $scope,
-                animation: 'slide-in-up',
-                backdropClickToClose: true,
-                hardwareBackButtonClose: true
-            }).then(function(modal)
-            {
-                $scope.editProduct = modal;
-                $scope.editProduct.show();
-
-                $scope.editProduct.close = function()
-                {
-                    $scope.editProduct.remove()
-                }
-            })
+            ComparePricesStorage.GetAllProducts(function(result) {
+                $scope.allProducts = result.rows;
+            });
+            ShowModal($scope, 'templates/edit_cart.html');
         };
 
         $scope.ClearSearchEditProduct = function()
@@ -267,13 +280,13 @@ angular.module('ComparePrices.controllers', [])
             $scope.allProductsFiltered = [];
             $scope.numOfProductsToShow = ComparePricesConstants.NUM_OF_PRODUCTS_TO_SHOW_INIT;
 
-            var numOfAllProducts                = $scope.c.allProducts.length;
+            var numOfAllProducts                = $scope.allProducts.length;
             var numOfProductsInFilteredArray    = 0;
             for (var i=0; i < numOfAllProducts; i++) {
                 // in two's compliment systems, -1 is represented in binary as all 1s (1111 1111 1111 1111 1111 1111 1111 1111 for 32 bit).
                 // The bitwise inverse (~) of this is all zeros, or just zero, and therefore falsy. That's why the squiggle trick works
-                if (~$scope.c.allProducts[i]['ItemName'].indexOf($scope.struct.searchQueryEditProduct)) {
-                    var product = $scope.c.allProducts[i];
+                if (~$scope.allProducts[i]['ItemName'].indexOf($scope.struct.searchQueryEditProduct)) {
+                    var product = $scope.allProducts[i];
                     product['Amount'] = 0;
 
                     var numOfProductsInMyCart = $scope.myCart.length;
@@ -295,7 +308,7 @@ angular.module('ComparePrices.controllers', [])
         });
 
         $scope.LoadMoreProducts = function() {
-            var numOfProducts                   = $scope.c.allProducts.length;
+            var numOfProducts                   = $scope.allProducts.length;
             var numOfProductsInFilteredArray    = 0;
             $scope.numOfProductsToShow += ComparePricesConstants.NUM_OF_PRODUCTS_TO_LOAD_MORE;
             $scope.allProductsFiltered = [];
@@ -303,8 +316,8 @@ angular.module('ComparePrices.controllers', [])
             for (var i=0; i < numOfProducts; i++) {
                 // in two's compliment systems, -1 is represented in binary as all 1s (1111 1111 1111 1111 1111 1111 1111 1111 for 32 bit).
                 // The bitwise inverse (~) of this is all zeros, or just zero, and therefore falsy. That's why the squiggle trick works
-                if (~$scope.c.allProducts[i]['ItemName'].indexOf($scope.struct.searchQueryEditProduct)) {
-                    var product = $scope.c.allProducts[i];
+                if (~$scope.allProducts[i]['ItemName'].indexOf($scope.struct.searchQueryEditProduct)) {
+                    var product = $scope.allProducts[i];
                     product['Amount'] = 0;
 
                     var numOfProductsInMyCart = $scope.myCart.length;
@@ -374,6 +387,7 @@ angular.module('ComparePrices.controllers', [])
                     }
                 } else {
                     $scope.myCart[productIndex]['Amount'] = newAmount;
+                    ComparePricesStorage.UpdateCart($scope.cartID, $scope.myCart);
                 }
             }
         };
