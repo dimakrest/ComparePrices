@@ -28,7 +28,7 @@
     <script src="js/lang.js"></script>
 
     <!-- TODO: this thing requires internet connection, need to create a fall back -->
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
 
   </head>
 
@@ -55,7 +55,7 @@
 
           <div class="bar bar-header item-input-inset">
               <google-autocomplete></google-autocomplete>
-              <button class="button button-clear" ng-click="c.FindLocation()">
+              <button class="button button-clear">
                   {{::c.localize.strings['FindLocationButton']}}
               </button>
           </div>

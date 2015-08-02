@@ -27,12 +27,11 @@ angular.module('ComparePrices', ['ionic', 'ComparePrices.controllers', 'CompareP
         replace: 'false',
         templateUrl: 'templates/google_autocomplete.html',
         link: function($scope, elm, attrs) {
-            var input = elm.children()[1]
+            var input = elm.children()[1];
             var autocomplete = new google.maps.places.Autocomplete(input);
             google.maps.event.addListener(autocomplete, 'place_changed', function () {
                 var place = autocomplete.getPlace();
 
-                console.log(place)
                 if (!place.geometry) {
                     // TODO: chamge error message
                     window.alert("Autocomplete's returned place contains no geometry");
