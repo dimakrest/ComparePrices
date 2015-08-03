@@ -271,7 +271,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                             success(response)
                         }
                     });
-                });
+                }, errorCB, successCB);
                 return response
             },
 
@@ -390,9 +390,16 @@ angular.module('ComparePrices.services', ['ngResource'])
 
                             var sqlQuery = 'UPDATE tbStoresLocation SET Distance=' + distance + ' WHERE ChainID="' + singleStore['ChainID'] + '"AND StoreID="' +
                                 singleStore['StoreID'] + '";';
-                            tx.executeSql(sqlQuery)
+                            tx.executeSql(sqlQuery);
                         }
                     })
+                })
+            },
+
+            UpdateImageUrl: function(productCode, targetPath) {
+                db.transaction(function (tx) {
+                    var sqlQuery = 'UPDATE tbProducts SET ImagePath="' + targetPath + '" WHERE ItemCode="' + productCode +'";';
+                    tx.executeSql(sqlQuery, successCB, errorCB);
                 })
             }
         }
@@ -538,5 +545,54 @@ angular.module('ComparePrices.services', ['ngResource'])
                 });
             });
             return d.promise
+        }
+    }])
+
+    // I assume that the device is ready when I get here
+    .factory('ImageCache', ['$cordovaFileTransfer', '$cordovaFile', 'ComparePricesStorage',  function ($cordovaFileTransfer, $cordovaFile, ComparePricesStorage) {
+
+        function IsImageCached(imageUrl) {
+            var splitedImageUrl = imageUrl.split('/');
+            var imageName       = splitedImageUrl[(splitedImageUrl.length - 1)];
+
+            return $cordovaFile.checkFile(cordova.file.documentsDirectory, imageName);
+        }
+
+        return {
+            CacheImage: function (productCode, imageUrl) {
+                IsImageCached(imageUrl).then(
+                    function(success) { // image is cached, do nothing
+console.log("test");
+                    },
+                    function(error) { // image is not cached
+                        var splitedImageUrl = imageUrl.split('/');
+                        var imageName       = splitedImageUrl[(splitedImageUrl.length - 1)];
+                        var targetPath      = cordova.file.documentsDirectory + imageName;
+                        var trustHosts      = false;
+                        var options         = {};
+
+                        $cordovaFileTransfer.download(imageUrl, targetPath, options, trustHosts)
+                            .then(function (result) {
+                                ComparePricesStorage.UpdateImageUrl(productCode, targetPath);
+                            }, function (err) {
+
+                            }, function (progress) {
+                            });
+                    }
+                );
+            },
+
+            DeleteCachedImage: function (imageUrl) {
+                var splitedImageUrl = imageUrl.split('/');
+                var imageName       = splitedImageUrl[(splitedImageUrl.length - 1)];
+
+                $cordovaFile.removeFile(cordova.file.dataDirectory, imageName)
+                    .then(function (success) {
+                        // success
+                    }, function (error) {
+                        // error
+                    });
+
+            }
         }
     }]);

@@ -201,7 +201,7 @@ angular.module('ComparePrices.controllers', [])
         };
     })
 
-    .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicPopup, ComparePricesStorage, FindBestShops, PopUpWithDuration, ComparePricesConstants, ShowModal) {
+    .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicPopup, ComparePricesStorage, FindBestShops, PopUpWithDuration, ComparePricesConstants, ShowModal, ImageCache) {
         // ionic related variables. Used to create advanced  <ion-list>
         $scope.shouldShowDelete = false;
         $scope.shouldShowReorder = false;
@@ -251,7 +251,7 @@ angular.module('ComparePrices.controllers', [])
                 }
             });
             window.plugins.socialsharing.share(message, subject);
-        }
+        };
 
         $scope.DeleteProduct = function(product) {
             var numOfProductsInCart = $scope.myCart.length;
@@ -382,7 +382,8 @@ angular.module('ComparePrices.controllers', [])
                     'ItemName': itemInfo['ItemName'],
                     'ImagePath': itemInfo['ImagePath'],
                     'Amount': parseInt(amountToAdd)};
-                $scope.myCart.push(newItemInCart)
+                $scope.myCart.push(newItemInCart);
+                ImageCache.CacheImage(itemInfo['ItemCode'], itemInfo['ImagePath']);
                 ComparePricesStorage.UpdateCart($scope.cartID, $scope.myCart);
             } else {
                 // if amount is 0, delete the product
