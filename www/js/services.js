@@ -187,7 +187,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     for (var i = 0; i < len; i++) {
                         response.rows.push(rawresults.rows.item(i));
                     }
-                    d.resolve(response)
+                    d.resolve(response);
                 });
             });
 
@@ -207,7 +207,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     for (var i = 0; i < len; i++) {
                         response.rows.push(rawresults.rows.item(i));
                     }
-                    d.resolve(response)
+                    d.resolve(response);
                 });
             });
 
@@ -241,7 +241,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     tx.executeSql('DELETE FROM tbUserCarts WHERE CartID = "' + cartID + '"');
                     newCart.forEach(function (singleProduct) {
                         tx.executeSql('INSERT INTO tbUserCarts (CartID, ItemCode, Amount)' +
-                            'VALUES ("' + singleProduct['CartID'] + '", "' + singleProduct['ItemCode'] + '", "' + singleProduct['Amount'] + '")')
+                            'VALUES ("' + singleProduct['CartID'] + '", "' + singleProduct['ItemCode'] + '", ' + singleProduct['Amount'] + ')')
                     });
                 });
             },
@@ -260,12 +260,10 @@ angular.module('ComparePrices.services', ['ngResource'])
                         'WHERE tbUserCarts.CartID="' + cartID + '"', [], function (tx, rawresults) {
                         // TODO: do I need the rows thing? if yes wrap this code in some kind of a function
                         var len = rawresults.rows.length;
-                        console.log("GetMyCart: " + len + " rows found.");
-                        // TODO: can I store Amount as int and skip this step?
                         for (var i = 0; i < len; i++) {
-                            var rawToPush       = rawresults.rows.item(i);
-                            rawToPush['Amount'] = parseInt(rawresults.rows.item(i)['Amount']);
-                            response.rows.push(rawToPush);
+                            // Amount is changed in the cart, so I have to make a copy,
+                            // otherwise it doesn't work in Safari. The properties are immutable.
+                            response.rows.push(angular.copy(rawresults.rows.item(i)));
                         }
                         if (success) {
                             success(response)
@@ -407,6 +405,7 @@ angular.module('ComparePrices.services', ['ngResource'])
 
     // TODO: Using different code for same thing, Slava check and delete this factory
     // + check which functions are not used
+    // Amount is integer, no need to call parse int
     .factory('MiscFunctions', ['ComparePricesStorage', function(ComparePricesStorage) {
         return {
             CalculateBestShopValues: function (productCart, productPricesInStore) {
@@ -416,6 +415,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     var amount = 0;
                     for (var i = 0; i < numOfProductsInCart; i++) {
                         if (productCart[i]['ItemCode'] == product['ItemCode']) {
+                            // TODO: Amount is integer, no need to call parse int
                             amount = parseInt(productCart[i]['Amount']);
                             break;
                         }
@@ -503,7 +503,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 var amount = 0;
                 for (var i=0; i < numOfProductsInCart; i++) {
                     if (productCart[i]['ItemCode'] == product['ItemCode']) {
-                        amount = parseInt(productCart[i]['Amount']);
+                        amount = productCart[i]['Amount'];
                         break;
                     }
                 }
@@ -541,10 +541,10 @@ angular.module('ComparePrices.services', ['ngResource'])
                         shopInfoWithPrice['IsChecked'] = (priceInSuperSal == minimumPrice);
                     }
                     $scope.shopsNear.push(shopInfoWithPrice);
-                    d.resolve()
                 });
+                d.resolve();
             });
-            return d.promise
+            return d.promise;
         }
     }])
 
@@ -552,6 +552,11 @@ angular.module('ComparePrices.services', ['ngResource'])
     .factory('ImageCache', ['$cordovaFileTransfer', '$cordovaFile', 'ComparePricesStorage',  function ($cordovaFileTransfer, $cordovaFile, ComparePricesStorage) {
 
         function IsImageCached(imageUrl) {
+            // for browser cordova is not defined
+            if (cordova == undefined) {
+                return imageUrl;
+            }
+
             var splitedImageUrl = imageUrl.split('/');
             var imageName       = splitedImageUrl[(splitedImageUrl.length - 1)];
 
@@ -562,7 +567,6 @@ angular.module('ComparePrices.services', ['ngResource'])
             CacheImage: function (productCode, imageUrl) {
                 IsImageCached(imageUrl).then(
                     function(success) { // image is cached, do nothing
-console.log("test");
                     },
                     function(error) { // image is not cached
                         var splitedImageUrl = imageUrl.split('/');
