@@ -8,7 +8,6 @@
     var heb = {
         'Amount':'כמות:',
         'AddedProduct': 'מוצר נוסף',
-        'FindNearestShop':'מצא חנות קרובה',
         'AddressPlaceHolder': 'הכנס כתובת',
         'FindLocationButton': 'חפש',
         'SearchQueryEditProductPlaceholder': 'הקלד שם מוצר',

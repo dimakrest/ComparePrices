@@ -4,7 +4,7 @@
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
 // 'starter.controllers' is found in controllers.js
-angular.module('ComparePrices', ['ionic', 'ngCordova', 'ComparePrices.controllers', 'ComparePrices.services', 'ComparePrices.constants'])
+angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'ComparePrices.controllers', 'ComparePrices.services', 'ComparePrices.constants'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {

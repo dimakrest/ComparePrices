@@ -41,7 +41,19 @@ angular.module('ComparePrices.controllers', [])
       };
     })
 
-    .controller('RootCtrl', function($scope, ComparePricesStorage) {
+    .controller('RootCtrl', function($scope, $ionicPopover, ComparePricesStorage) {
+
+
+        // Form data for the login modal
+        $scope.loginData = {};
+
+        var navIcons = document.getElementsByClassName('ion-navicon');
+        for (var i = 0; i < navIcons.length; i++) {
+            navIcons[i].addEventListener('click', function() {
+                this.classList.toggle('active');
+            });
+        }
+
         $scope.c = {};
         $scope.c.allProductsByItemID = [];
 
@@ -78,11 +90,12 @@ angular.module('ComparePrices.controllers', [])
         console.log("Here")
     })
 
-    .controller('MyCartsCtrl', function($scope, $ionicPopup, ComparePricesStorage, FindBestShops, ShowModal) {
+    .controller('MyCartsCtrl', function($scope, $ionicPopup, ComparePricesStorage, FindBestShops, ShowModal, ionicMaterialInk, ionicMaterialMotion) {
+
         // ionic related variables. Used to create advanced  <ion-list>
         $scope.shouldShowDelete = false;
         $scope.shouldShowReorder = false;
-        $scope.listCanSwipe = true;
+        $scope.listCanSwipe = false;
 
         $scope.newCartName = "";
 
@@ -101,6 +114,17 @@ angular.module('ComparePrices.controllers', [])
         };
 
         $scope.DeleteCart = function(cartID) {
+
+            // Need to remove the animate attribute, otherwise when I delete cart the animation is very slow
+            // it takes a second to update the view
+            var ionList = document.getElementsByTagName('ion-list');
+            for (var k = 0; k < ionList.length; k++) {
+                var toRemove = ionList[k].className;
+                if (/animate-/.test(toRemove)) {
+                    ionList[k].className = ionList[k].className.replace(/(?:^|\s)animate-\S*(?:$|\s)/, '');
+                }
+            }
+
             var numOfCarts = $scope.myCartsInfo.length;
             var cartIndex  = -1;
             for (var i=0; i < numOfCarts; i++) {
@@ -110,10 +134,15 @@ angular.module('ComparePrices.controllers', [])
                 }
             }
             if (cartIndex != -1) {
-                $scope.myCartsInfo.splice(cartIndex, 1)
+                $scope.myCartsInfo.splice(cartIndex, 1);
             }
 
-            ComparePricesStorage.DeleteCart(cartID)
+            ComparePricesStorage.DeleteCart(cartID);
+
+            // put the animation class back
+            setTimeout(function(){
+                document.getElementsByTagName('ion-list')[0].className += ' animate-blinds';
+            }, 500);
         };
 
         $scope.ToggleDeleteValue = function() {
@@ -132,9 +161,10 @@ angular.module('ComparePrices.controllers', [])
             $scope.shopsNear = [];
             ComparePricesStorage.GetMyCart(cartID, function(myCart) {
                 FindBestShops($scope, myCart.rows).then(function() {
-                    ShowModal($scope, 'templates/best_shops.html');
+                    setTimeout(function() {
+                        ShowModal($scope, 'templates/best_shops.html')}, 100)
+                    })
                 });
-            });
         };
 
         // TODO: need to restructure this, need to print the list in a pretty way
@@ -196,12 +226,30 @@ angular.module('ComparePrices.controllers', [])
 
                 $scope.lastCartID = String(parseInt($scope.lastCartID) + 1);
 
-                localStorage.setItem('lastCartID', $scope.lastCartID)
+                localStorage.setItem('lastCartID', $scope.lastCartID);
+
+                setTimeout(function() {
+                    ionicMaterialMotion.blinds();
+                }, 0);
             });
         };
+
+        // TODO: need to find an event when the list is ready
+        // ionicMaterialMotion - to have the carts animation
+        // ionicMaterialInk - material effect on buttons inside the ion-item
+        setTimeout(function(){
+//            ionicMaterialMotion.fadeSlideInRight();
+//            ionicMaterialMotion.fadeSlideIn();
+
+            ionicMaterialInk.displayEffect();
+            ionicMaterialMotion.blinds();
+
+//            ionicMaterialMotion.ripple();
+        }, 500);
+
     })
 
-    .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicPopup, ComparePricesStorage, FindBestShops, PopUpWithDuration, ComparePricesConstants, ShowModal, ImageCache) {
+    .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicPopup, ComparePricesStorage, FindBestShops, PopUpWithDuration, ComparePricesConstants, ShowModal, ImageCache, ionicMaterialMotion, ionicMaterialInk) {
         // ionic related variables. Used to create advanced  <ion-list>
         $scope.shouldShowDelete = false;
         $scope.shouldShowReorder = false;
@@ -254,6 +302,16 @@ angular.module('ComparePrices.controllers', [])
         };
 
         $scope.DeleteProduct = function(product) {
+            // Need to remove the animate attribute, otherwise when I delete cart the animation is very slow
+            // it takes a second to update the view
+            var ionList = document.getElementsByTagName('ion-list');
+            for (var k = 0; k < ionList.length; k++) {
+                var toRemove = ionList[k].className;
+                if (/animate-/.test(toRemove)) {
+                    ionList[k].className = ionList[k].className.replace(/(?:^|\s)animate-\S*(?:$|\s)/, '');
+                }
+            }
+
             var numOfProductsInCart = $scope.myCart.length;
             var productIndex        = -1;
             for (var i=0; i < numOfProductsInCart; i++) {
@@ -263,9 +321,14 @@ angular.module('ComparePrices.controllers', [])
                 }
             }
             if (productIndex != -1) {
-                $scope.myCart.splice(productIndex, 1)
+                $scope.myCart.splice(productIndex, 1);
             }
-            ComparePricesStorage.UpdateCart($scope.cartID, $scope.myCart)
+            ComparePricesStorage.UpdateCart($scope.cartID, $scope.myCart);
+
+            // put the animation class back
+            setTimeout(function(){
+                document.getElementsByTagName('ion-list')[0].className += ' animate-blinds';
+            }, 500);
         };
 
         $scope.ToggleDeleteValue = function() {
@@ -429,6 +492,16 @@ angular.module('ComparePrices.controllers', [])
             $scope.UpdateProductAmountFromEditCart(clickedItem, 1);
             PopUpWithDuration(400, $scope.c.localize.strings['AddedProduct'])
         };
+
+        // TODO: need to find an event when the list is ready
+        setTimeout(function(){
+//            ionicMaterialMotion.fadeSlideInRight();
+//            ionicMaterialMotion.fadeSlideIn();
+            ionicMaterialInk.displayEffect();
+            ionicMaterialMotion.blinds();
+
+//            ionicMaterialMotion.ripple();
+        }, 500);
      })
 
     .controller('RecipesListCtrl', function($scope, Recipes, CalculatePriceForRecipes) {

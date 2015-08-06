@@ -1,73 +1,35 @@
 <ion-header-bar class="bar bar-subheader item-input-inset">
     <button class="button button-icon icon ion-minus-circled" ng-click="ToggleDeleteValue()"></button>
-    <button class="button button-clear icon ion-plus-circled" ng-click="CreateNewCart()"></button>
+    <button class="button button-icon icon ion-plus-circled" ng-click="CreateNewCart()"></button>
 </ion-header-bar>
 
 <ion-view view-title={{::c.localize.strings['MyCartsTitle']}}>
 
     <ion-content class="content-bg">
+        <!--<div>-->
+            <!--<button class="button icon-left ion-home button-balanced" ng-click="ToggleDeleteValue()"></button>-->
+            <!--<button class="button icon-right ion-home button-energized" ng-click="CreateNewCart()"></button>-->
+            <!--&lt;!&ndash;<strong class="title">All Ionic, Materialized</strong>&ndash;&gt;-->
+        <!--</div>-->
+        <ion-list class="animate-blinds" show-delete="shouldShowDelete"
+                                         show-reorder="shouldShowReorder"
+                                         can-swipe="listCanSwipe">
 
-        <!-- TODO: Is there a way to make swipe right? -->
-        <ion-list show-delete="shouldShowDelete"
-                  show-reorder="shouldShowReorder"
-                  can-swipe="listCanSwipe">
-            <ion-item ng-repeat="cartInfo in myCartsInfo"
-                      class="item-avatar-right" ng-click="OpenCartDetails(cartInfo['CartID'], cartInfo['CartName'])">
+            <ion-item ng-repeat="cartInfo in myCartsInfo" ng-click="OpenCartDetails(cartInfo['CartID'], cartInfo['CartName'])">
+                <a class="item item-avatar-right">
 
-                <img ng-src="img/tabasco.jpg">
-                <h2 style="float:right">{{cartInfo['CartName']}}</h2>
-
-                <ion-option-button class="ion-minus-circled"
-                                   ng-click="DeleteCart(cartInfo['CartID'])">
-                </ion-option-button>
-
-                <ion-option-button class="button-positive"
-                                   ng-click="FindBestShop(cartInfo['CartID'])">
-                    {{::c.localize.strings['FindNearestShop']}}
-                </ion-option-button>
-
-                <ion-delete-button class="ion-minus-circled"
-                                   ng-click="DeleteCart(cartInfo['CartID'])">
-                </ion-delete-button>
-
+                    <img ng-src="img/tabasco.jpg">
+                    <h2 style="float:right">{{cartInfo['CartName']}}</h2>
+                    <ion-delete-button class="ion-minus-circled"
+                                       ng-click="DeleteCart(cartInfo['CartID'])">
+                    </ion-delete-button>
+                    <!-- want the color to be white and not dark blue -->
+                    <button ng-click="FindBestShop(); $event.stopPropagation()" class="button button-fab button-flat button-positive" data-ink-color="#ff0000" data-ink-opacity=".8">Find best shop</button>
+                </a>
             </ion-item>
+
         </ion-list>
 
-        <!---->
-        <!--<div>-->
-        <!--<button onclick="window.plugins.socialsharing.share('Message only')">message only</button>-->
-        <!--</div>-->
-
-        <!--<div>-->
-        <!--<button onclick="window.plugins.socialsharing.share('Message and subject', 'The subject')">message and subject</button>-->
-        <!--</div>-->
-
-        <!--<div>-->
-        <!--<button onclick="window.plugins.socialsharing.share(null, null, null, 'http://www.x-services.nl')">link only</button>-->
-        <!--</div>-->
-
-        <!--<div>-->
-        <!--<button onclick="window.plugins.socialsharing.share('Message and link', null, null, 'http://www.x-services.nl')">message and link</button>-->
-        <!--</div>-->
-
-        <!--<div>-->
-        <!--<button onclick="window.plugins.socialsharing.share(null, null, 'https://www.google.nl/images/srpr/logo4w.png', null)">image only</button>-->
-        <!--</div>-->
-
-        <!--<div>-->
-        <!--<button onclick="window.plugins.socialsharing.share(null, 'Android filename', 'data:image/png;base64,R0lGODlhDAAMALMBAP8AAP///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAUKAAEALAAAAAAMAAwAQAQZMMhJK7iY4p3nlZ8XgmNlnibXdVqolmhcRQA7', null)">base64 image only</button>-->
-            <!--</div>-->
-        <!--<div>-->
-        <!--<button onclick="window.plugins.socialsharing.share('Message and image', null, 'https://www.google.nl/images/srpr/logo4w.png', null)">message and image</button>-->
-        <!--</div>-->
-
-        <!--<div>-->
-        <!--<button onclick="window.plugins.socialsharing.share('Message, image and link', null, 'https://www.google.nl/images/srpr/logo4w.png', 'http://www.x-services.nl')">message, image and link</button>-->
-        <!--</div>-->
-
-        <!--<div>-->
-        <!--<button onclick="window.plugins.socialsharing.share('Message, subject, image and link', 'The subject', 'https://www.google.nl/images/srpr/logo4w.png', 'http://www.x-services.nl')">message, subject, image and link</button>-->
-        <!--</div>-->
     </ion-content>
 
 
