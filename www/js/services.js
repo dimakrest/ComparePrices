@@ -10,33 +10,6 @@ angular.module('ComparePrices.services', ['ngResource'])
             })
         }])
 
-    .factory('Recipes', ['$resource',
-        function($resource){
-            return $resource('resources/recipes/:recipe.json', {}, {
-                query: {method:'GET', params:{recipe:'recipes'}, isArray:true}
-            });
-    }])
-
-    .factory('CalculatePriceForRecipes', ['ComparePricesStorage', 'MiscFunctions',
-        function(ComparePricesStorage, MiscFunctions){
-            return {
-                FindBestShop: function(products) {
-                    var productCodesInMyCart = [];
-                    var productsStructForCalculation = [];
-
-                    for (var itemCode in products)
-                    {
-                        productCodesInMyCart.push(itemCode);
-                        productsStructForCalculation.push({"ItemCode":itemCode,"Amount":products[itemCode]});
-                    }
-
-                    ComparePricesStorage.GetProductsForEachShopByItemCode(productCodesInMyCart, function(result) {
-                        MiscFunctions.CalculateBestShopValues(productsStructForCalculation, result)
-                    });
-                }
-            }
-    }])
-
     .factory('ComparePricesStorage', ['Shop', '$q', function (Shop, $q) {
 
         var createUserCartsTbQuery = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID, ItemCode, Amount)';
@@ -463,15 +436,38 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
     }])
 
-    .factory('PopUpWithDuration', ['$ionicLoading', function($ionicLoading) {
-        return function(duration, message)
+    .factory('PopUpFactory', ['$ionicLoading', '$ionicPopup', function($ionicLoading, $ionicPopup) {
+        return {
+
+            ConfirmationPopUp: function($scope) {
+                return $ionicPopup.confirm({
+                    title: $scope.c.localize.strings['AreYouSureWantToDeleteProductTitle'],
+                    template: '<div style="text-align:right">' + $scope.c.localize.strings['AreYouSureWantToDeleteProductText'] + '</div>',
+                    buttons: [
+                        { text: $scope.c.localize.strings['NoButton'],
+                            onTap: function(e) {
+                                return false;
+                            }
+                        },
+                        { text: '<b>' + $scope.c.localize.strings['YesButton'] + '</b>',
+                            type: 'button-positive',
+                            onTap: function(e) {
+                                return true
+                            }
+                        }
+                    ]
+                });
+            },
+
+            PopUpWithDuration: function (duration, message)
             {
-            var template = "<h2><i class='ion-checkmark-circled'></i></h2><br><small>"+message+"</small>";
-            $ionicLoading.show({
-                template:'<span style="color:white;">'+template+"</span>",
-                noBackdrop:false,
-                duration:duration
-            });
+                var template = "<h2><i class='ion-checkmark-circled'></i></h2><br><small>"+message+"</small>";
+                $ionicLoading.show({
+                    template:'<span style="color:white;">'+template+"</span>",
+                    noBackdrop:false,
+                    duration:duration
+                });
+            }
         }
     }])
 

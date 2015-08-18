@@ -1,9 +1,11 @@
 <ion-header-bar class="bar bar-subheader item-input-inset">
     <button class="button button-icon icon ion-minus-circled" ng-click="ToggleDeleteValue()"></button>
-    <button class="button button-icon icon ion-plus-circled" ng-click="CreateNewCart()"></button>
 </ion-header-bar>
 
 <ion-view view-title={{::c.localize.strings['MyCartsTitle']}}>
+        <ion-nav-buttons side="left">
+            <button class="button button-icon button-clear ion-plus-round" ng-click="CreateNewCart()"></button>
+        </ion-nav-buttons>
 
     <ion-content class="content-bg">
         <!--<div>-->
@@ -15,7 +17,7 @@
                                          show-reorder="shouldShowReorder"
                                          can-swipe="listCanSwipe">
 
-            <ion-item ng-repeat="cartInfo in myCartsInfo" ng-click="OpenCartDetails(cartInfo['CartID'], cartInfo['CartName'])">
+            <ion-item ng-repeat="cartInfo in c.myCartsInfo" ng-click="OpenCartDetails(cartInfo['CartID'], cartInfo['CartName'])">
                 <a class="item item-avatar-right">
 
                     <img ng-src="img/tabasco.jpg">
