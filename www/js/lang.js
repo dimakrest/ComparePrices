@@ -23,7 +23,8 @@
         'AreYouSureWantToDeleteProductText': '?אתה בטוח שאתה רוצה למחוק את המוצר',
         'YesButton': 'כן',
         'NoButton': 'לא',
-        'ShareHeader': 'שתף'
+        'ShareHeader': 'שתף',
+        'MyAddress': 'כתובת שלי'
     };
 
     document.selectLanguage = function(lang)

@@ -33,7 +33,6 @@
     <script src="js/constants.js"></script>
     <script src="js/lang.js"></script>
 
-    <!-- TODO: this thing requires internet connection, need to create a fall back -->
     <script src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
 
   </head>
@@ -59,6 +58,7 @@
       <!-- Right menu -->
       <ion-side-menu side="right">
 
+          <h2 style="text-align:center">{{::c.localize.strings['MyAddress']}}</h2>
           <div class="bar bar-header item-input-inset">
               <google-autocomplete></google-autocomplete>
               <button class="button button-clear">
