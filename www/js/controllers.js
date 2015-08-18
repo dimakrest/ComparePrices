@@ -62,6 +62,12 @@ angular.module('ComparePrices.controllers', [])
             });
         });
 
+        ComparePricesStorage.GetAllCarts(function(result) {
+            $scope.$apply(function() {
+                $scope.c.myCartsInfo = result.rows
+            })
+        });
+
         // wa for ionic and google autocomplete service
         $scope.DisableTap = function(){
             var container = document.getElementsByClassName('pac-container');
@@ -89,11 +95,7 @@ angular.module('ComparePrices.controllers', [])
 
         $scope.shopsNear = [];
 
-        ComparePricesStorage.GetAllCarts(function(result) {
-            $scope.$apply(function() {
-                $scope.myCartsInfo = result.rows
-            })
-        });
+
 
         $scope.lastCartID = localStorage.getItem('lastCartID') || "1";
 
@@ -103,34 +105,19 @@ angular.module('ComparePrices.controllers', [])
 
         $scope.DeleteCart = function(cartID) {
 
-            // Need to remove the animate attribute, otherwise when I delete cart the animation is very slow
-            // it takes a second to update the view
-            var ionList = document.getElementsByTagName('ion-list');
-            for (var k = 0; k < ionList.length; k++) {
-                var toRemove = ionList[k].className;
-                if (/animate-/.test(toRemove)) {
-                    ionList[k].className = ionList[k].className.replace(/(?:^|\s)animate-\S*(?:$|\s)/, '');
-                }
-            }
-
-            var numOfCarts = $scope.myCartsInfo.length;
+            var numOfCarts = $scope.c.myCartsInfo.length;
             var cartIndex  = -1;
             for (var i=0; i < numOfCarts; i++) {
-                if ($scope.myCartsInfo[i]['CartID'] == cartID) {
+                if ($scope.c.myCartsInfo[i]['CartID'] == cartID) {
                     cartIndex = i;
                     break;
                 }
             }
             if (cartIndex != -1) {
-                $scope.myCartsInfo.splice(cartIndex, 1);
+                $scope.c.myCartsInfo.splice(cartIndex, 1);
             }
 
             ComparePricesStorage.DeleteCart(cartID);
-
-            // put the animation class back
-            setTimeout(function(){
-                document.getElementsByTagName('ion-list')[0].className += ' animate-blinds';
-            }, 500);
         };
 
         $scope.ToggleDeleteValue = function() {
@@ -209,7 +196,7 @@ angular.module('ComparePrices.controllers', [])
 
                 var newCartInfo = {'CartID'  : $scope.lastCartID,
                                    'CartName': res};
-                $scope.myCartsInfo.push(newCartInfo);
+                $scope.c.myCartsInfo.push(newCartInfo);
                 ComparePricesStorage.UpdateCartsList(newCartInfo);
 
                 $scope.lastCartID = String(parseInt($scope.lastCartID) + 1);
@@ -233,11 +220,11 @@ angular.module('ComparePrices.controllers', [])
             ionicMaterialMotion.blinds();
 
 //            ionicMaterialMotion.ripple();
-        }, 500);
+        }, 1500);
 
     })
 
-    .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicPopup, ComparePricesStorage, FindBestShops, PopUpWithDuration, ComparePricesConstants, ShowModal, ImageCache, ionicMaterialMotion, ionicMaterialInk) {
+    .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicPopup, $ionicHistory, ComparePricesStorage, FindBestShops, PopUpFactory, ComparePricesConstants, ShowModal, ImageCache, ionicMaterialMotion, ionicMaterialInk) {
         // ionic related variables. Used to create advanced  <ion-list>
         $scope.shouldShowDelete = false;
         $scope.shouldShowReorder = false;
@@ -271,6 +258,24 @@ angular.module('ComparePrices.controllers', [])
         $scope.FindBestShop = function() {
             $scope.shopsNear = [];
             FindBestShops($scope, $scope.myCart).then(ShowModal($scope, 'templates/best_shops.html'));
+        };
+
+        $scope.DeleteCart = function() {
+
+            var numOfCarts = $scope.c.myCartsInfo.length;
+            var cartIndex  = -1;
+            for (var i=0; i < numOfCarts; i++) {
+                if ($scope.c.myCartsInfo[i]['CartID'] == $scope.cartID) {
+                    cartIndex = i;
+                    break;
+                }
+            }
+            if (cartIndex != -1) {
+                $scope.c.myCartsInfo.splice(cartIndex, 1);
+            }
+
+            ComparePricesStorage.DeleteCart($scope.cartID);
+            $ionicHistory.goBack();
         };
 
         $scope.ShareCartAndShopDetails = function() {
@@ -441,7 +446,7 @@ angular.module('ComparePrices.controllers', [])
                 var newAmount = $scope.myCart[productIndex]['Amount'] + parseInt(amountToAdd);
                 if (newAmount == 0) {
                     if (showConfirmationPopUp) {
-                        $scope.ConfirmProductDelete().then(function(confirmed) {
+                        PopUpFactory.ConfirmationPopUp($scope).then(function(confirmed) {
                             if(confirmed) {
                                 $scope.myCart.splice(productIndex, 1)
                                 ComparePricesStorage.UpdateCart($scope.cartID, $scope.myCart);
@@ -455,30 +460,10 @@ angular.module('ComparePrices.controllers', [])
             }
         };
 
-        $scope.ConfirmProductDelete = function() {
-            return $ionicPopup.confirm({
-                title: $scope.c.localize.strings['AreYouSureWantToDeleteProductTitle'],
-                template: '<div style="text-align:right">' + $scope.c.localize.strings['AreYouSureWantToDeleteProductText'] + '</div>',
-                buttons: [
-                    { text: $scope.c.localize.strings['NoButton'],
-                        onTap: function(e) {
-                            return false;
-                        }
-                    },
-                    { text: '<b>' + $scope.c.localize.strings['YesButton'] + '</b>',
-                        type: 'button-positive',
-                        onTap: function(e) {
-                            return true
-                        }
-                    }
-                ]
-            });
-        };
-
         // TODO: maybe there's a prettier way, no need to change the entire cart
         $scope.ItemWasClickedInEditCart = function(clickedItem) {
             $scope.UpdateProductAmountFromEditCart(clickedItem, 1);
-            PopUpWithDuration(400, $scope.c.localize.strings['AddedProduct'])
+            PopUpFactory.PopUpWithDuration(400, $scope.c.localize.strings['AddedProduct'])
         };
 
         // TODO: need to find an event when the list is ready
@@ -491,86 +476,5 @@ angular.module('ComparePrices.controllers', [])
 //            ionicMaterialMotion.ripple();
         }, 500);
      })
-
-    .controller('RecipesListCtrl', function($scope, Recipes, CalculatePriceForRecipes) {
-            $scope.recipesSelected = [];
-            $scope.productsByRecipeId = [];
-            $scope.totalRecipesSelected = 0;
-            Recipes.query(function(result) {
-                $scope.recipes = result;
-                $scope.recipes.forEach(function(singleRecipe) {
-                    $scope.recipesSelected[singleRecipe.id] = 0;
-                    $scope.productsByRecipeId[singleRecipe.id] = singleRecipe["products"];
-                });
-            });
-
-            $scope.IncreaseRecipes = function(recipeID) {
-                if($scope.recipesSelected[recipeID] < 9)
-                {
-                    $scope.recipesSelected[recipeID]++;
-                    $scope.totalRecipesSelected++;
-                }
-            };
-
-            $scope.DecreaseRecipes = function(recipeID) {
-                if($scope.recipesSelected[recipeID] > 0)
-                {
-                    $scope.recipesSelected[recipeID]--;
-                    $scope.totalRecipesSelected--;
-                }
-            };
-
-            $scope.FindBestShop = function() {
-                var totalProducts = [];
-
-                for (var recipeId in $scope.recipesSelected)
-                {
-                    if ($scope.recipesSelected[recipeId] > 0)
-                    {
-
-                        for (var productId in $scope.productsByRecipeId[recipeId])
-                        {
-                            if (productId in totalProducts)
-                            {
-                                // amount of product per receipt multiplied by num od receipts
-                                totalProducts[productId] += $scope.productsByRecipeId[recipeId][productId] * $scope.recipesSelected[recipeId];
-                            }
-                            else
-                            {
-                                totalProducts[productId] = $scope.productsByRecipeId[recipeId][productId] * $scope.recipesSelected[recipeId];
-                            }
-                        }
-                    }
-                }
-                CalculatePriceForRecipes.FindBestShop(totalProducts);
-            }
-
-    })
-
-    .controller('RecipeCtrl', function($scope, $stateParams, Recipes, CalculatePriceForRecipes) {
-            $scope.recipe = Recipes.get({recipe: $stateParams.recipe}, function() {});
-
-
-            $scope.showGroup = [];
-            for (var i=0; i<10; i++) {
-                $scope.showGroup[i] = 0;
-            }
-
-            $scope.toggleGroup = function(groupId) {
-                if ($scope.isGroupShown(groupId)) {
-                    $scope.showGroup[groupId] = 0;
-                } else {
-                    $scope.showGroup[groupId] = 1;
-                }
-            };
-            $scope.isGroupShown = function(groupId) {
-                return $scope.showGroup[groupId] == 1;
-            };
-
-            $scope.FindBestShop = function() {
-                CalculatePriceForRecipes.FindBestShop($scope.recipe.products);
-            };
-
-    })
 
 ;
