@@ -7,12 +7,11 @@
 <ion-view view-title={{::c.currentCartName}}>
 
     <ion-content class="content-bg">
-
         <div class="item item-input-inset">
             <label class="item-input-wrapper" ng-click="ClearSearchCartDetails()">
                 <!-- TODO: without the style="width it doesn't work -->
                 <i class="icon ion-ios-search placeholder-icon" style="width: 100%;"></i>
-                <input type="search" ng-model="struct.searchQueryCartDetails" placeholder={{::c.localize.strings['SearchQueryCartDetailsPlaceholder']}}>
+                <input type="search" ng-model="searchQueryCartDetails" placeholder={{::c.localize.strings['SearchQueryCartDetailsPlaceholder']}}>
                 <button class="button button-clear">X</button>
             </label>
         </div>

@@ -454,7 +454,6 @@ angular.module('ComparePrices.services', ['ngResource'])
                         "Mega Price: " + priceInMega + "\n" +
                         "SuperSal Price: " + priceInSuperSal + "\nStores near you: \n";
 
-
                     storesInRadius.rows.forEach(function (singleStore) {
                         alertMessage += "Name " + singleStore['StoreName'] + "Address " + singleStore['Address'] + ", Distance: " + singleStore['Distance'] + "\n"
                     });
@@ -552,6 +551,7 @@ angular.module('ComparePrices.services', ['ngResource'])
     .factory('ImageCache', ['$cordovaFileTransfer', '$cordovaFile', 'ComparePricesStorage',  function ($cordovaFileTransfer, $cordovaFile, ComparePricesStorage) {
 
         function IsImageCached(imageUrl) {
+            // TODO: doesn't work
             // for browser cordova is not defined
             if (cordova == undefined) {
                 return imageUrl;
