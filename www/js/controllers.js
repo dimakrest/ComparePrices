@@ -86,16 +86,9 @@ angular.module('ComparePrices.controllers', [])
 
     .controller('MyCartsCtrl', function($scope, $ionicPopup, PopUpFactory, ComparePricesStorage, FindBestShops, ShowModal, ionicMaterialInk, ionicMaterialMotion) {
 
-        // ionic related variables. Used to create advanced  <ion-list>
-        $scope.shouldShowReorder = false;
-        $scope.listCanSwipe = false;
         $scope.totalCartsSelected = 0;
-
         $scope.newCartName = "";
-
         $scope.shopsNear = [];
-
-
 
         $scope.lastCartID = localStorage.getItem('lastCartID') || "1";
 

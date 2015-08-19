@@ -1,33 +1,22 @@
-<ion-header-bar class="bar bar-subheader item-input-inset">
-    <button class="button button-icon icon ion-minus-circled" ng-click="ToggleDeleteValue()"></button>
-</ion-header-bar>
-
 <ion-view view-title={{::c.localize.strings['MyCartsTitle']}}>
-        <ion-nav-buttons side="left">
-            <button class="button button-icon button-clear ion-plus-round" ng-click="CreateNewCart()"></button>
-        </ion-nav-buttons>
+    <ion-nav-buttons side="left">
+        <button class="button button-icon button-clear ion-plus-round" ng-click="CreateNewCart()"></button>
+    </ion-nav-buttons>
 
     <ion-content class="content-bg">
-        <ion-list class="animate-blinds" show-delete="shouldShowDelete"
-                                         show-reorder="shouldShowReorder"
-                                         can-swipe="listCanSwipe">
 
-            <ion-item ng-repeat="cartInfo in c.myCartsInfo" ng-click="OpenCartDetails(cartInfo['CartID'], cartInfo['CartName'])">
-                <a class="item item-avatar-right">
-
-                    <img ng-src="img/tabasco.jpg">
-                    <h2 style="float:right">{{cartInfo['CartName']}}</h2>
-                    <!-- want the color to be white and not dark blue -->
-                    <label class="checkbox">
-                        <input type="checkbox" ng-checked="cartInfo.IsChecked" ng-model="cartInfo.IsChecked" ng-click="ChangeCheckbox(); $event.stopPropagation()">
-                    </label>
-                </a>
-            </ion-item>
-
-        </ion-list>
+        <div class="list animate-blinds">
+            <a class="item item-avatar-right" ng-repeat="cartInfo in c.myCartsInfo" ng-click="OpenCartDetails(cartInfo['CartID'], cartInfo['CartName'])">
+                <img ng-src="img/tabasco.jpg">
+                <h2 style="float:right">{{cartInfo['CartName']}}</h2>
+                <!-- want the color to be white and not dark blue -->
+                <label class="checkbox">
+                    <input type="checkbox" ng-checked="cartInfo.IsChecked" ng-model="cartInfo.IsChecked" ng-click="ChangeCheckbox(); $event.stopPropagation()">
+                </label>
+            </a>
+        </div>
 
     </ion-content>
-
 </ion-view>
 
 <ion-footer-bar>

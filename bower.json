@@ -5,6 +5,5 @@
     "ionic": "driftyco/ionic-bower#1.0.1"
   },
   "dependencies": {
-    "angular-number-picker": "~1.2.1"
   }
 }
