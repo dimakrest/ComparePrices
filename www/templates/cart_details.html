@@ -3,7 +3,6 @@
     <button class="button button-clear button-positive" ng-click="OpenProductsList()"> {{::c.localize.strings['EditButton']}} </button>
 </ion-header-bar>
 
-
 <ion-view view-title={{::c.currentCartName}}>
 
     <ion-content class="content-bg">
@@ -17,6 +16,7 @@
         </div>
 
         <!-- TODO: Is there a way to make swipe right? -->
+        <!-- do I need here class == list -->
         <ion-list class="list" class="animate-blinds" show-delete="shouldShowDelete"
                                          show-reorder="shouldShowReorder"
                                          can-swipe="listCanSwipe">

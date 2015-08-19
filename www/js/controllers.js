@@ -86,16 +86,9 @@ angular.module('ComparePrices.controllers', [])
 
     .controller('MyCartsCtrl', function($scope, $ionicPopup, PopUpFactory, ComparePricesStorage, FindBestShops, ShowModal, ionicMaterialInk, ionicMaterialMotion) {
 
-        // ionic related variables. Used to create advanced  <ion-list>
-        $scope.shouldShowReorder = false;
-        $scope.listCanSwipe = false;
         $scope.totalCartsSelected = 0;
-
         $scope.newCartName = "";
-
         $scope.shopsNear = [];
-
-
 
         $scope.lastCartID = localStorage.getItem('lastCartID') || "1";
 
@@ -138,15 +131,6 @@ angular.module('ComparePrices.controllers', [])
                         }, 100)
                     })
                 });
-
-                //var checkedValue = null;
-                //var inputElements = document.getElementsByClassName('cartsForCalc');
-                //for(var i=0; inputElements[i]; ++i){
-                //    if(inputElements[i].checked){
-                //        checkedValue = inputElements[i].value;
-                //        break;
-                //    }
-                //}
             }
         };
 
