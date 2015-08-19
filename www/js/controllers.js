@@ -43,7 +43,6 @@ angular.module('ComparePrices.controllers', [])
 
     .controller('RootCtrl', function($scope, $ionicPopover, ComparePricesStorage) {
         $scope.c = {};
-        $scope.c.allProductsByItemID = [];
 
         // TODO: Not the best code, to keep the cart name in this way
         $scope.c.currentCartName = "";
@@ -53,14 +52,6 @@ angular.module('ComparePrices.controllers', [])
         document.selectLanguage('heb');
 
         $scope.c.lastAddress = localStorage.getItem('lastAddress') || "";
-
-        // TODO: Slava Think if you can move it
-        ComparePricesStorage.GetAllProducts(function(result) {
-            // TODO: may be to replace allProducts with allProductsByItemID in the whole code?
-            result.rows.forEach(function(singleProduct) {
-                $scope.c.allProductsByItemID[singleProduct['ItemCode']] = singleProduct;
-            });
-        });
 
         ComparePricesStorage.GetAllCarts(function(result) {
             $scope.$apply(function() {
@@ -90,7 +81,7 @@ angular.module('ComparePrices.controllers', [])
         $scope.newCartName = "";
         $scope.shopsNear = [];
 
-        $scope.lastCartID = localStorage.getItem('lastCartID') || "1";
+        $scope.lastCartID = localStorage.getItem('lastCartID') || "100";
 
         $scope.CreateNewCart = function() {
             $scope.AskForCartName();
