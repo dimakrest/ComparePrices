@@ -1,6 +1,3 @@
-<ion-header-bar class="bar bar-subheader item-input-inset">
-    <button class="button button-icon icon ion-minus-circled" ng-click="ToggleDeleteValue()"></button>
-</ion-header-bar>
 
 <ion-view view-title={{::c.localize.strings['MyCartsTitle']}}>
         <ion-nav-buttons side="left">
@@ -13,8 +10,7 @@
             <!--<button class="button icon-right ion-home button-energized" ng-click="CreateNewCart()"></button>-->
             <!--&lt;!&ndash;<strong class="title">All Ionic, Materialized</strong>&ndash;&gt;-->
         <!--</div>-->
-        <ion-list class="animate-blinds" show-delete="shouldShowDelete"
-                                         show-reorder="shouldShowReorder"
+        <ion-list class="animate-blinds" show-reorder="shouldShowReorder"
                                          can-swipe="listCanSwipe">
 
             <ion-item ng-repeat="cartInfo in c.myCartsInfo" ng-click="OpenCartDetails(cartInfo['CartID'], cartInfo['CartName'])">
@@ -22,11 +18,10 @@
 
                     <img ng-src="img/tabasco.jpg">
                     <h2 style="float:right">{{cartInfo['CartName']}}</h2>
-                    <ion-delete-button class="ion-minus-circled"
-                                       ng-click="DeleteCart(cartInfo['CartID'])">
-                    </ion-delete-button>
                     <!-- want the color to be white and not dark blue -->
-                    <button ng-click="FindBestShop(); $event.stopPropagation()" class="button button-fab button-flat button-positive" data-ink-color="#ff0000" data-ink-opacity=".8">Find best shop</button>
+                    <label class="checkbox">
+                        <input type="checkbox" ng-checked="cartInfo.IsChecked" ng-model="cartInfo.IsChecked" ng-click="ChangeCheckbox(); $event.stopPropagation()">
+                    </label>
                 </a>
             </ion-item>
 
@@ -34,5 +29,11 @@
 
     </ion-content>
 
-
 </ion-view>
+
+<ion-footer-bar>
+    <button ng-click="FindBestShop(5);" class="button button-fab button-flat button-positive find-best-shop-button" data-ink-color="#ff0000" data-ink-opacity=".8" >{{::c.localize.strings['FindBestShop']}}</button>
+    <h4 style="text-align:right;">
+        {{totalCartsSelected}} :{{::c.localize.strings['TotalCartsSelected']}}
+    </h4>
+</ion-footer-bar>

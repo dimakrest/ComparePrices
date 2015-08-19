@@ -303,6 +303,7 @@ angular.module('ComparePrices.services', ['ngResource'])
             GetAllCarts: function (success) {
                 var sqlQuery = 'SELECT * FROM tbCarts;';
                 var response = {};
+                var singleItem;
                 response.rows = [];
                 db.transaction(function (tx) {
                     tx.executeSql(sqlQuery, [], function (tx, rawresults) {
@@ -310,7 +311,9 @@ angular.module('ComparePrices.services', ['ngResource'])
                         var len = rawresults.rows.length;
                         console.log("GetAllCarts: " + len + " rows found.");
                         for (var i = 0; i < len; i++) {
-                            response.rows.push(rawresults.rows.item(i))
+                            singleItem = rawresults.rows.item(i);
+                            singleItem['IsChecked'] = false;
+                            response.rows.push(singleItem)
                         }
                         if (success) {
                             success(response)
@@ -439,10 +442,16 @@ angular.module('ComparePrices.services', ['ngResource'])
     .factory('PopUpFactory', ['$ionicLoading', '$ionicPopup', function($ionicLoading, $ionicPopup) {
         return {
 
-            ConfirmationPopUp: function($scope) {
+            ErrorPopUp: function($scope, popUpText) {
+                $ionicPopup.alert({
+                    template: '<div style="text-align:right">' + popUpText + '</div>'
+                });
+            },
+
+            ConfirmationPopUp: function($scope, popUpTitle, popUpText) {
                 return $ionicPopup.confirm({
-                    title: $scope.c.localize.strings['AreYouSureWantToDeleteProductTitle'],
-                    template: '<div style="text-align:right">' + $scope.c.localize.strings['AreYouSureWantToDeleteProductText'] + '</div>',
+                    title: popUpTitle,
+                    template: '<div style="text-align:right">' + popUpText + '</div>',
                     buttons: [
                         { text: $scope.c.localize.strings['NoButton'],
                             onTap: function(e) {

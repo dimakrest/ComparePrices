@@ -96,12 +96,12 @@ angular.module('ComparePrices.controllers', [])
         console.log("Here")
     })
 
-    .controller('MyCartsCtrl', function($scope, $ionicPopup, ComparePricesStorage, FindBestShops, ShowModal, ionicMaterialInk, ionicMaterialMotion) {
+    .controller('MyCartsCtrl', function($scope, $ionicPopup, PopUpFactory, ComparePricesStorage, FindBestShops, ShowModal, ionicMaterialInk, ionicMaterialMotion) {
 
         // ionic related variables. Used to create advanced  <ion-list>
-        $scope.shouldShowDelete = false;
         $scope.shouldShowReorder = false;
         $scope.listCanSwipe = false;
+        $scope.totalCartsSelected = 0;
 
         $scope.newCartName = "";
 
@@ -115,27 +115,6 @@ angular.module('ComparePrices.controllers', [])
             $scope.AskForCartName();
         };
 
-        $scope.DeleteCart = function(cartID) {
-
-            var numOfCarts = $scope.c.myCartsInfo.length;
-            var cartIndex  = -1;
-            for (var i=0; i < numOfCarts; i++) {
-                if ($scope.c.myCartsInfo[i]['CartID'] == cartID) {
-                    cartIndex = i;
-                    break;
-                }
-            }
-            if (cartIndex != -1) {
-                $scope.c.myCartsInfo.splice(cartIndex, 1);
-            }
-
-            ComparePricesStorage.DeleteCart(cartID);
-        };
-
-        $scope.ToggleDeleteValue = function() {
-            $scope.shouldShowDelete = !$scope.shouldShowDelete;
-        };
-
         $scope.OpenCartDetails = function(cartID, cartName) {
             setTimeout(function()
             {
@@ -144,15 +123,45 @@ angular.module('ComparePrices.controllers', [])
             },100)
         };
 
+        $scope.ChangeCheckbox = function() {
+            var checkedValues = 0;
+
+            $scope.c.myCartsInfo.forEach(function(singleCart) {
+                if (singleCart['IsChecked']) {
+                    checkedValues++;
+                }
+            });
+            $scope.totalCartsSelected = checkedValues;
+        };
+
         $scope.FindBestShop = function(cartID) {
-            $scope.shopsNear = [];
-            ComparePricesStorage.GetMyCart(cartID, function(myCart) {
-                FindBestShops($scope, myCart.rows).then(function() {
-                    setTimeout(function() {
-                        ShowModal($scope, 'templates/best_shops.html')}, 100)
+            if ($scope.c.lastAddress == '')
+            {
+                var text  = $scope.c.localize.strings['ChooseYourAddressInSettings'];
+                PopUpFactory.ErrorPopUp($scope, text);
+            }
+            else
+            {
+                $scope.shopsNear = [];
+                ComparePricesStorage.GetMyCart(cartID, function (myCart) {
+                    FindBestShops($scope, myCart.rows).then(function () {
+                        setTimeout(function () {
+                            ShowModal($scope, 'templates/best_shops.html')
+                        }, 100)
                     })
                 });
+
+                //var checkedValue = null;
+                //var inputElements = document.getElementsByClassName('cartsForCalc');
+                //for(var i=0; inputElements[i]; ++i){
+                //    if(inputElements[i].checked){
+                //        checkedValue = inputElements[i].value;
+                //        break;
+                //    }
+                //}
+            }
         };
+
 
         // TODO: need to restructure this, need to print the list in a pretty way
         $scope.ShareCartAndShopDetails = function() {
@@ -236,7 +245,7 @@ angular.module('ComparePrices.controllers', [])
 
     })
 
-    .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicPopup, $ionicHistory, ComparePricesStorage, FindBestShops, PopUpFactory, ComparePricesConstants, ShowModal, ImageCache, ionicMaterialMotion, ionicMaterialInk) {
+    .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicHistory, ComparePricesStorage, FindBestShops, PopUpFactory, ComparePricesConstants, ShowModal, ImageCache, ionicMaterialMotion, ionicMaterialInk) {
         // ionic related variables. Used to create advanced  <ion-list>
         $scope.shouldShowDelete = false;
         $scope.shouldShowReorder = false;
@@ -273,21 +282,26 @@ angular.module('ComparePrices.controllers', [])
         };
 
         $scope.DeleteCart = function() {
+            var title = $scope.c.localize.strings['AreYouSureWantToDeleteCartTitle'];
+            var text  = $scope.c.localize.strings['AreYouSureWantToDeleteCartText'];
+            PopUpFactory.ConfirmationPopUp($scope, title, text).then(function(confirmed) {
+                if(confirmed) {
+                    var numOfCarts = $scope.c.myCartsInfo.length;
+                    var cartIndex  = -1;
+                    for (var i=0; i < numOfCarts; i++) {
+                        if ($scope.c.myCartsInfo[i]['CartID'] == $scope.cartID) {
+                            cartIndex = i;
+                            break;
+                        }
+                    }
+                    if (cartIndex != -1) {
+                        $scope.c.myCartsInfo.splice(cartIndex, 1);
+                    }
 
-            var numOfCarts = $scope.c.myCartsInfo.length;
-            var cartIndex  = -1;
-            for (var i=0; i < numOfCarts; i++) {
-                if ($scope.c.myCartsInfo[i]['CartID'] == $scope.cartID) {
-                    cartIndex = i;
-                    break;
+                    ComparePricesStorage.DeleteCart($scope.cartID);
+                    $ionicHistory.goBack();
                 }
-            }
-            if (cartIndex != -1) {
-                $scope.c.myCartsInfo.splice(cartIndex, 1);
-            }
-
-            ComparePricesStorage.DeleteCart($scope.cartID);
-            $ionicHistory.goBack();
+            });
         };
 
         $scope.ShareCartAndShopDetails = function() {
@@ -458,7 +472,9 @@ angular.module('ComparePrices.controllers', [])
                 var newAmount = $scope.myCart[productIndex]['Amount'] + parseInt(amountToAdd);
                 if (newAmount == 0) {
                     if (showConfirmationPopUp) {
-                        PopUpFactory.ConfirmationPopUp($scope).then(function(confirmed) {
+                        var title = $scope.c.localize.strings['AreYouSureWantToDeleteProductTitle'];
+                        var text  = $scope.c.localize.strings['AreYouSureWantToDeleteProductText'];
+                        PopUpFactory.ConfirmationPopUp($scope, title, text).then(function(confirmed) {
                             if(confirmed) {
                                 $scope.myCart.splice(productIndex, 1)
                                 ComparePricesStorage.UpdateCart($scope.cartID, $scope.myCart);

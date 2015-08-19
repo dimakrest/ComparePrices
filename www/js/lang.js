@@ -21,9 +21,14 @@
         'Cart': 'סל',
         'AreYouSureWantToDeleteProductTitle': 'למחוק מוצר',
         'AreYouSureWantToDeleteProductText': '?אתה בטוח שאתה רוצה למחוק את המוצר',
+        'AreYouSureWantToDeleteCartTitle': 'למחוק סל',
+        'AreYouSureWantToDeleteCartText': '?אתה בטוח שאתה רוצה למחוק את הסל',
         'YesButton': 'כן',
         'NoButton': 'לא',
-        'ShareHeader': 'שתף'
+        'ShareHeader': 'שתף',
+        'FindBestShop': 'מצא מחיר הטוב ביותר',
+        'TotalCartsSelected': 'סלים נבחרו',
+        'ChooseYourAddressInSettings': 'קודם תבחר מיקומך בהגדרות'
     };
 
     document.selectLanguage = function(lang)

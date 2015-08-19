@@ -50,6 +50,13 @@ table.bottomBorder td { text-align:center; padding:3px;}
     pointer-events: none;
     display: inline-block;
 }
+
+.bar .button.find-best-shop-button {
+    max-width: none;
+    width: auto; }
+
+/* HERE STARTS POLYMER CSS */
+
 /* Motion: Blinds
 ==================================*/
 .animate-blinds .item,
