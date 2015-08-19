@@ -17,34 +17,21 @@
         </div>
 
         <!-- TODO: Is there a way to make swipe right? -->
-        <ion-list class="animate-blinds" show-delete="shouldShowDelete"
+        <ion-list class="list" class="animate-blinds" show-delete="shouldShowDelete"
                                          show-reorder="shouldShowReorder"
                                          can-swipe="listCanSwipe">
-            <ion-item ng-repeat="product in myCart | filter:struct.searchQueryCartDetails">
-                <a class="item item-avatar-right">
-                    <img ng-src={{product['ImagePath']}}>
+                <ion-item ng-repeat="product in myCart | filter:struct.searchQueryCartDetails">
+                    <a class="item item-avatar-right">
+                        <img ng-src={{product['ImagePath']}}>
 
-                    <h2 style="text-align:right">{{product.ItemName}}</h2>
-                    <div class="col" style="text-align:right; direction: rtl;">
-                        <button ng-click="UpdateProductAmountFromCartDetails(product, 1); $event.stopPropagation()" class="button button-outline button-positive item item-input-inset" style="display:inline-block">
-                            +
-                        </button>
+                        <h2 style="text-align: right">{{product.ItemName}}</h2>
 
-                        {{c.localize.strings['Amount']}} {{product["Amount"]}}
-
-                        <button ng-click="UpdateProductAmountFromCartDetails(product, -1); $event.stopPropagation()" class="button button-outline button-positive item item-input-inset" style="display:inline-block">
-                            -
-                        </button>
-                    </div>
-                    <!--<h2 class="heb-selector-group" style="text-align:right; direction: rtl;">{{c.localize.strings['Amount']}}-->
-
-
-                            <!--<select class="heb-select">-->
-                                <!--<option>Blue</option>-->
-                                <!--<option selected>Green</option>-->
-                                <!--<option>Red</option>-->
-                            <!--</select>-->
-                    <!--</h2>-->
+                        <div class="ionic-input-group">
+                            <span class="ionic-input-group-addon-left" ng-click="UpdateProductAmountFromCartDetails(product, -1); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
+                            <label class="ionic-form-control">{{ product["Amount"] }}</label>
+                            <span class="ionic-input-group-addon-right" ng-click="UpdateProductAmountFromCartDetails(product, +1); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
+                        </div>
+                    </a>
 
                     <ion-option-button class="ion-minus-circled"
                                        ng-click="DeleteProduct(product)">
@@ -53,8 +40,7 @@
                     <ion-delete-button class="ion-minus-circled"
                                        ng-click="DeleteProduct(product)">
                     </ion-delete-button>
-                </a>
-            </ion-item>
+                </ion-item>
         </ion-list>
 
         <div>
@@ -66,6 +52,5 @@
         </div>
 
     </ion-content>
-
 
 </ion-view>

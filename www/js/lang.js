@@ -28,7 +28,8 @@
         'ShareHeader': 'שתף',
         'FindBestShop': 'מצא מחיר הטוב ביותר',
         'TotalCartsSelected': 'סלים נבחרו',
-        'ChooseYourAddressInSettings': 'קודם תבחר מיקומך בהגדרות'
+        'ChooseYourAddressInSettings': 'קודם תבחר מיקומך בהגדרות',
+        'MyAddress': 'כתובת שלי'
     };
 
     document.selectLanguage = function(lang)

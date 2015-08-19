@@ -42,18 +42,6 @@ angular.module('ComparePrices.controllers', [])
     })
 
     .controller('RootCtrl', function($scope, $ionicPopover, ComparePricesStorage) {
-
-
-        // Form data for the login modal
-        $scope.loginData = {};
-
-        var navIcons = document.getElementsByClassName('ion-navicon');
-        for (var i = 0; i < navIcons.length; i++) {
-            navIcons[i].addEventListener('click', function() {
-                this.classList.toggle('active');
-            });
-        }
-
         $scope.c = {};
         $scope.c.allProductsByItemID = [];
 
