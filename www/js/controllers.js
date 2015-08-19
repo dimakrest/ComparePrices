@@ -122,7 +122,7 @@ angular.module('ComparePrices.controllers', [])
             $scope.totalCartsSelected = checkedValues;
         };
 
-        $scope.FindBestShop = function(cartID) {
+        $scope.FindBestShop = function() {
             if ($scope.c.lastAddress == '')
             {
                 var text  = $scope.c.localize.strings['ChooseYourAddressInSettings'];
@@ -130,23 +130,29 @@ angular.module('ComparePrices.controllers', [])
             }
             else
             {
+                var cartIDs = [];
                 $scope.shopsNear = [];
-                ComparePricesStorage.GetMyCart(cartID, function (myCart) {
-                    FindBestShops($scope, myCart.rows).then(function () {
-                        setTimeout(function () {
-                            ShowModal($scope, 'templates/best_shops.html')
-                        }, 100)
-                    })
+                $scope.c.myCartsInfo.forEach(function(singleCart) {
+                    if (singleCart['IsChecked']) {
+                        cartIDs.push(singleCart['CartID']);
+                    }
                 });
 
-                //var checkedValue = null;
-                //var inputElements = document.getElementsByClassName('cartsForCalc');
-                //for(var i=0; inputElements[i]; ++i){
-                //    if(inputElements[i].checked){
-                //        checkedValue = inputElements[i].value;
-                //        break;
-                //    }
-                //}
+                if (cartIDs.length == 0)
+                {
+                    var text  = $scope.c.localize.strings['ChooseCartsFirst'];
+                    PopUpFactory.ErrorPopUp($scope, text);
+                }
+                else
+                {
+                    ComparePricesStorage.GetMyCarts(cartIDs, function (myCart) {
+                        FindBestShops($scope, myCart.rows).then(function () {
+                            setTimeout(function () {
+                                ShowModal($scope, 'templates/best_shops.html')
+                            }, 100)
+                        })
+                    });
+                }
             }
         };
 
@@ -258,7 +264,7 @@ angular.module('ComparePrices.controllers', [])
             $scope.struct.searchQueryCartDetails = "";
         };
 
-        ComparePricesStorage.GetMyCart($scope.cartID, function(result) {
+        ComparePricesStorage.GetMyCarts([$scope.cartID], function(result) {
             $scope.$apply(function() {
                 $scope.myCart = result.rows;
             });

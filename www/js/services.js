@@ -143,16 +143,7 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             var response = {};
             response.rows = [];
-            var selectQuery = 'SELECT * FROM ' + tableName + ' WHERE ItemCode IN (';
-
-            var numOfProducts = productCodes.length;
-            for (var i=0; i < numOfProducts; i++) {
-                selectQuery += '"' + productCodes[i] + '"';
-                if (i != (numOfProducts-1)) {
-                    selectQuery += ', '
-                }
-            }
-            selectQuery += ')';
+            var selectQuery = 'SELECT * FROM ' + tableName + ' WHERE ItemCode IN ("' + productCodes.join("\",\"") + '")';
 
             db.transaction(function (tx) {
                 tx.executeSql(selectQuery, [], function (tx, rawresults) {
@@ -219,8 +210,8 @@ angular.module('ComparePrices.services', ['ngResource'])
                 });
             },
 
-            GetMyCart: function (cartID, success, error) {
-                console.log("GetMyCart: Init");
+            GetMyCarts: function (cartIDs, success, error) {
+                console.log("GetMyCarts: Init " + cartIDs.join("\",\"") );
                 var response = {};
                 response.rows = [];
                 db.transaction(function (tx) {
@@ -230,7 +221,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                         'tbUserCarts.Amount AS Amount, ' +
                         'tbUserCarts.CartID AS CartID ' +
                         'FROM tbProducts JOIN tbUserCarts ON tbProducts.ItemCode=tbUserCarts.ItemCode ' +
-                        'WHERE tbUserCarts.CartID="' + cartID + '"', [], function (tx, rawresults) {
+                        'WHERE tbUserCarts.CartID IN ("' + cartIDs.join("\",\"") + '")', [], function (tx, rawresults) {
                         // TODO: do I need the rows thing? if yes wrap this code in some kind of a function
                         var len = rawresults.rows.length;
                         for (var i = 0; i < len; i++) {
@@ -507,8 +498,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 var amount = 0;
                 for (var i=0; i < numOfProductsInCart; i++) {
                     if (productCart[i]['ItemCode'] == product['ItemCode']) {
-                        amount = productCart[i]['Amount'];
-                        break;
+                        amount += productCart[i]['Amount'];
                     }
                 }
                 totalPrice += parseFloat(product['ItemPrice']) * amount
