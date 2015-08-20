@@ -4,7 +4,7 @@
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
 // 'starter.controllers' is found in controllers.js
-angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'ComparePrices.controllers', 'ComparePrices.services', 'ComparePrices.constants'])
+angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'ComparePrices.controllers', 'ComparePrices.services', 'ComparePrices.constants', 'jett.ionic.filter.bar'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
@@ -48,7 +48,7 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
 }])
 
     // Need to add myCart -> this is a default page
-.config(function($stateProvider, $urlRouterProvider) {
+.config(function($stateProvider, $urlRouterProvider, $ionicFilterBarConfigProvider) {
     $stateProvider
 
         .state('tabs', {
@@ -76,8 +76,11 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                     controller: 'CartDetailsCtrl'
                 }
             }
-        })
+        });
 
     // if none of the above states are matched, use this as the fallback
     $urlRouterProvider.otherwise('/tab/myCarts');
+
+    // placeholder for a search bar
+    $ionicFilterBarConfigProvider.placeholder(document.localize.strings['SearchQueryCartDetailsPlaceholder']);
 });

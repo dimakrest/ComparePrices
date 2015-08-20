@@ -20,17 +20,17 @@ angular.module('ComparePrices.services', ['ngResource'])
         // TODO: database size + don't want to call init every time
         var db = openDatabase("ComparePricesDB", "1.0", "Global storage", 4 * 1024 * 1024);
 
-            db.transaction(initDB, errorCB, successCB); // creates tables for the first time if required
+        db.transaction(initDB, errorCB, successCB); // creates tables for the first time if required
 
-            initProductList = localStorage.getItem('initProductList') || 1;
-            if (initProductList == 1) {
-                CreateTbProducts();
-                CreateStoresLocationTable();
-                CreateProductTablesForShops(); // TODO: call doesn't match the function declaration
+        initProductList = localStorage.getItem('initProductList') || 1;
+        if (initProductList == 1) {
+            CreateTbProducts();
+            CreateStoresLocationTable();
+            CreateProductTablesForShops(); // TODO: call doesn't match the function declaration
 
-                // For now do this only once
-                localStorage.setItem('initProductList', 0)
-            }
+            // For now do this only once
+            localStorage.setItem('initProductList', 0)
+        }
 
         // TODO: add index
         function CreateTbProducts()

@@ -217,30 +217,22 @@ angular.module('ComparePrices.controllers', [])
 
     })
 
-    .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicHistory, ComparePricesStorage, FindBestShops, PopUpFactory, ComparePricesConstants, ShowModal, ImageCache, ionicMaterialMotion, ionicMaterialInk) {
+    .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicHistory, ComparePricesStorage, FindBestShops, PopUpFactory, ComparePricesConstants, ShowModal, ImageCache, ionicMaterialMotion, ionicMaterialInk, $ionicFilterBar) {
         // ionic related variables. Used to create advanced  <ion-list>
         $scope.shouldShowDelete = false;
         $scope.shouldShowReorder = false;
         $scope.listCanSwipe = true;
 
+        // TODO: try to implement the bar without all structures
+        $scope.data = {};
+        $scope.data.allProducts         = [];
+        $scope.data.allProductsFiltered = [];
+        $scope.data.showSearchResults   = false;
+
         $scope.myCart      = [];
         $scope.cartID = $stateParams.cartID;
 
-        // WA for ionic bug
-        $scope.struct = {};
-        $scope.struct.searchQueryCartDetails = "";
-        $scope.struct.searchQueryEditProduct = "";
-
-        $scope.allProducts          = [];
-        $scope.allProductsFiltered  = [];
-        $scope.numOfProductsToShow  = ComparePricesConstants.NUM_OF_PRODUCTS_TO_SHOW_INIT;
-
         $scope.shopsNear = [];
-
-        $scope.ClearSearchCartDetails = function()
-        {
-            $scope.struct.searchQueryCartDetails = "";
-        };
 
         ComparePricesStorage.GetMyCart($scope.cartID, function(result) {
             $scope.$apply(function() {
@@ -326,84 +318,6 @@ angular.module('ComparePrices.controllers', [])
             $scope.shouldShowDelete = !$scope.shouldShowDelete;
         };
 
-        $scope.OpenProductsList = function()
-        {
-            ComparePricesStorage.GetAllProducts(function(result) {
-                $scope.allProducts = result.rows;
-            });
-            ShowModal($scope, 'templates/edit_cart.html');
-        };
-
-        $scope.ClearSearchEditProduct = function()
-        {
-            $scope.struct.searchQueryEditProduct = "";
-            $scope.allProductsFiltered = [];
-            $scope.numOfProductsToShow = ComparePricesConstants.NUM_OF_PRODUCTS_TO_SHOW_INIT;
-        };
-
-        $scope.$watch('struct.searchQueryEditProduct', function() {
-            $scope.allProductsFiltered = [];
-            $scope.numOfProductsToShow = ComparePricesConstants.NUM_OF_PRODUCTS_TO_SHOW_INIT;
-
-            var numOfAllProducts                = $scope.allProducts.length;
-            var numOfProductsInFilteredArray    = 0;
-            for (var i=0; i < numOfAllProducts; i++) {
-                // in two's compliment systems, -1 is represented in binary as all 1s (1111 1111 1111 1111 1111 1111 1111 1111 for 32 bit).
-                // The bitwise inverse (~) of this is all zeros, or just zero, and therefore falsy. That's why the squiggle trick works
-                if (~$scope.allProducts[i]['ItemName'].indexOf($scope.struct.searchQueryEditProduct)) {
-                    var product = $scope.allProducts[i];
-                    product['Amount'] = 0;
-
-                    var numOfProductsInMyCart = $scope.myCart.length;
-                    for (var j=0; j < numOfProductsInMyCart; j++) {
-                        if ($scope.myCart[j]['ItemCode'] == product['ItemCode']) {
-                            product['Amount'] = $scope.myCart[j]['Amount'];
-                            break;
-                        }
-                    }
-
-                    $scope.allProductsFiltered.push(product);
-
-                    numOfProductsInFilteredArray++;
-                    if (numOfProductsInFilteredArray == $scope.numOfProductsToShow) {
-                        break;
-                    }
-                }
-            }
-        });
-
-        $scope.LoadMoreProducts = function() {
-            var numOfProducts                   = $scope.allProducts.length;
-            var numOfProductsInFilteredArray    = 0;
-            $scope.numOfProductsToShow += ComparePricesConstants.NUM_OF_PRODUCTS_TO_LOAD_MORE;
-            $scope.allProductsFiltered = [];
-
-            for (var i=0; i < numOfProducts; i++) {
-                // in two's compliment systems, -1 is represented in binary as all 1s (1111 1111 1111 1111 1111 1111 1111 1111 for 32 bit).
-                // The bitwise inverse (~) of this is all zeros, or just zero, and therefore falsy. That's why the squiggle trick works
-                if (~$scope.allProducts[i]['ItemName'].indexOf($scope.struct.searchQueryEditProduct)) {
-                    var product = $scope.allProducts[i];
-                    product['Amount'] = 0;
-
-                    var numOfProductsInMyCart = $scope.myCart.length;
-                    for (var j=0; j < numOfProductsInMyCart; j++) {
-                        if ($scope.myCart[j]['ItemCode'] == product['ItemCode']) {
-                            product['Amount'] = $scope.myCart[j]['Amount'];
-                            break;
-                        }
-                    }
-
-                    $scope.allProductsFiltered.push(product);
-
-                    numOfProductsInFilteredArray++;
-                    if (numOfProductsInFilteredArray == $scope.numOfProductsToShow) {
-                        break;
-                    }
-                }
-            }
-            $scope.$broadcast('scroll.infiniteScrollComplete');
-        };
-
         $scope.UpdateProductAmountFromCartDetails = function(itemInfo, amountToAdd) {
             $scope.UpdateProductAmountInMyCart(itemInfo, amountToAdd, true);
         };
@@ -412,10 +326,10 @@ angular.module('ComparePrices.controllers', [])
             $scope.UpdateProductAmountInMyCart(itemInfo, amountToAdd, false);
 
             // TODO: is there a better way?
-            var numOfFilteredProducts = $scope.allProductsFiltered.length;
+            var numOfFilteredProducts = $scope.data.allProductsFiltered.length;
             for (var i=0; i < numOfFilteredProducts; i++) {
-                if ($scope.allProductsFiltered[i]['ItemCode'] == itemInfo['ItemCode']) {
-                    $scope.allProductsFiltered[i]['Amount'] += parseInt(amountToAdd);
+                if ($scope.data.allProductsFiltered[i]['ItemCode'] == itemInfo['ItemCode']) {
+                    $scope.data.allProductsFiltered[i]['Amount'] += parseInt(amountToAdd);
                     break;
                 }
             }
@@ -466,6 +380,62 @@ angular.module('ComparePrices.controllers', [])
             PopUpFactory.PopUpWithDuration(400, $scope.c.localize.strings['AddedProduct'])
         };
 
+        // TODO: don't want to initalize this every time, need to do this only when we want to update
+        // the cart
+        ComparePricesStorage.GetAllProducts(function(result) {
+            $scope.data.allProducts = result.rows;
+        });
+
+        // based on https://github.com/djett41/ionic-filter-bar
+        $scope.ShowFilterBar = function () {
+            filterBarInstance = $ionicFilterBar.show({
+                // items gets the array to filter
+                items: $scope.data.allProducts,
+                // this function is called when filtering is done
+                update: function (filteredItems) {
+                    $scope.data.showSearchResults   = true;
+                    $scope.data.allProductsFiltered = [];
+
+                    var numOfProductsInCart     = $scope.myCart.length;
+                    var numOfFilteredProducts   = filteredItems.length;
+
+                    for (var i=0; i < numOfProductsInCart; i++) {
+                        for (var j=0; j < numOfFilteredProducts; j++) {
+                            if ($scope.myCart[i]['ItemCode'] == filteredItems[j]['ItemCode']) {
+                                $scope.data.allProductsFiltered.push($scope.myCart[i]);
+                                break;
+                            }
+                        }
+                    }
+                    // Now add products that doesn't exist in the cart
+                    for (var i=0; i < numOfFilteredProducts; i++) {
+                        var singleProduct   = filteredItems[i];
+                        var productFound    = false;
+
+                        for (var j=0; j < numOfProductsInCart; j++) {
+                            if ($scope.myCart[j]['ItemCode'] == singleProduct['ItemCode']) {
+                                productFound = true;
+                                break;
+                            }
+                        }
+                        if (!productFound) {
+                            singleProduct['Amount'] = 0;
+                            $scope.data.allProductsFiltered.push(singleProduct);
+                        }
+                    }
+                },
+                // Called after the filterBar is removed. This can happen when the cancel button is pressed, the backdrop is tapped
+                // or swiped, or the back button is pressed.
+                cancel: function() {
+                    $scope.data.allProductsFiltered = [];
+                    $scope.data.showSearchResults = false;
+                },
+                debounce: true,
+                delay: 500,
+                filterProperties: 'ItemName'
+            });
+        };
+
         // TODO: need to find an event when the list is ready
         setTimeout(function(){
 //            ionicMaterialMotion.fadeSlideInRight();
@@ -475,6 +445,4 @@ angular.module('ComparePrices.controllers', [])
 
 //            ionicMaterialMotion.ripple();
         }, 500);
-     })
-
-;
+});

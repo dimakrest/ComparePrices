@@ -1,53 +1,57 @@
 <ion-header-bar class="bar bar-subheader item-input-inset">
     <button class="button button-icon icon ion-minus-circled" ng-click="ToggleDeleteValue()"></button>
-    <button class="button button-clear button-positive" ng-click="OpenProductsList()"> {{::c.localize.strings['EditButton']}} </button>
+    <button class="button button-icon ion-android-search" ng-click="ShowFilterBar()"></button>
 </ion-header-bar>
 
 <ion-view view-title={{::c.currentCartName}}>
 
     <ion-content class="content-bg">
-        <div class="item item-input-inset">
-            <label class="item-input-wrapper" ng-click="ClearSearchCartDetails()">
-                <!-- TODO: without the style="width it doesn't work -->
-                <i class="icon ion-ios-search placeholder-icon" style="width: 100%;"></i>
-                <input type="search" ng-model="searchQueryCartDetails" placeholder={{::c.localize.strings['SearchQueryCartDetailsPlaceholder']}}>
-                <button class="button button-clear">X</button>
-            </label>
+
+        <!-- TODO: ask Karen why if I change it to ng-if it removes the buttons also(even if the buttons are not under ng-if
+         and the cart never comes back -->
+        <div class="list" ng-show="data.showSearchResults">
+            <a style="background-color: #999999" class="item item-avatar-right" collection-repeat="product in data.allProductsFiltered" divider-collection-repeat ng-click="UpdateProductAmountFromEditCart(product, 1)">
+                <img ng-src={{product['ImagePath']}}>
+                <h2 style="text-align: right">{{product['ItemName']}}</h2>
+                <div class="ionic-input-group" ng-if="product.Amount != 0">
+                    <span class="ionic-input-group-addon-left" ng-click="UpdateProductAmountFromCartDetails(product, -1); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
+                    <label class="ionic-form-control">{{product["Amount"]}}</label>
+                    <span class="ionic-input-group-addon-right" ng-click="UpdateProductAmountFromCartDetails(product, +1); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
+                </div>
+            </a>
         </div>
 
+        <div ng-if="!data.showSearchResults">
         <!-- TODO: Is there a way to make swipe right? -->
         <!-- do I need here class == list -->
-        <ion-list class="list" class="animate-blinds" show-delete="shouldShowDelete"
-                                         show-reorder="shouldShowReorder"
-                                         can-swipe="listCanSwipe">
-                <ion-item ng-repeat="product in myCart | filter:struct.searchQueryCartDetails">
-                    <a class="item item-avatar-right">
-                        <img ng-src={{product['ImagePath']}}>
+            <ion-list class="list" class="animate-blinds" show-delete="shouldShowDelete"
+                                                         show-reorder="shouldShowReorder"
+                                                         can-swipe="listCanSwipe">
+                    <ion-item ng-repeat="product in myCart">
+                        <a class="item item-avatar-right">
+                            <img ng-src={{product['ImagePath']}}>
 
-                        <h2 style="text-align: right">{{product.ItemName}}</h2>
+                            <h2 style="text-align: right">{{product.ItemName}}</h2>
 
-                        <div class="ionic-input-group">
-                            <span class="ionic-input-group-addon-left" ng-click="UpdateProductAmountFromCartDetails(product, -1); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
-                            <label class="ionic-form-control">{{ product["Amount"] }}</label>
-                            <span class="ionic-input-group-addon-right" ng-click="UpdateProductAmountFromCartDetails(product, +1); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
-                        </div>
-                    </a>
+                            <div class="ionic-input-group">
+                                <span class="ionic-input-group-addon-left" ng-click="UpdateProductAmountFromCartDetails(product, -1); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
+                                <label class="ionic-form-control">{{ product["Amount"] }}</label>
+                                <span class="ionic-input-group-addon-right" ng-click="UpdateProductAmountFromCartDetails(product, +1); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
+                            </div>
+                        </a>
 
-                    <ion-option-button class="ion-minus-circled"
-                                       ng-click="DeleteProduct(product)">
-                    </ion-option-button>
+                        <ion-option-button class="ion-minus-circled"
+                                           ng-click="DeleteProduct(product)">
+                        </ion-option-button>
 
-                    <ion-delete-button class="ion-minus-circled"
-                                       ng-click="DeleteProduct(product)">
-                    </ion-delete-button>
-                </ion-item>
-        </ion-list>
+                        <ion-delete-button class="ion-minus-circled"
+                                           ng-click="DeleteProduct(product)">
+                        </ion-delete-button>
+                    </ion-item>
+            </ion-list>
 
-        <div>
+
             <button ng-click="FindBestShop()" class="button button-outline button-positive icon-left ion-ios-compose-outline">Find best shop</button>
-        </div>
-
-        <div>
             <button ng-click="DeleteCart()" class="button button-outline button-positive icon-left ion-ios-compose-outline">Delete cart</button>
         </div>
 
