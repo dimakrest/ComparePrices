@@ -43,24 +43,16 @@ angular.module('ComparePrices.controllers', [])
 
     .controller('RootCtrl', function($scope, $ionicPopover, ComparePricesStorage) {
         $scope.c = {};
-        $scope.c.allProductsByItemID = [];
 
         // TODO: Not the best code, to keep the cart name in this way
         $scope.c.currentCartName = "";
+        $scope.c.isCurrentCartPredefined = "";
 
         // init localization array
         $scope.c.localize = document.localize;
         document.selectLanguage('heb');
 
         $scope.c.lastAddress = localStorage.getItem('lastAddress') || "";
-
-        // TODO: Slava Think if you can move it
-        ComparePricesStorage.GetAllProducts(function(result) {
-            // TODO: may be to replace allProducts with allProductsByItemID in the whole code?
-            result.rows.forEach(function(singleProduct) {
-                $scope.c.allProductsByItemID[singleProduct['ItemCode']] = singleProduct;
-            });
-        });
 
         ComparePricesStorage.GetAllCarts(function(result) {
             $scope.$apply(function() {
@@ -84,7 +76,7 @@ angular.module('ComparePrices.controllers', [])
         console.log("Here")
     })
 
-    .controller('MyCartsCtrl', function($scope, $ionicPopup, PopUpFactory, ComparePricesStorage, FindBestShops, ShowModal, ionicMaterialInk, ionicMaterialMotion) {
+    .controller('MyCartsCtrl', function($scope, $ionicPopup, PopUpFactory, ComparePricesStorage, ComparePricesConstants, FindBestShops, ShowModal, ionicMaterialInk, ionicMaterialMotion) {
 
         $scope.totalCartsSelected = 0;
         $scope.newCartName = "";
@@ -115,7 +107,7 @@ angular.module('ComparePrices.controllers', [])
             $scope.totalCartsSelected = checkedValues;
         };
 
-        $scope.FindBestShop = function(cartID) {
+        $scope.FindBestShop = function() {
             if ($scope.c.lastAddress == '')
             {
                 var text  = $scope.c.localize.strings['ChooseYourAddressInSettings'];
@@ -123,14 +115,29 @@ angular.module('ComparePrices.controllers', [])
             }
             else
             {
+                var cartIDs = [];
                 $scope.shopsNear = [];
-                ComparePricesStorage.GetMyCart(cartID, function (myCart) {
-                    FindBestShops($scope, myCart.rows).then(function () {
-                        setTimeout(function () {
-                            ShowModal($scope, 'templates/best_shops.html')
-                        }, 100)
-                    })
+                $scope.c.myCartsInfo.forEach(function(singleCart) {
+                    if (singleCart['IsChecked']) {
+                        cartIDs.push(singleCart['CartID']);
+                    }
                 });
+
+                if (cartIDs.length == 0)
+                {
+                    var text  = $scope.c.localize.strings['ChooseCartsFirst'];
+                    PopUpFactory.ErrorPopUp($scope, text);
+                }
+                else
+                {
+                    ComparePricesStorage.GetMyCarts(cartIDs, function (myCart) {
+                        FindBestShops($scope, myCart.rows).then(function () {
+                            setTimeout(function () {
+                                ShowModal($scope, 'templates/best_shops.html')
+                            }, 100)
+                        })
+                    });
+                }
             }
         };
 
@@ -154,7 +161,7 @@ angular.module('ComparePrices.controllers', [])
 
         // TODO: return my popup and handle the response in calling function. same way as in confirm delete product
         // TODO: make pop-ups as service?
-        $scope.AskForCartName = function() {
+        $scope.CreateNewCart = function() {
             // An elaborate, custom popup
             $scope.popupData = {};
             $scope.popupData.newCartName = "";
@@ -188,11 +195,15 @@ angular.module('ComparePrices.controllers', [])
                 }
 
                 var newCartInfo = {'CartID'  : $scope.lastCartID,
-                                   'CartName': res};
+                                   'CartName': res,
+                                   'ImageUrl': ComparePricesConstants.DEFAULT_IMAGE_URL,
+                                   'CheckboxColor': ComparePricesConstants.DEFAULT_CHECKBOX_COLOR,
+                                   'IsPredefined': 0};
+
                 $scope.c.myCartsInfo.push(newCartInfo);
                 ComparePricesStorage.UpdateCartsList(newCartInfo);
 
-                $scope.lastCartID = String(parseInt($scope.lastCartID) + 1);
+                $scope.lastCartID = $scope.lastCartID + 1;
 
                 localStorage.setItem('lastCartID', $scope.lastCartID);
 

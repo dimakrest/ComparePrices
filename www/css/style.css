@@ -124,6 +124,10 @@ table.bottomBorder td { text-align:center; padding:3px;}
     max-width: none;
     width: auto; }
 
+.bar .button.back-button {
+    max-width: none;
+    width: auto; }
+
 /* HERE STARTS POLYMER CSS */
 
 /* Motion: Blinds

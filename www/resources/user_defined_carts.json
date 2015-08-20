@@ -1,0 +1,21 @@
+[
+    {
+        "CartName": "Meat", 
+        "Products":{"32147230":"1","40111216":"1","40883007":"2"},
+        "ImageUrl": "img/golubtsi.jpg",
+        "CheckboxColor": "calm"
+    }, 
+    {
+        "CartName": "Alcohol", 
+        "Products":{"32147230":"1","40111216":"1","40883007":"2"},
+        "ImageUrl": "img/okroshka.jpg",
+        "CheckboxColor": "balanced"
+    }, 
+    {
+        "CartName": "Diary", 
+        "Products":{"32147230":"1","40111216":"1","40883007":"2"},
+        "ImageUrl": "img/solyanka.jpg",
+        "CheckboxColor": "assertive"
+    }
+]
+

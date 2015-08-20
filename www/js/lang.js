@@ -26,6 +26,7 @@
         'FindBestShop': 'מצא מחיר הטוב ביותר',
         'TotalCartsSelected': 'סלים נבחרו',
         'ChooseYourAddressInSettings': 'קודם תבחר מיקומך בהגדרות',
+        'ChooseCartsFirst': 'קודם תבחר סלים',
         'MyAddress': 'כתובת שלי'
     };
 
