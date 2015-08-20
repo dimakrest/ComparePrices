@@ -7,10 +7,10 @@
 
         <div class="list animate-blinds">
             <a class="item item-avatar-right" ng-repeat="cartInfo in c.myCartsInfo" ng-click="OpenCartDetails(cartInfo['CartID'], cartInfo['CartName'])">
-                <img ng-src="img/tabasco.jpg">
+                <img ng-src={{cartInfo['ImageUrl']}}>
                 <h2 style="float:right">{{cartInfo['CartName']}}</h2>
                 <!-- want the color to be white and not dark blue -->
-                <label class="checkbox">
+                <label class="checkbox checkbox-{{cartInfo['CheckboxColor']}}">
                     <input type="checkbox" ng-checked="cartInfo.IsChecked" ng-model="cartInfo.IsChecked" ng-click="ChangeCheckbox(); $event.stopPropagation()">
                 </label>
             </a>

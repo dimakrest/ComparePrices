@@ -75,7 +75,7 @@ angular.module('ComparePrices.controllers', [])
         console.log("Here")
     })
 
-    .controller('MyCartsCtrl', function($scope, $ionicPopup, PopUpFactory, ComparePricesStorage, FindBestShops, ShowModal, ionicMaterialInk, ionicMaterialMotion) {
+    .controller('MyCartsCtrl', function($scope, $ionicPopup, PopUpFactory, ComparePricesStorage, ComparePricesConstants, FindBestShops, ShowModal, ionicMaterialInk, ionicMaterialMotion) {
 
         $scope.totalCartsSelected = 0;
         $scope.newCartName = "";
@@ -194,7 +194,10 @@ angular.module('ComparePrices.controllers', [])
                 }
 
                 var newCartInfo = {'CartID'  : $scope.lastCartID,
-                                   'CartName': res};
+                                   'CartName': res,
+                                   'ImageUrl': ComparePricesConstants.DEFAULT_IMAGE_URL,
+                                   'CheckboxColor': ComparePricesConstants.DEFAULT_CHECKBOX_COLOR};
+
                 $scope.c.myCartsInfo.push(newCartInfo);
                 ComparePricesStorage.UpdateCartsList(newCartInfo);
 
@@ -480,7 +483,7 @@ angular.module('ComparePrices.controllers', [])
             ionicMaterialMotion.blinds();
 
 //            ionicMaterialMotion.ripple();
-        }, 500);
+        }, 3000);
      })
 
 ;

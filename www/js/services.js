@@ -4,16 +4,17 @@
 
 angular.module('ComparePrices.services', ['ngResource'])
 
-    .factory('Shop', ['$resource',
+    .factory('ReadJson', ['$resource',
         function($resource){
-            return $resource('resources/:shopName.json', {}, {
+            return $resource('resources/:jsonName.json', {}, {
             })
         }])
 
-    .factory('ComparePricesStorage', ['Shop', '$q', '$resource', function (Shop, $q, $resource) {
+    .factory('ComparePricesStorage', ['ReadJson', '$q', '$resource',
+        function (ReadJson, $q, $resource) {
 
         var createUserCartsTbQuery = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID, ItemCode, Amount)';
-        var createCartsTbQuery     = 'CREATE TABLE IF NOT EXISTS tbCarts (CartID, CartName)';
+        var createCartsTbQuery     = 'CREATE TABLE IF NOT EXISTS tbCarts (CartID, CartName, ImageUrl, CheckboxColor)';
         var fileNameToTable = {'am_pm_products'     : 'tbAmPmProducts',
                                'mega_products'      : 'tbMegaProducts',
                                'supersal_products'  : 'tbSuperSalProducts'};
@@ -38,13 +39,14 @@ angular.module('ComparePrices.services', ['ngResource'])
         {
             var lastCartID = 1;
 
-            Shop.query({shopName:'user_defined_carts'}, function (userCarts) {
+            ReadJson.query({jsonName:'user_defined_carts'}, function (userCarts) {
                 var carts = userCarts;
                 var products;
 
                 db.transaction(function (tx) {
                     carts.forEach(function(singleCart) {
-                        tx.executeSql('INSERT INTO tbCarts VALUES ("' + lastCartID + '", "' + singleCart['CartName'] + '")');
+                        tx.executeSql('INSERT INTO tbCarts (CartID, CartName, ImageUrl, CheckboxColor)' +
+                        'VALUES ("' + lastCartID + '", "' + singleCart['CartName'] + '", "' + singleCart['ImageUrl'] + '", "' + singleCart['CheckboxColor'] + '")');
 
                         products = singleCart['Products'];
 
@@ -68,7 +70,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 tx.executeSql('CREATE TABLE IF NOT EXISTS tbProducts (ItemCode, ItemName, ImagePath)')
             }, errorCB, successCB);
 
-            Shop.query({shopName:'all_products'}, function (products) {
+            ReadJson.query({jsonName:'all_products'}, function (products) {
                 db.transaction(function (tx) {
                     var numOfProducts = products.length;
                     // TODO: how better mask ' and "
@@ -92,7 +94,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 tx.executeSql('CREATE TABLE IF NOT EXISTS tbStoresLocation (ChainID, StoreID, StoreName, Lat, Lon, Address, Distance)')
             }, errorCB, successCB);
 
-            Shop.query({shopName:'all_stores_location'}, function (storeLocations) {
+            ReadJson.query({jsonName:'all_stores_location'}, function (storeLocations) {
                 db.transaction(function (tx) {
                     var numOfStoreLocations = storeLocations.length;
                     // TODO: how better mask ' and "
@@ -119,7 +121,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 tx.executeSql('DROP TABLE IF EXISTS ' + tableName);
                 tx.executeSql('CREATE TABLE IF NOT EXISTS ' + tableName + ' (ItemCode, ItemPrice)')
             }, errorCB, successCB);
-            Shop.query({shopName:fileName}, function (products) {
+            ReadJson.query({jsonName:fileName}, function (products) {
                 db.transaction(function (tx) {
                     var numOfProducts = products.length;
                     // TODO: how better mask ' and "
@@ -329,7 +331,9 @@ angular.module('ComparePrices.services', ['ngResource'])
             UpdateCartsList: function (newCart) {
                 var sqlQuery = 'INSERT INTO tbCarts VALUES ("' +
                     newCart['CartID'] + '", "' +
-                    newCart['CartName'] + '")';
+                    newCart['CartName'] + '", "' +
+                    newCart['ImageUrl'] + '", "' +
+                    newCart['CheckboxColor'] + '")';
 
                 db.transaction(function (tx) {
                     tx.executeSql(sqlQuery)
