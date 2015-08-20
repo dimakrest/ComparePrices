@@ -4,16 +4,17 @@
 
 angular.module('ComparePrices.services', ['ngResource'])
 
-    .factory('Shop', ['$resource',
+    .factory('ReadJson', ['$resource',
         function($resource){
-            return $resource('resources/:shopName.json', {}, {
+            return $resource('resources/:jsonName.json', {}, {
             })
         }])
 
-    .factory('ComparePricesStorage', ['Shop', '$q', function (Shop, $q) {
+    .factory('ComparePricesStorage', ['ReadJson', '$q', '$resource',
+        function (ReadJson, $q, $resource) {
 
         var createUserCartsTbQuery = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID, ItemCode, Amount)';
-        var createCartsTbQuery     = 'CREATE TABLE IF NOT EXISTS tbCarts (CartID, CartName)';
+        var createCartsTbQuery     = 'CREATE TABLE IF NOT EXISTS tbCarts (CartID, CartName, ImageUrl, CheckboxColor, IsPredefined)';
         var fileNameToTable = {'am_pm_products'     : 'tbAmPmProducts',
                                'mega_products'      : 'tbMegaProducts',
                                'supersal_products'  : 'tbSuperSalProducts'};
@@ -22,14 +23,43 @@ angular.module('ComparePrices.services', ['ngResource'])
 
         db.transaction(initDB, errorCB, successCB); // creates tables for the first time if required
 
-        initProductList = localStorage.getItem('initProductList') || 1;
+        var initProductList = localStorage.getItem('initProductList') || 1;
         if (initProductList == 1) {
             CreateTbProducts();
             CreateStoresLocationTable();
             CreateProductTablesForShops(); // TODO: call doesn't match the function declaration
+            CreatePredefinedCarts();
 
             // For now do this only once
             localStorage.setItem('initProductList', 0)
+        }
+
+
+        function CreatePredefinedCarts()
+        {
+            var lastCartID = 1;
+
+            ReadJson.query({jsonName:'user_defined_carts'}, function (userCarts) {
+                var carts = userCarts;
+                var products;
+
+                db.transaction(function (tx) {
+                    carts.forEach(function(singleCart) {
+                        tx.executeSql('INSERT INTO tbCarts (CartID, CartName, ImageUrl, CheckboxColor, IsPredefined)' +
+                        'VALUES (' + lastCartID + ', "' + singleCart['CartName'] + '", "' + singleCart['ImageUrl'] + '", "' + singleCart['CheckboxColor'] + '",1)');
+
+                        products = singleCart['Products'];
+
+                        for (var productId in products)
+                        {
+                                tx.executeSql('INSERT INTO tbUserCarts (CartID, ItemCode, Amount)' +
+                                'VALUES (' + lastCartID + ', "' + productId + '", ' + products[productId] + ')');
+                        }
+                        lastCartID++;
+                    });
+                });
+            });
+
         }
 
         // TODO: add index
@@ -40,7 +70,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 tx.executeSql('CREATE TABLE IF NOT EXISTS tbProducts (ItemCode, ItemName, ImagePath)')
             }, errorCB, successCB);
 
-            Shop.query({shopName:'all_products'}, function (products) {
+            ReadJson.query({jsonName:'all_products'}, function (products) {
                 db.transaction(function (tx) {
                     var numOfProducts = products.length;
                     // TODO: how better mask ' and "
@@ -64,7 +94,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 tx.executeSql('CREATE TABLE IF NOT EXISTS tbStoresLocation (ChainID, StoreID, StoreName, Lat, Lon, Address, Distance)')
             }, errorCB, successCB);
 
-            Shop.query({shopName:'all_stores_location'}, function (storeLocations) {
+            ReadJson.query({jsonName:'all_stores_location'}, function (storeLocations) {
                 db.transaction(function (tx) {
                     var numOfStoreLocations = storeLocations.length;
                     // TODO: how better mask ' and "
@@ -91,7 +121,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 tx.executeSql('DROP TABLE IF EXISTS ' + tableName);
                 tx.executeSql('CREATE TABLE IF NOT EXISTS ' + tableName + ' (ItemCode, ItemPrice)')
             }, errorCB, successCB);
-            Shop.query({shopName:fileName}, function (products) {
+            ReadJson.query({jsonName:fileName}, function (products) {
                 db.transaction(function (tx) {
                     var numOfProducts = products.length;
                     // TODO: how better mask ' and "
@@ -143,16 +173,7 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             var response = {};
             response.rows = [];
-            var selectQuery = 'SELECT * FROM ' + tableName + ' WHERE ItemCode IN (';
-
-            var numOfProducts = productCodes.length;
-            for (var i=0; i < numOfProducts; i++) {
-                selectQuery += '"' + productCodes[i] + '"';
-                if (i != (numOfProducts-1)) {
-                    selectQuery += ', '
-                }
-            }
-            selectQuery += ')';
+            var selectQuery = 'SELECT * FROM ' + tableName + ' WHERE ItemCode IN ("' + productCodes.join("\",\"") + '")';
 
             db.transaction(function (tx) {
                 tx.executeSql(selectQuery, [], function (tx, rawresults) {
@@ -211,16 +232,16 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             UpdateCart: function (cartID, newCart) {
                 db.transaction(function (tx) {
-                    tx.executeSql('DELETE FROM tbUserCarts WHERE CartID = "' + cartID + '"');
+                    tx.executeSql('DELETE FROM tbUserCarts WHERE CartID = ' + cartID);
                     newCart.forEach(function (singleProduct) {
                         tx.executeSql('INSERT INTO tbUserCarts (CartID, ItemCode, Amount)' +
-                            'VALUES ("' + singleProduct['CartID'] + '", "' + singleProduct['ItemCode'] + '", ' + singleProduct['Amount'] + ')')
+                            'VALUES (' + singleProduct['CartID'] + ', "' + singleProduct['ItemCode'] + '", ' + singleProduct['Amount'] + ')')
                     });
                 });
             },
 
-            GetMyCart: function (cartID, success, error) {
-                console.log("GetMyCart: Init");
+            GetMyCarts: function (cartIDs, success, error) {
+                console.log("GetMyCarts: Init " + cartIDs.join("\",\"") );
                 var response = {};
                 response.rows = [];
                 db.transaction(function (tx) {
@@ -230,7 +251,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                         'tbUserCarts.Amount AS Amount, ' +
                         'tbUserCarts.CartID AS CartID ' +
                         'FROM tbProducts JOIN tbUserCarts ON tbProducts.ItemCode=tbUserCarts.ItemCode ' +
-                        'WHERE tbUserCarts.CartID="' + cartID + '"', [], function (tx, rawresults) {
+                        'WHERE tbUserCarts.CartID IN (' + cartIDs.join() + ')', [], function (tx, rawresults) {
                         // TODO: do I need the rows thing? if yes wrap this code in some kind of a function
                         var len = rawresults.rows.length;
                         for (var i = 0; i < len; i++) {
@@ -244,22 +265,6 @@ angular.module('ComparePrices.services', ['ngResource'])
                     });
                 }, errorCB, successCB);
                 return response
-            },
-
-            GetProductsForEachShopByItemCode: function (productCodes, success) {
-                $q.all([
-                    IssueProductsSelectQuery(productCodes, 'tbAmPmProducts'),
-                    IssueProductsSelectQuery(productCodes, 'tbMegaProducts'),
-                    IssueProductsSelectQuery(productCodes, 'tbSuperSalProducts')]).then(function (data) {
-
-                    // TODO: is there a way to do this prettier?
-                    if (success) {
-                        dataAdjusted = {'AM_PM': data[0],
-                            'Mega': data[1],
-                            'SuperSal': data[2]};
-                        success(dataAdjusted)
-                    }
-                });
             },
 
             GetProductsPerShopAndShops : function (productCodes, radius, success) {
@@ -324,9 +329,12 @@ angular.module('ComparePrices.services', ['ngResource'])
             },
 
             UpdateCartsList: function (newCart) {
-                var sqlQuery = 'INSERT INTO tbCarts VALUES ("' +
-                    newCart['CartID'] + '", "' +
-                    newCart['CartName'] + '")';
+                var sqlQuery = 'INSERT INTO tbCarts VALUES (' +
+                    newCart['CartID'] + ', "' +
+                    newCart['CartName'] + '", "' +
+                    newCart['ImageUrl'] + '", "' +
+                    newCart['CheckboxColor'] + '",' +
+                    '0)';
 
                 db.transaction(function (tx) {
                     tx.executeSql(sqlQuery)
@@ -335,11 +343,11 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             DeleteCart: function (cartID) {
                 db.transaction(function (tx) {
-                    var sqlQuery = 'DELETE FROM tbCarts WHERE CartID = "' + cartID + '"';
+                    var sqlQuery = 'DELETE FROM tbCarts WHERE CartID = ' + cartID;
                     tx.executeSql(sqlQuery)
                 });
                 db.transaction(function (tx) {
-                    var sqlQuery = 'DELETE FROM tbUserCarts WHERE CartID = "' + cartID + '"';
+                    var sqlQuery = 'DELETE FROM tbUserCarts WHERE CartID = ' + cartID;
                     tx.executeSql(sqlQuery)
                 });
             },
@@ -374,66 +382,6 @@ angular.module('ComparePrices.services', ['ngResource'])
                 db.transaction(function (tx) {
                     var sqlQuery = 'UPDATE tbProducts SET ImagePath="' + targetPath + '" WHERE ItemCode="' + productCode +'";';
                     tx.executeSql(sqlQuery, successCB, errorCB);
-                })
-            }
-        }
-    }])
-
-    // TODO: Using different code for same thing, Slava check and delete this factory
-    // + check which functions are not used
-    // Amount is integer, no need to call parse int
-    .factory('MiscFunctions', ['ComparePricesStorage', function(ComparePricesStorage) {
-        return {
-            CalculateBestShopValues: function (productCart, productPricesInStore) {
-                var priceInAmPM = 0.0;
-                productPricesInStore['AM_PM'].rows.forEach(function (product) {
-                    var numOfProductsInCart = productCart.length;
-                    var amount = 0;
-                    for (var i = 0; i < numOfProductsInCart; i++) {
-                        if (productCart[i]['ItemCode'] == product['ItemCode']) {
-                            // TODO: Amount is integer, no need to call parse int
-                            amount = parseInt(productCart[i]['Amount']);
-                            break;
-                        }
-                    }
-                    priceInAmPM += parseFloat(product['ItemPrice']) * amount
-                });
-
-                var priceInMega = 0.0;
-                productPricesInStore['Mega'].rows.forEach(function (product) {
-                    var numOfProductsInCart = productCart.length;
-                    var amount = 0;
-                    for (var i = 0; i < numOfProductsInCart; i++) {
-                        if (productCart[i]['ItemCode'] == product['ItemCode']) {
-                            amount = parseInt(productCart[i]['Amount']);
-                            break;
-                        }
-                    }
-                    priceInMega += parseFloat(product['ItemPrice']) * amount
-                });
-
-                var priceInSuperSal = 0.0;
-                productPricesInStore['SuperSal'].rows.forEach(function (product) {
-                    var numOfProductsInCart = productCart.length;
-                    var amount = 0;
-                    for (var i = 0; i < numOfProductsInCart; i++) {
-                        if (productCart[i]['ItemCode'] == product['ItemCode']) {
-                            amount = parseInt(productCart[i]['Amount']);
-                            break;
-                        }
-                    }
-                    priceInSuperSal += parseFloat(product['ItemPrice']) * amount
-                });
-
-                ComparePricesStorage.GetStoresInRadius(15, function (storesInRadius) {
-                    var alertMessage = "AM_PM Price: " + priceInAmPM + "\n" +
-                        "Mega Price: " + priceInMega + "\n" +
-                        "SuperSal Price: " + priceInSuperSal + "\nStores near you: \n";
-
-                    storesInRadius.rows.forEach(function (singleStore) {
-                        alertMessage += "Name " + singleStore['StoreName'] + "Address " + singleStore['Address'] + ", Distance: " + singleStore['Distance'] + "\n"
-                    });
-                    alert(alertMessage)
                 })
             }
         }
@@ -507,8 +455,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 var amount = 0;
                 for (var i=0; i < numOfProductsInCart; i++) {
                     if (productCart[i]['ItemCode'] == product['ItemCode']) {
-                        amount = productCart[i]['Amount'];
-                        break;
+                        amount += productCart[i]['Amount'];
                     }
                 }
                 totalPrice += parseFloat(product['ItemPrice']) * amount

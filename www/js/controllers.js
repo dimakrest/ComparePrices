@@ -82,16 +82,20 @@ angular.module('ComparePrices.controllers', [])
         $scope.newCartName = "";
         $scope.shopsNear = [];
 
-        $scope.lastCartID = localStorage.getItem('lastCartID') || "1";
+        $scope.lastCartID = localStorage.getItem('lastCartID') || "100";
+        $scope.lastCartID = parseInt($scope.lastCartID);
 
-        $scope.CreateNewCart = function() {
-            $scope.AskForCartName();
-        };
-
-        $scope.OpenCartDetails = function(cartID, cartName) {
+        $scope.OpenCartDetails = function(cartID) {
             setTimeout(function()
             {
-                $scope.c.currentCartName = cartName;
+                $scope.c.myCartsInfo.forEach(function(singleCart) {
+                    if (singleCart['CartID'] == cartID)
+                    {
+                        $scope.c.currentCartName = singleCart['CartName'];
+                        $scope.c.isCurrentCartPredefined = singleCart['IsPredefined'];
+                    }
+                });
+
                 location.href="#/tab/myCarts/cartDetails/" + cartID
             },100)
         };
@@ -245,7 +249,7 @@ angular.module('ComparePrices.controllers', [])
 
         $scope.shopsNear = [];
 
-        ComparePricesStorage.GetMyCart($scope.cartID, function(result) {
+        ComparePricesStorage.GetMyCarts([$scope.cartID], function(result) {
             $scope.$apply(function() {
                 $scope.myCart = result.rows;
             });
@@ -455,5 +459,5 @@ angular.module('ComparePrices.controllers', [])
             ionicMaterialMotion.blinds();
 
 //            ionicMaterialMotion.ripple();
-        }, 500);
+        }, 1500);
 });

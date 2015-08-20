@@ -22,8 +22,8 @@
         </div>
 
         <div ng-if="!data.showSearchResults">
-        <!-- TODO: Is there a way to make swipe right? -->
-        <!-- do I need here class == list -->
+            <!-- TODO: Is there a way to make swipe right? -->
+            <!-- do I need here class == list -->
             <ion-list class="list" class="animate-blinds" show-delete="shouldShowDelete"
                                                          show-reorder="shouldShowReorder"
                                                          can-swipe="listCanSwipe">
@@ -44,14 +44,11 @@
                                        ng-click="DeleteProduct(product)">
                     </ion-delete-button>
                 </ion-item>
-        </ion-list>
+            </ion-list>
 
-        <div>
             <button ng-click="FindBestShop()" class="button button-outline button-positive icon-left ion-ios-compose-outline">Find best shop</button>
-        </div>
+            <button ng-hide=::c.isCurrentCartPredefined ng-click="DeleteCart()" class="button button-outline button-positive icon-left ion-ios-compose-outline">Delete cart</button>
 
-        <div>
-            <button ng-click="DeleteCart()" class="button button-outline button-positive icon-left ion-ios-compose-outline">Delete cart</button>
         </div>
 
     </ion-content>
