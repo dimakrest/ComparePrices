@@ -46,6 +46,7 @@ angular.module('ComparePrices.controllers', [])
 
         // TODO: Not the best code, to keep the cart name in this way
         $scope.c.currentCartName = "";
+        $scope.c.isCurrentCartPredefined = "";
 
         // init localization array
         $scope.c.localize = document.localize;
@@ -84,14 +85,17 @@ angular.module('ComparePrices.controllers', [])
         $scope.lastCartID = localStorage.getItem('lastCartID') || "100";
         $scope.lastCartID = parseInt($scope.lastCartID);
 
-        $scope.CreateNewCart = function() {
-            $scope.AskForCartName();
-        };
-
-        $scope.OpenCartDetails = function(cartID, cartName) {
+        $scope.OpenCartDetails = function(cartID) {
             setTimeout(function()
             {
-                $scope.c.currentCartName = cartName;
+                $scope.c.myCartsInfo.forEach(function(singleCart) {
+                    if (singleCart['CartID'] == cartID)
+                    {
+                        $scope.c.currentCartName = singleCart['CartName'];
+                        $scope.c.isCurrentCartPredefined = singleCart['IsPredefined'];
+                    }
+                });
+
                 location.href="#/tab/myCarts/cartDetails/" + cartID
             },100)
         };
@@ -161,7 +165,7 @@ angular.module('ComparePrices.controllers', [])
 
         // TODO: return my popup and handle the response in calling function. same way as in confirm delete product
         // TODO: make pop-ups as service?
-        $scope.AskForCartName = function() {
+        $scope.CreateNewCart = function() {
             // An elaborate, custom popup
             $scope.popupData = {};
             $scope.popupData.newCartName = "";
@@ -197,7 +201,8 @@ angular.module('ComparePrices.controllers', [])
                 var newCartInfo = {'CartID'  : $scope.lastCartID,
                                    'CartName': res,
                                    'ImageUrl': ComparePricesConstants.DEFAULT_IMAGE_URL,
-                                   'CheckboxColor': ComparePricesConstants.DEFAULT_CHECKBOX_COLOR};
+                                   'CheckboxColor': ComparePricesConstants.DEFAULT_CHECKBOX_COLOR,
+                                   'IsPredefined': 0};
 
                 $scope.c.myCartsInfo.push(newCartInfo);
                 ComparePricesStorage.UpdateCartsList(newCartInfo);

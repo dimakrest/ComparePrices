@@ -14,7 +14,7 @@ angular.module('ComparePrices.services', ['ngResource'])
         function (ReadJson, $q, $resource) {
 
         var createUserCartsTbQuery = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID, ItemCode, Amount)';
-        var createCartsTbQuery     = 'CREATE TABLE IF NOT EXISTS tbCarts (CartID, CartName, ImageUrl, CheckboxColor)';
+        var createCartsTbQuery     = 'CREATE TABLE IF NOT EXISTS tbCarts (CartID, CartName, ImageUrl, CheckboxColor, IsPredefined)';
         var fileNameToTable = {'am_pm_products'     : 'tbAmPmProducts',
                                'mega_products'      : 'tbMegaProducts',
                                'supersal_products'  : 'tbSuperSalProducts'};
@@ -28,14 +28,14 @@ angular.module('ComparePrices.services', ['ngResource'])
             CreateTbProducts();
             CreateStoresLocationTable();
             CreateProductTablesForShops(); // TODO: call doesn't match the function declaration
-            CreateUserDefinedCarts();
+            CreatePredefinedCarts();
 
             // For now do this only once
             localStorage.setItem('initProductList', 0)
         }
 
 
-        function CreateUserDefinedCarts()
+        function CreatePredefinedCarts()
         {
             var lastCartID = 1;
 
@@ -45,8 +45,8 @@ angular.module('ComparePrices.services', ['ngResource'])
 
                 db.transaction(function (tx) {
                     carts.forEach(function(singleCart) {
-                        tx.executeSql('INSERT INTO tbCarts (CartID, CartName, ImageUrl, CheckboxColor)' +
-                        'VALUES (' + lastCartID + ', "' + singleCart['CartName'] + '", "' + singleCart['ImageUrl'] + '", "' + singleCart['CheckboxColor'] + '")');
+                        tx.executeSql('INSERT INTO tbCarts (CartID, CartName, ImageUrl, CheckboxColor, IsPredefined)' +
+                        'VALUES (' + lastCartID + ', "' + singleCart['CartName'] + '", "' + singleCart['ImageUrl'] + '", "' + singleCart['CheckboxColor'] + '",1)');
 
                         products = singleCart['Products'];
 
@@ -333,7 +333,8 @@ angular.module('ComparePrices.services', ['ngResource'])
                     newCart['CartID'] + ', "' +
                     newCart['CartName'] + '", "' +
                     newCart['ImageUrl'] + '", "' +
-                    newCart['CheckboxColor'] + '")';
+                    newCart['CheckboxColor'] + '",' +
+                    '0)';
 
                 db.transaction(function (tx) {
                     tx.executeSql(sqlQuery)

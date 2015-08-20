@@ -6,7 +6,21 @@
     <ion-content class="content-bg">
 
         <div class="list animate-blinds">
-            <a class="item item-avatar-right" ng-repeat="cartInfo in c.myCartsInfo | orderBy:'-CartID'" ng-click="OpenCartDetails(cartInfo['CartID'], cartInfo['CartName'])">
+            <div class="item item-divider">
+                User Defined carts
+            </div>
+            <a class="item item-avatar-right" ng-repeat="cartInfo in c.myCartsInfo | filter:{ 'IsPredefined' : 0 } | orderBy:'-CartID'" ng-click="OpenCartDetails(cartInfo['CartID'])">
+                <img ng-src={{cartInfo['ImageUrl']}}>
+                <h2 style="float:right">{{cartInfo['CartName']}}</h2>
+                <!-- want the color to be white and not dark blue -->
+                <label class="checkbox checkbox-{{cartInfo['CheckboxColor']}}">
+                    <input type="checkbox" ng-checked="cartInfo.IsChecked" ng-model="cartInfo.IsChecked" ng-click="ChangeCheckbox(); $event.stopPropagation()">
+                </label>
+            </a>
+            <div class="item item-divider">
+                Predefined carts
+            </div>
+            <a class="item item-avatar-right" ng-repeat="cartInfo in c.myCartsInfo | filter:{ 'IsPredefined' : 1 }" ng-click="OpenCartDetails(cartInfo['CartID'])">
                 <img ng-src={{cartInfo['ImageUrl']}}>
                 <h2 style="float:right">{{cartInfo['CartName']}}</h2>
                 <!-- want the color to be white and not dark blue -->

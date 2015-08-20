@@ -33,10 +33,6 @@
                         </div>
                     </a>
 
-                    <ion-option-button class="ion-minus-circled"
-                                       ng-click="DeleteProduct(product)">
-                    </ion-option-button>
-
                     <ion-delete-button class="ion-minus-circled"
                                        ng-click="DeleteProduct(product)">
                     </ion-delete-button>
@@ -47,7 +43,7 @@
             <button ng-click="FindBestShop()" class="button button-outline button-positive icon-left ion-ios-compose-outline">Find best shop</button>
         </div>
 
-        <div>
+        <div ng-hide=::c.isCurrentCartPredefined>
             <button ng-click="DeleteCart()" class="button button-outline button-positive icon-left ion-ios-compose-outline">Delete cart</button>
         </div>
 
