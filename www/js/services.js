@@ -46,14 +46,14 @@ angular.module('ComparePrices.services', ['ngResource'])
                 db.transaction(function (tx) {
                     carts.forEach(function(singleCart) {
                         tx.executeSql('INSERT INTO tbCarts (CartID, CartName, ImageUrl, CheckboxColor)' +
-                        'VALUES ("' + lastCartID + '", "' + singleCart['CartName'] + '", "' + singleCart['ImageUrl'] + '", "' + singleCart['CheckboxColor'] + '")');
+                        'VALUES (' + lastCartID + ', "' + singleCart['CartName'] + '", "' + singleCart['ImageUrl'] + '", "' + singleCart['CheckboxColor'] + '")');
 
                         products = singleCart['Products'];
 
                         for (var productId in products)
                         {
                                 tx.executeSql('INSERT INTO tbUserCarts (CartID, ItemCode, Amount)' +
-                                'VALUES ("' + lastCartID + '", "' + productId + '", ' + products[productId] + ')');
+                                'VALUES (' + lastCartID + ', "' + productId + '", ' + products[productId] + ')');
                         }
                         lastCartID++;
                     });
@@ -232,10 +232,10 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             UpdateCart: function (cartID, newCart) {
                 db.transaction(function (tx) {
-                    tx.executeSql('DELETE FROM tbUserCarts WHERE CartID = "' + cartID + '"');
+                    tx.executeSql('DELETE FROM tbUserCarts WHERE CartID = ' + cartID);
                     newCart.forEach(function (singleProduct) {
                         tx.executeSql('INSERT INTO tbUserCarts (CartID, ItemCode, Amount)' +
-                            'VALUES ("' + singleProduct['CartID'] + '", "' + singleProduct['ItemCode'] + '", ' + singleProduct['Amount'] + ')')
+                            'VALUES (' + singleProduct['CartID'] + ', "' + singleProduct['ItemCode'] + '", ' + singleProduct['Amount'] + ')')
                     });
                 });
             },
@@ -251,7 +251,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                         'tbUserCarts.Amount AS Amount, ' +
                         'tbUserCarts.CartID AS CartID ' +
                         'FROM tbProducts JOIN tbUserCarts ON tbProducts.ItemCode=tbUserCarts.ItemCode ' +
-                        'WHERE tbUserCarts.CartID IN ("' + cartIDs.join("\",\"") + '")', [], function (tx, rawresults) {
+                        'WHERE tbUserCarts.CartID IN (' + cartIDs.join() + ')', [], function (tx, rawresults) {
                         // TODO: do I need the rows thing? if yes wrap this code in some kind of a function
                         var len = rawresults.rows.length;
                         for (var i = 0; i < len; i++) {
@@ -329,8 +329,8 @@ angular.module('ComparePrices.services', ['ngResource'])
             },
 
             UpdateCartsList: function (newCart) {
-                var sqlQuery = 'INSERT INTO tbCarts VALUES ("' +
-                    newCart['CartID'] + '", "' +
+                var sqlQuery = 'INSERT INTO tbCarts VALUES (' +
+                    newCart['CartID'] + ', "' +
                     newCart['CartName'] + '", "' +
                     newCart['ImageUrl'] + '", "' +
                     newCart['CheckboxColor'] + '")';
@@ -342,11 +342,11 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             DeleteCart: function (cartID) {
                 db.transaction(function (tx) {
-                    var sqlQuery = 'DELETE FROM tbCarts WHERE CartID = "' + cartID + '"';
+                    var sqlQuery = 'DELETE FROM tbCarts WHERE CartID = ' + cartID;
                     tx.executeSql(sqlQuery)
                 });
                 db.transaction(function (tx) {
-                    var sqlQuery = 'DELETE FROM tbUserCarts WHERE CartID = "' + cartID + '"';
+                    var sqlQuery = 'DELETE FROM tbUserCarts WHERE CartID = ' + cartID;
                     tx.executeSql(sqlQuery)
                 });
             },

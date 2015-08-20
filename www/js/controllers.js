@@ -82,6 +82,7 @@ angular.module('ComparePrices.controllers', [])
         $scope.shopsNear = [];
 
         $scope.lastCartID = localStorage.getItem('lastCartID') || "100";
+        $scope.lastCartID = parseInt($scope.lastCartID);
 
         $scope.CreateNewCart = function() {
             $scope.AskForCartName();
@@ -201,7 +202,7 @@ angular.module('ComparePrices.controllers', [])
                 $scope.c.myCartsInfo.push(newCartInfo);
                 ComparePricesStorage.UpdateCartsList(newCartInfo);
 
-                $scope.lastCartID = String(parseInt($scope.lastCartID) + 1);
+                $scope.lastCartID = $scope.lastCartID + 1;
 
                 localStorage.setItem('lastCartID', $scope.lastCartID);
 

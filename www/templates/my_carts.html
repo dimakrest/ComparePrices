@@ -6,7 +6,7 @@
     <ion-content class="content-bg">
 
         <div class="list animate-blinds">
-            <a class="item item-avatar-right" ng-repeat="cartInfo in c.myCartsInfo" ng-click="OpenCartDetails(cartInfo['CartID'], cartInfo['CartName'])">
+            <a class="item item-avatar-right" ng-repeat="cartInfo in c.myCartsInfo | orderBy:'-CartID'" ng-click="OpenCartDetails(cartInfo['CartID'], cartInfo['CartName'])">
                 <img ng-src={{cartInfo['ImageUrl']}}>
                 <h2 style="float:right">{{cartInfo['CartName']}}</h2>
                 <!-- want the color to be white and not dark blue -->
