@@ -536,10 +536,9 @@ angular.module('ComparePrices.services', ['ngResource'])
     .factory('ImageCache', ['$cordovaFileTransfer', '$cordovaFile', 'ComparePricesStorage',  function ($cordovaFileTransfer, $cordovaFile, ComparePricesStorage) {
 
         function IsImageCached(imageUrl) {
-            // TODO: doesn't work
             // for browser cordova is not defined
-            if (cordova == "undefined") {
-                return imageUrl;
+            if (typeof (cordova) == "undefined") {
+                return true;
             }
 
             var splitedImageUrl = imageUrl.split('/');
@@ -550,7 +549,13 @@ angular.module('ComparePrices.services', ['ngResource'])
 
         return {
             CacheImage: function (productCode, imageUrl) {
-                IsImageCached(imageUrl).then(
+                var isImageCached = IsImageCached(imageUrl);
+                // wa for browser caching
+                if (isImageCached) {
+                    return;
+                }
+
+                isImageCached.then(
                     function(success) { // image is cached, do nothing
                     },
                     function(error) { // image is not cached
