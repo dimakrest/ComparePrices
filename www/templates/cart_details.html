@@ -1,24 +1,25 @@
-<ion-header-bar class="bar bar-subheader item-input-inset">
-    <button ng-hide=::c.isCurrentCartPredefined class="button button-icon icon ion-minus-circled" ng-click="ToggleDeleteValue()"></button>
+<ion-header-bar ng-if=!c.isCurrentCartPredefined class="bar bar-subheader item-input-inset">
+    <button class="button button-icon icon ion-minus-circled" ng-click="ToggleDeleteValue()"></button>
     <button class="button button-icon ion-android-search" ng-click="ShowFilterBar()"></button>
 </ion-header-bar>
 
 <ion-view view-title={{::c.currentCartName}}>
 
-    <ion-content class="content-bg">
+    <ion-content class="content-bg" ng-class="{'has-subheader': !c.isCurrentCartPredefined}">
 
         <!-- TODO: ask Karen why if I change it to ng-if it removes the buttons also(even if the buttons are not under ng-if
          and the cart never comes back -->
         <div class="list" ng-show="data.showSearchResults">
-            <a style="background-color: #999999" class="item item-avatar-right" collection-repeat="product in data.allProductsFiltered" divider-collection-repeat ng-click="UpdateProductAmountFromEditCart(product, 1)">
+            <div style="background-color: #999999" class="item item-avatar-right" collection-repeat="product in data.allProductsFiltered" divider-collection-repeat>
                 <img ng-src={{product['ImagePath']}}>
                 <h2 style="text-align: right">{{product['ItemName']}}</h2>
-                <div class="ionic-input-group" ng-if="product.Amount != 0">
-                    <span class="ionic-input-group-addon-left" ng-click="UpdateProductAmountFromCartDetails(product, -1); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
-                    <label class="ionic-form-control">{{product["Amount"]}}</label>
-                    <span class="ionic-input-group-addon-right" ng-click="UpdateProductAmountFromCartDetails(product, +1); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
+
+                <div class="ionic-input-group">
+                    <span ng-if="product.Amount != 0" class="ionic-input-group-addon-left" ng-click="UpdateProductAmount(product, -1, false); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
+                    <label ng-if="product.Amount != 0" class="ionic-form-control">{{product["Amount"]}}</label>
+                    <span class="ionic-input-group-addon-right" ng-click="UpdateProductAmount(product, +1, false); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
                 </div>
-            </a>
+            </div>
         </div>
 
         <div ng-if="!data.showSearchResults">
@@ -27,18 +28,18 @@
             <ion-list class="list" class="animate-blinds" show-delete="shouldShowDelete"
                                                          show-reorder="shouldShowReorder"
                                                          can-swipe="listCanSwipe">
-                    <ion-item ng-repeat="product in myCart">
-                        <a class="item item-avatar-right">
-                            <img ng-src={{product['ImagePath']}}>
+                <ion-item ng-repeat="product in myCart">
+                    <div class="item item-avatar-right">
+                        <img ng-src={{product['ImagePath']}}>
 
-                            <h2 style="text-align: right">{{product.ItemName}}</h2>
+                        <h2 style="text-align: right">{{product.ItemName}}</h2>
 
-                            <div class="ionic-input-group">
-                                <span class="ionic-input-group-addon-left" ng-click="UpdateProductAmountFromCartDetails(product, -1); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
-                                <label class="ionic-form-control">{{ product["Amount"] }}</label>
-                                <span class="ionic-input-group-addon-right" ng-click="UpdateProductAmountFromCartDetails(product, +1); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
-                            </div>
-                        </a>
+                        <div class="ionic-input-group">
+                            <span class="ionic-input-group-addon-left" ng-click="UpdateProductAmount(product, -1, true); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
+                            <label class="ionic-form-control">{{ product["Amount"] }}</label>
+                            <span class="ionic-input-group-addon-right" ng-click="UpdateProductAmount(product, +1, true); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
+                        </div>
+                    </div>
 
                     <ion-delete-button class="ion-minus-circled"
                                        ng-click="DeleteProduct(product)">
@@ -47,7 +48,7 @@
             </ion-list>
 
             <button ng-click="FindBestShop()" class="button button-outline button-positive icon-left ion-ios-compose-outline">Find best shop</button>
-            <button ng-hide=::c.isCurrentCartPredefined ng-click="DeleteCart()" class="button button-outline button-positive icon-left ion-ios-compose-outline">Delete cart</button>
+            <button ng-hide=c.isCurrentCartPredefined ng-click="DeleteCart()" class="button button-outline button-positive icon-left ion-ios-compose-outline">Delete cart</button>
 
         </div>
 

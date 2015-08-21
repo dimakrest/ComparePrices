@@ -23,7 +23,7 @@
         'YesButton': 'כן',
         'NoButton': 'לא',
         'ShareHeader': 'שתף',
-        'FindBestShop': 'מצא מחיר הטוב ביותר',
+        'FindBestShop': 'לבדוק מחירים',
         'TotalCartsSelected': 'סלים נבחרו',
         'ChooseYourAddressInSettings': 'קודם תבחר מיקומך בהגדרות',
         'ChooseCartsFirst': 'קודם תבחר סלים',

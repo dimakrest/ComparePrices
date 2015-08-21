@@ -56,9 +56,19 @@ angular.module('ComparePrices.controllers', [])
 
         ComparePricesStorage.GetAllCarts(function(result) {
             $scope.$apply(function() {
-                $scope.c.myCartsInfo = result.rows
+                $scope.c.myCartsInfo = result.rows;
+                // check if user has own carts
+                var numOfCarts = $scope.c.myCartsInfo.length;
+                for (var i=0; i < numOfCarts; i++) {
+                    if ($scope.c.myCartsInfo[i]['IsPredefined'] == 0) {
+                        $scope.c.hasUserCarts = 1;
+                        break;
+                    }
+                }
             })
         });
+
+
 
         // wa for ionic and google autocomplete service
         $scope.DisableTap = function(){
@@ -225,7 +235,7 @@ angular.module('ComparePrices.controllers', [])
 //            ionicMaterialMotion.fadeSlideInRight();
 //            ionicMaterialMotion.fadeSlideIn();
 
-            ionicMaterialInk.displayEffect();
+            //ionicMaterialInk.displayEffect();
             ionicMaterialMotion.blinds();
 
 //            ionicMaterialMotion.ripple();
@@ -348,13 +358,12 @@ angular.module('ComparePrices.controllers', [])
             $scope.shouldShowDelete = !$scope.shouldShowDelete;
         };
 
-        $scope.UpdateProductAmountFromCartDetails = function(itemInfo, amountToAdd) {
-            $scope.UpdateProductAmountInMyCart(itemInfo, amountToAdd, true);
-        };
+        // this function called also from cartDetails list, and also in search
+        $scope.UpdateProductAmount = function(itemInfo, amountToAdd, showConfirmationPopUp) {
 
-        $scope.UpdateProductAmountFromEditCart = function(itemInfo, amountToAdd) {
-            $scope.UpdateProductAmountInMyCart(itemInfo, amountToAdd, false);
+            $scope.UpdateProductAmountInMyCart(itemInfo, amountToAdd, showConfirmationPopUp);
 
+            // when this is called from cartDetails list, and not search, length will be zero, so below code is not relevant
             // TODO: is there a better way?
             var numOfFilteredProducts = $scope.data.allProductsFiltered.length;
             for (var i=0; i < numOfFilteredProducts; i++) {
@@ -397,6 +406,10 @@ angular.module('ComparePrices.controllers', [])
                             }
                         });
                     }
+                    else {
+                        $scope.myCart.splice(productIndex, 1)
+                        ComparePricesStorage.UpdateCart($scope.cartID, $scope.myCart);
+                    }
                 } else {
                     $scope.myCart[productIndex]['Amount'] = newAmount;
                     ComparePricesStorage.UpdateCart($scope.cartID, $scope.myCart);
@@ -418,10 +431,11 @@ angular.module('ComparePrices.controllers', [])
 
         // based on https://github.com/djett41/ionic-filter-bar
         $scope.ShowFilterBar = function () {
-            filterBarInstance = $ionicFilterBar.show({
+            $ionicFilterBar.show({
                 // items gets the array to filter
                 items: $scope.data.allProducts,
                 // this function is called when filtering is done
+                // we take filtered items and place items that already in cart in the top of the list
                 update: function (filteredItems) {
                     $scope.data.showSearchResults   = true;
                     $scope.data.allProductsFiltered = [];
@@ -432,7 +446,7 @@ angular.module('ComparePrices.controllers', [])
                     for (var i=0; i < numOfProductsInCart; i++) {
                         for (var j=0; j < numOfFilteredProducts; j++) {
                             if ($scope.myCart[i]['ItemCode'] == filteredItems[j]['ItemCode']) {
-                                $scope.data.allProductsFiltered.push($scope.myCart[i]);
+                                $scope.data.allProductsFiltered.push(angular.copy($scope.myCart[i]));
                                 break;
                             }
                         }
@@ -470,7 +484,7 @@ angular.module('ComparePrices.controllers', [])
         setTimeout(function(){
 //            ionicMaterialMotion.fadeSlideInRight();
 //            ionicMaterialMotion.fadeSlideIn();
-            ionicMaterialInk.displayEffect();
+//            ionicMaterialInk.displayEffect();
             ionicMaterialMotion.blinds();
 
 //            ionicMaterialMotion.ripple();
