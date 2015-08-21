@@ -6,7 +6,7 @@
     <ion-content class="content-bg">
 
         <div class="list animate-blinds">
-            <div class="item item-divider">
+            <div ng-show=c.hasUserCarts class="item item-divider">
                 User Defined carts
             </div>
             <a class="item item-avatar-right" ng-repeat="cartInfo in c.myCartsInfo | filter:{ 'IsPredefined' : 0 } | orderBy:'-CartID'" ng-click="OpenCartDetails(cartInfo['CartID'])">

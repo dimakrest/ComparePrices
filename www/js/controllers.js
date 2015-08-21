@@ -44,9 +44,9 @@ angular.module('ComparePrices.controllers', [])
     .controller('RootCtrl', function($scope, $ionicPopover, ComparePricesStorage) {
         $scope.c = {};
 
-        // TODO: Not the best code, to keep the cart name in this way
         $scope.c.currentCartName = "";
-        $scope.c.isCurrentCartPredefined = "";
+        $scope.c.isCurrentCartPredefined = 0;
+        $scope.c.hasUserCarts = 0;
 
         // init localization array
         $scope.c.localize = document.localize;
@@ -208,6 +208,7 @@ angular.module('ComparePrices.controllers', [])
                 ComparePricesStorage.UpdateCartsList(newCartInfo);
 
                 $scope.lastCartID = $scope.lastCartID + 1;
+                $scope.c.hasUserCarts = 1;
 
                 localStorage.setItem('lastCartID', $scope.lastCartID);
 
@@ -256,8 +257,16 @@ angular.module('ComparePrices.controllers', [])
         });
 
         $scope.FindBestShop = function() {
-            $scope.shopsNear = [];
-            FindBestShops($scope, $scope.myCart).then(ShowModal($scope, 'templates/best_shops.html'));
+            if ($scope.c.lastAddress == '')
+            {
+                var text  = $scope.c.localize.strings['ChooseYourAddressInSettings'];
+                PopUpFactory.ErrorPopUp($scope, text);
+            }
+            else
+            {
+                $scope.shopsNear = [];
+                FindBestShops($scope, $scope.myCart).then(ShowModal($scope, 'templates/best_shops.html'));
+            }
         };
 
         $scope.DeleteCart = function() {
@@ -267,11 +276,17 @@ angular.module('ComparePrices.controllers', [])
                 if(confirmed) {
                     var numOfCarts = $scope.c.myCartsInfo.length;
                     var cartIndex  = -1;
+                    var numOfUserCarts = 0;
                     for (var i=0; i < numOfCarts; i++) {
+                        if ($scope.c.myCartsInfo[i]['IsPredefined'] == 0) {
+                            numOfUserCarts++;
+                        }
                         if ($scope.c.myCartsInfo[i]['CartID'] == $scope.cartID) {
                             cartIndex = i;
-                            break;
                         }
+                    }
+                    if (numOfUserCarts == 1) {  // user had last cart
+                        $scope.c.hasUserCarts = 0;
                     }
                     if (cartIndex != -1) {
                         $scope.c.myCartsInfo.splice(cartIndex, 1);
