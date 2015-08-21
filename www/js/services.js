@@ -10,16 +10,13 @@ angular.module('ComparePrices.services', ['ngResource'])
             })
         }])
 
-    .factory('ComparePricesStorage', ['ReadJson', '$q', '$resource',
-        function (ReadJson, $q, $resource) {
+    .factory('ComparePricesStorage', ['ReadJson', 'ComparePricesConstants', '$q',
+        function (ReadJson, ComparePricesConstants, $q) {
 
         var createUserCartsTbQuery = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID, ItemCode, Amount)';
         var createCartsTbQuery     = 'CREATE TABLE IF NOT EXISTS tbCarts (CartID, CartName, ImageUrl, CheckboxColor, IsPredefined)';
-        var fileNameToTable = {'am_pm_products'     : 'tbAmPmProducts',
-                               'mega_products'      : 'tbMegaProducts',
-                               'supersal_products'  : 'tbSuperSalProducts'};
         // TODO: database size + don't want to call init every time
-        var db = openDatabase("ComparePricesDB", "1.0", "Global storage", 4 * 1024 * 1024);
+        var db = openDatabase("ComparePricesDB", "1.0", "Global storage", 4 * 1024 * 1024); // TODO: check what happens when we exceed this limit
 
         db.transaction(initDB, errorCB, successCB); // creates tables for the first time if required
 
@@ -27,11 +24,10 @@ angular.module('ComparePrices.services', ['ngResource'])
         if (initProductList == 1) {
             CreateTbProducts();
             CreateStoresLocationTable();
-            CreateProductTablesForShops(); // TODO: call doesn't match the function declaration
             CreatePredefinedCarts();
 
             // For now do this only once
-            localStorage.setItem('initProductList', 0)
+            localStorage.setItem('initProductList', 0);
         }
 
 
@@ -91,58 +87,94 @@ angular.module('ComparePrices.services', ['ngResource'])
         {
             db.transaction(function(tx) {
                 tx.executeSql('DROP TABLE IF EXISTS tbStoresLocation');
-                tx.executeSql('CREATE TABLE IF NOT EXISTS tbStoresLocation (ChainID, StoreID, StoreName, Lat, Lon, Address, Distance)')
+                tx.executeSql('CREATE TABLE IF NOT EXISTS tbStoresLocation (ChainID, BrandName, BrandNameHeb, StoreID, StoreName, Lat, Lon, City, Address, Distance, ProductListExists)')
             }, errorCB, successCB);
 
-            ReadJson.query({jsonName:'all_stores_location'}, function (storeLocations) {
+            ReadJson.query({jsonName:'stores'}, function (storesInfo) {
                 db.transaction(function (tx) {
-                    var numOfStoreLocations = storeLocations.length;
-                    // TODO: how better mask ' and "
-                    for (var i = 0; i < numOfStoreLocations; i++) {
-                        var singleStore = storeLocations[i]
-                        var sqlQuery = 'INSERT INTO tbStoresLocation VALUES ("' +
-                            singleStore['ChainID'] + '", "' +
-                            singleStore['StoreID'] + '", "' +
-                            singleStore['StoreName'].replace(/\"/g, "\'\'") + '", "' +
-                            singleStore['Lat'] + '", "' +
-                            singleStore['Lon'] + '", "' +
-                            singleStore['Address'].replace(/\"/g, "\'\'") + '", "0")';
-                        tx.executeSql(sqlQuery)
+                    var numOfBrands = storesInfo.length;
+                    for (var brandIndex=0; brandIndex < numOfBrands; brandIndex++) {
+                        var brandInfo = storesInfo[brandIndex];
+                        var brandName       = brandInfo['brand'];
+                        var brandNameHeb    = brandInfo['brand']; // TODO: change to brandHeb when have the coreect json
+                        var chainID         = brandInfo['ChainId'];
+
+                        if (typeof (chainID) == "undefined" || chainID == "undefined") {
+                            continue;
+                        }
+                        var numOfBranches = brandInfo['branches'].length;
+                        // TODO: how better mask ' and "
+                        for (var branchIndex = 0; branchIndex < numOfBranches; branchIndex++) {
+                            var singleBranch = brandInfo['branches'][branchIndex];
+                            // TODO: Kirill has to remove undefined
+                            if ((typeof (singleBranch['Lat']) == "undefined") || (typeof (singleBranch['Lng']) == "undefined") ||
+                                (singleBranch['Lat'] == "unknown") || (singleBranch['Lng'] == "unknown")) {
+                                continue;
+                            }
+                            var sqlQuery = 'INSERT INTO tbStoresLocation VALUES ("' +
+                                chainID + '", "' +
+                                brandName + '", "' +
+                                brandNameHeb + '", "' +
+                                singleBranch['StoreId'] + '", "' +
+                                singleBranch['StoreName'].replace(/\"/g, "\'\'") + '", "' +
+                                singleBranch['Lat'] + '", "' +
+                                singleBranch['Lng'] + '", "' +
+                                singleBranch['City'].replace(/\"/g, "\'\'") + '", "' +
+                                singleBranch['Address'].replace(/\"/g, "\'\'") + '", "0", 0)';
+                            tx.executeSql(sqlQuery)
+                        }
                     }
-                }, errorCB, successCB)
+                }, errorCB, successCB);
             });
         }
 
+        // Function to mark that for this store products json exists
+        function SuccessTableCreation(chainID, storeID) {
+            db.transaction(function (tx) {
+                var sqlQuery = 'UPDATE tbStoresLocation SET ProductListExists=1 WHERE ChainID="' + chainID + '" AND StoreID="' + storeID + '";'
+                tx.executeSql(sqlQuery);
+            })
+        }
+
         // TODO: add index
-        function CreateProductTableForSingleShop(tableName, fileName)
+        function CreateProductTableForSingleShop(tableName, fileName, chainID, storeID)
         {
-            // create table if needed
-            db.transaction(function(tx) {
-                tx.executeSql('DROP TABLE IF EXISTS ' + tableName);
-                tx.executeSql('CREATE TABLE IF NOT EXISTS ' + tableName + ' (ItemCode, ItemPrice)')
-            }, errorCB, successCB);
-            ReadJson.query({jsonName:fileName}, function (products) {
+            // TODO: change back to query after prices update
+            ReadJson.get({jsonName:fileName}, function (response) {
                 db.transaction(function (tx) {
+                    tx.executeSql('DROP TABLE IF EXISTS ' + tableName);
+                    tx.executeSql('CREATE TABLE IF NOT EXISTS ' + tableName + ' (ItemCode, ItemPrice)')
+                    var products = response['items'];
                     var numOfProducts = products.length;
                     // TODO: how better mask ' and "
                     for (var i = 0; i < numOfProducts; i++) {
                         var singleProduct = products[i];
                         var sqlQuery = 'INSERT INTO ' + tableName + ' VALUES ("' +
-                            singleProduct['ItemCode'] + '", "' +
-                            singleProduct['ItemPrice'] + '")';
+                            singleProduct['IC'] + '", "' +
+                            singleProduct['IP'] + '")';
                         tx.executeSql(sqlQuery)
                     }
-                }, errorCB, successCB)
+                }, errorCB, SuccessTableCreation(chainID, storeID))
             });
         }
 
-        function CreateProductTablesForShops(tableName, fileName)
+        function CreateProductTablesForShops(radius)
         {
-            for (fileName in fileNameToTable)
-            {
-                var tableName = fileNameToTable[fileName];
-                CreateProductTableForSingleShop(tableName, fileName)
-            }
+            // get all shops in defined radius
+            // read json and create table
+            IssueShopsInRadiusQuery(radius, false).then(function(shopsInfo) {
+                var numOfShops = shopsInfo.rows.length;
+                for (var i=0; i < numOfShops; i++) {
+                    // need to pad store id with zeroes to get the right name
+                    var singleShop  = shopsInfo.rows[i];
+                    var storeID = ("000" + singleShop['StoreID']);
+                    storeID  = storeID.substr(storeID.length - 3);
+
+                    var tableName   = 'tb_' + singleShop['BrandName'] + '_' + singleShop['StoreID'];
+                    var fileName    =  'stores\/' + singleShop['BrandName'] + '\/price-' + singleShop['BrandName'] + '-' + storeID;
+                    CreateProductTableForSingleShop(tableName, fileName, singleShop['ChainID'], singleShop['StoreID']);
+                }
+            });
         }
 
         function logError(errorCallBack) {
@@ -168,11 +200,12 @@ angular.module('ComparePrices.services', ['ngResource'])
             console.log("Db connection success!");
         }
 
-        function IssueProductsSelectQuery(productCodes, tableName) {
+        function IssueProductsSelectQuery(productCodes, tableName, shopInfo) {
             var d = $q.defer();
 
-            var response = {};
-            response.rows = [];
+            var response        = {};
+            response.shopInfo   = shopInfo;
+            response.rows       = [];
             var selectQuery = 'SELECT * FROM ' + tableName + ' WHERE ItemCode IN ("' + productCodes.join("\",\"") + '")';
 
             db.transaction(function (tx) {
@@ -185,16 +218,21 @@ angular.module('ComparePrices.services', ['ngResource'])
                 });
             });
 
-            return d.promise
+            return d.promise;
         }
 
-        function IssueShopsInRadiusQuery(radius) {
+            // TODO: check if I need all the fields
+        // onlyWithLocation fag says if return all fields or only then ones that have products json
+        function IssueShopsInRadiusQuery(radius, onlyWithProductList) {
             var d = $q.defer();
 
             var response = {};
             response.rows = [];
+            // TODO: do I need all the elements?
             var selectQuery = "SELECT * FROM tbStoresLocation WHERE Distance < " + radius;
-
+            if (onlyWithProductList) {
+                selectQuery += ' AND ProductListExists = 1';
+            }
             db.transaction(function (tx) {
                 tx.executeSql(selectQuery, [], function (tx, rawresults) {
                     var len = rawresults.rows.length;
@@ -205,7 +243,32 @@ angular.module('ComparePrices.services', ['ngResource'])
                 });
             });
 
-            return d.promise
+            return d.promise;
+        }
+
+        function UpdateStoreRadiusFromLocations(myLat, myLon) {
+            var sqlQuery = "SELECT ChainID, StoreID, Lat, Lon FROM tbStoresLocation;";
+            db.transaction(function (tx) {
+                tx.executeSql(sqlQuery, [], function (tx, rawresults) {
+                    // TODO: do I need the rows thing? if yes wrap this code in some kind of a function
+                    var len = rawresults.rows.length;
+                    for (var i = 0; i < len; i++) {
+                        var singleStore = rawresults.rows.item(i);
+                        var storeLat = parseFloat(singleStore['Lat']);
+                        var storeLon = parseFloat(singleStore['Lon']);
+
+                        var R = 6371; // Radius of the earth in km
+                        var dLat = (myLat - storeLat) * Math.PI / 180;  // deg2rad below
+                        var dLon = (myLon - storeLon) * Math.PI / 180;
+                        var a = 0.5 - Math.cos(dLat) / 2 + Math.cos(storeLat * Math.PI / 180) * Math.cos(myLat * Math.PI / 180) * (1 - Math.cos(dLon)) / 2;
+                        var distance = Math.round(R * 2 * Math.asin(Math.sqrt(a)));
+
+                        var sqlQuery = 'UPDATE tbStoresLocation SET Distance=' + distance + ' WHERE ChainID="' + singleStore['ChainID'] + '" AND StoreID="' +
+                                        singleStore['StoreID'] + '";';
+                        tx.executeSql(sqlQuery);
+                    }
+                })
+            })
         }
 
         // TODO: succes, error handlers
@@ -260,49 +323,29 @@ angular.module('ComparePrices.services', ['ngResource'])
                             response.rows.push(angular.copy(rawresults.rows.item(i)));
                         }
                         if (success) {
-                            success(response)
+                            success(response);
                         }
                     });
                 }, errorCB, successCB);
-                return response
+                return response;
             },
 
             GetProductsPerShopAndShops : function (productCodes, radius, success) {
-                $q.all([
-                    IssueProductsSelectQuery(productCodes, 'tbAmPmProducts'),
-                    IssueProductsSelectQuery(productCodes, 'tbMegaProducts'),
-                    IssueProductsSelectQuery(productCodes, 'tbSuperSalProducts'),
-                    IssueShopsInRadiusQuery(radius)]).then(function (data) {
-
-                    // TODO: is there a way to do this prettier?
-                    if (success) {
-                        dataAdjusted = {'AM_PM': data[0],
-                                        'Mega': data[1],
-                                        'SuperSal': data[2],
-                                        'Shops': data[3]};
-                        success(dataAdjusted)
+                IssueShopsInRadiusQuery(radius, true).then(function(response) {
+                    var shopsInfo = response.rows;
+                    var numOfShops = shopsInfo.length;
+                    var promises = [];
+                    for (var i=0; i < numOfShops; i++) {
+                        var tableName   = 'tb_' + shopsInfo[i]['BrandName'] + '_' + shopsInfo[i]['StoreID'];
+                        promises.push(IssueProductsSelectQuery(productCodes, tableName, shopsInfo[i]));
                     }
-                });
-            },
 
-            GetStoresInRadius: function (radius, success) {
-                var sqlQuery = "SELECT * FROM tbStoresLocation WHERE Distance < " + radius;
-                var response = {};
-                response.rows = [];
-                db.transaction(function (tx) {
-                    tx.executeSql(sqlQuery, [], function (tx, rawresults) {
-                        // TODO: do I need the rows thing? if yes wrap this code in some kind of a function
-                        var len = rawresults.rows.length;
-                        console.log("GetStoresInRadius: " + len + " rows found.");
-                        for (var i = 0; i < len; i++) {
-                            response.rows.push(rawresults.rows.item(i));
-                        }
+                    $q.all(promises).then(function (data) {
                         if (success) {
-                            success(response)
+                            success(data);
                         }
                     });
                 });
-                return response
             },
 
             GetAllCarts: function (success) {
@@ -352,30 +395,11 @@ angular.module('ComparePrices.services', ['ngResource'])
                 });
             },
 
-            UpdateStoreRadiusFromLocations: function (myLat, myLon) {
-                var sqlQuery = "SELECT ChainID, StoreID, Lat, Lon FROM tbStoresLocation;";
-                db.transaction(function (tx) {
-                    tx.executeSql(sqlQuery, [], function (tx, rawresults) {
-                        // TODO: do I need the rows thing? if yes wrap this code in some kind of a function
-                        var len = rawresults.rows.length;
-                        console.log("CalcStoreInRadius: " + len + " rows found.");
-                        for (var i = 0; i < len; i++) {
-                            var singleStore = rawresults.rows.item(i);
-                            var storeLat = parseFloat(singleStore['Lat']);
-                            var storeLon = parseFloat(singleStore['Lon']);
-
-                            var R = 6371; // Radius of the earth in km
-                            var dLat = (myLat - storeLat) * Math.PI / 180;  // deg2rad below
-                            var dLon = (myLon - storeLon) * Math.PI / 180;
-                            var a = 0.5 - Math.cos(dLat) / 2 + Math.cos(storeLat * Math.PI / 180) * Math.cos(myLat * Math.PI / 180) * (1 - Math.cos(dLon)) / 2;
-                            var distance = Math.round(R * 2 * Math.asin(Math.sqrt(a)));
-
-                            var sqlQuery = 'UPDATE tbStoresLocation SET Distance=' + distance + ' WHERE ChainID="' + singleStore['ChainID'] + '"AND StoreID="' +
-                                singleStore['StoreID'] + '";';
-                            tx.executeSql(sqlQuery);
-                        }
-                    })
-                })
+            UpdateStoresInfo : function(myLat, myLon) {
+                // Each time we update user location we have to recalculate distance to
+                // each shop and if needed download/creat missing jsons/tables.
+                UpdateStoreRadiusFromLocations(myLat, myLon);
+                CreateProductTablesForShops(ComparePricesConstants.RADIUS);
             },
 
             UpdateImageUrl: function(productCode, targetPath) {
@@ -446,7 +470,7 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
     }])
 
-    .factory('FindBestShops', ['ComparePricesStorage', '$q', function(ComparePricesStorage, $q) {
+    .factory('FindBestShops', ['ComparePricesStorage', 'ComparePricesConstants', '$q', function(ComparePricesStorage, ComparePricesConstants, $q) {
 
         function CalculatePriceForShop(productCart, productPriceInStore) {
             var totalPrice = 0.0;
@@ -472,26 +496,35 @@ angular.module('ComparePrices.services', ['ngResource'])
                 productCodesInMyCart.push(singleItem['ItemCode'])
             });
 
-            ComparePricesStorage.GetProductsPerShopAndShops(productCodesInMyCart, 150, function(result) {
-                var priceInAmPm     = CalculatePriceForShop(cart, result['AM_PM'].rows);
-                var priceInMega     = CalculatePriceForShop(cart, result['Mega'].rows);
-                var priceInSuperSal = CalculatePriceForShop(cart, result['SuperSal'].rows);
-                var minimumPrice    = Math.min(priceInAmPm, priceInMega, priceInSuperSal);
+            ComparePricesStorage.GetProductsPerShopAndShops(productCodesInMyCart, ComparePricesConstants.RADIUS, function(result) {
+                var numOfResults = result.length;
+                for (var i=0; i < numOfResults; i++) {
+                    result[i].shopInfo['NumOfProducts'] = result[i].rows.length;
+                    if (result[i].shopInfo['NumOfProducts'] == 0) {
+                        continue;
+                    }
+                    result[i].shopInfo['CartPrice'] = CalculatePriceForShop(cart, result[i].rows);
+                }
+
+                var minimumPrice    = 0;
+                // Find the lowest price
+                result.forEach(function(singleShopInfo) {
+                    // skip stores without products
+                    if (singleShopInfo.shopInfo['NumOfProducts'] == 0) {
+                        return;
+                    }
+                    if (minimumPrice == 0 || ((minimumPrice != 0) && (singleShopInfo.shopInfo['CartPrice'] < minimumPrice))) {
+                        minimumPrice = singleShopInfo.shopInfo['CartPrice'];
+                    }
+                });
 
                 // TODO: sort rhe shops near array to show at first shops that match the best))
-                result['Shops'].rows.forEach(function(shopInfo) {
-                    var shopInfoWithPrice = shopInfo;
-                    if (shopInfo['StoreName'] == 'AM_PM') {
-                        shopInfoWithPrice['Price'] = priceInAmPm;
-                        shopInfoWithPrice['IsChecked'] = (priceInAmPm == minimumPrice);
-                    } else if (shopInfo['StoreName'] == 'Mega') {
-                        shopInfoWithPrice['Price'] = priceInMega;
-                        shopInfoWithPrice['IsChecked'] = (priceInMega == minimumPrice);
-                    } else {
-                        shopInfoWithPrice['Price'] = priceInSuperSal;
-                        shopInfoWithPrice['IsChecked'] = (priceInSuperSal == minimumPrice);
+                result.forEach(function(singleShopInfo) {
+                    if (singleShopInfo.shopInfo['NumOfProducts'] == 0) {
+                        return;
                     }
-                    $scope.shopsNear.push(shopInfoWithPrice);
+                    singleShopInfo.shopInfo['IsChecked'] = (singleShopInfo.shopInfo['CartPrice'] == minimumPrice);
+                    $scope.shopsNear.push(singleShopInfo.shopInfo);
                 });
                 d.resolve();
             });
@@ -505,7 +538,7 @@ angular.module('ComparePrices.services', ['ngResource'])
         function IsImageCached(imageUrl) {
             // TODO: doesn't work
             // for browser cordova is not defined
-            if (cordova == undefined) {
+            if (cordova == "undefined") {
                 return imageUrl;
             }
 
