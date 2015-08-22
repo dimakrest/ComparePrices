@@ -28,7 +28,7 @@ angular.module('ComparePrices.services', ['ngResource'])
             // For now do this only once
             localStorage.setItem('initProductList', 0);
         }
-            
+
         function CreateTbProducts()
         {
             ReadJson.query({jsonName:'all_products'}, function (products) {
@@ -273,7 +273,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                             for (var productId in products)
                             {
                                 tx.executeSql('INSERT INTO tbUserCarts (CartID, ItemCode, Amount)' +
-                                'VALUES (' + lastCartID + ', "' + productId + '", ' + products[productId] + ')');
+                                'VALUES (' + lastCartID + ', "' + productId + '", ' + parseInt(products[productId]) + ')');
                             }
                             lastCartID++;
                         });
@@ -282,6 +282,8 @@ angular.module('ComparePrices.services', ['ngResource'])
                         defer.resolve();
                     });
                 });
+
+                localStorage.setItem('initPredefinedCarts', 0);
                 return defer.promise;
             },
 

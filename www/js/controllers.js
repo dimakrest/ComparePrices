@@ -327,15 +327,15 @@ angular.module('ComparePrices.controllers', [])
         };
 
         $scope.DeleteProduct = function(product) {
-            // Need to remove the animate attribute, otherwise when I delete cart the animation is very slow
-            // it takes a second to update the view
-            var ionList = document.getElementsByTagName('ion-list');
-            for (var k = 0; k < ionList.length; k++) {
-                var toRemove = ionList[k].className;
-                if (/animate-/.test(toRemove)) {
-                    ionList[k].className = ionList[k].className.replace(/(?:^|\s)animate-\S*(?:$|\s)/, '');
-                }
-            }
+            //// Need to remove the animate attribute, otherwise when I delete product the animation is very slow
+            //// it takes a second to update the view
+            //var ionList = document.getElementsByTagName('ion-list');
+            //for (var k = 0; k < ionList.length; k++) {
+            //    var toRemove = ionList[k].className;
+            //    if (/animate-/.test(toRemove)) {
+            //        ionList[k].className = ionList[k].className.replace(/(?:^|\s)animate-\S*(?:$|\s)/, '');
+            //    }
+            //}
 
             var numOfProductsInCart = $scope.myCart.length;
             var productIndex        = -1;
@@ -350,10 +350,10 @@ angular.module('ComparePrices.controllers', [])
             }
             ComparePricesStorage.UpdateCart($scope.cartID, $scope.myCart);
 
-            // put the animation class back
-            setTimeout(function(){
-                document.getElementsByTagName('ion-list')[0].className += ' animate-blinds';
-            }, 500);
+            //// put the animation class back
+            //setTimeout(function(){
+            //    document.getElementsByTagName('ion-list')[0].className += ' animate-blinds';
+            //}, 500);
         };
 
         $scope.ToggleDeleteValue = function() {

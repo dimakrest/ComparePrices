@@ -70,8 +70,9 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                     resolve: {
                         "ComparePrices": function (ComparePricesStorage)
                         {
-                            var initProductList = localStorage.getItem('initProductList') || 1;
-                            if (initProductList == 1) {
+                            var initPredefinedCarts = localStorage.getItem('initPredefinedCarts') || 1;
+                            if (initPredefinedCarts == 1) {
+                                // initPredefinedCarts is changed to 0 inside CreatePredefinedCarts()
                                 return ComparePricesStorage.CreatePredefinedCarts();
                             }
                         }}
