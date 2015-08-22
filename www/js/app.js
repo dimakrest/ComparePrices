@@ -38,7 +38,13 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                     return;
                 }
 
+                $ionicLoading.show({
+                    template: 'Loading...'
+                });
+
                 ComparePricesStorage.UpdateStoresInfo(place.geometry.location.G, place.geometry.location.K);
+                $ionicLoading.hide();
+
                 $scope.c.lastAddress = place.formatted_address;
                 localStorage.setItem('lastAddress', $scope.c.lastAddress)
             });
