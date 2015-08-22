@@ -13,11 +13,11 @@ angular.module('ComparePrices.services', ['ngResource'])
     .factory('ComparePricesStorage', ['ReadJson', 'ComparePricesConstants', '$q',
         function (ReadJson, ComparePricesConstants, $q) {
 
-        var createUserCartsTbQuery = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID, ItemCode, Amount)';
-        var createCartsTbQuery     = 'CREATE TABLE IF NOT EXISTS tbCarts (CartID, CartName, ImageUrl, CheckboxColor, IsPredefined)';
+        var createUserCartsTbQuery  = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID INTEGER, ItemCode TEXT, Amount INTEGER)';
+        var createCartsTbQuery      = 'CREATE TABLE IF NOT EXISTS tbCarts (CartID INTEGER PRIMARY KEY, CartName TEXT, ImageUrl TEXT, CheckboxColor TEXT, IsPredefined INTEGER)';
+
         // TODO: database size + don't want to call init every time
         var db = openDatabase("ComparePricesDB", "1.0", "Global storage", 4 * 1024 * 1024); // TODO: check what happens when we exceed this limit
-
         db.transaction(initDB, errorCB, successCB); // creates tables for the first time if required
 
         var initProductList = localStorage.getItem('initProductList') || 1;
@@ -28,17 +28,13 @@ angular.module('ComparePrices.services', ['ngResource'])
             // For now do this only once
             localStorage.setItem('initProductList', 0);
         }
-
-        // TODO: add index
+            
         function CreateTbProducts()
         {
-            db.transaction(function(tx) {
-                tx.executeSql('DROP TABLE IF EXISTS tbProducts');
-                tx.executeSql('CREATE TABLE IF NOT EXISTS tbProducts (ItemCode, ItemName, ImagePath)')
-            }, errorCB, successCB);
-
             ReadJson.query({jsonName:'all_products'}, function (products) {
                 db.transaction(function (tx) {
+                    tx.executeSql('DROP TABLE IF EXISTS tbProducts');
+                    tx.executeSql('CREATE TABLE IF NOT EXISTS tbProducts (ItemCode TEXT PRIMARY KEY, ItemName TEXT, ImagePath TEXT)');
                     var numOfProducts = products.length;
                     // TODO: how better mask ' and "
                     for (var i = 0; i < numOfProducts; i++) {
@@ -56,13 +52,11 @@ angular.module('ComparePrices.services', ['ngResource'])
         // TODO: add index
         function CreateStoresLocationTable()
         {
-            db.transaction(function(tx) {
-                tx.executeSql('DROP TABLE IF EXISTS tbStoresLocation');
-                tx.executeSql('CREATE TABLE IF NOT EXISTS tbStoresLocation (ChainID, BrandName, BrandNameHeb, StoreID, StoreName, Lat, Lon, City, Address, Distance, ProductListExists)')
-            }, errorCB, successCB);
-
             ReadJson.query({jsonName:'stores'}, function (storesInfo) {
                 db.transaction(function (tx) {
+                    tx.executeSql('DROP TABLE IF EXISTS tbStoresLocation');
+                    tx.executeSql('CREATE TABLE IF NOT EXISTS tbStoresLocation (ChainID TEXT, BrandName TEXT, BrandNameHeb TEXT, StoreID TEXT, StoreName TEXT, Lat TEXT, Lon TEXT, ' +
+                                  'City TEXT, Address TEXT, Distance INTEGER, ProductListExists INTEGER, PRIMARY KEY (ChainID, StoreID))')
                     var numOfBrands = storesInfo.length;
                     for (var brandIndex=0; brandIndex < numOfBrands; brandIndex++) {
                         var brandInfo = storesInfo[brandIndex];
@@ -91,7 +85,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                                 singleBranch['Lat'] + '", "' +
                                 singleBranch['Lng'] + '", "' +
                                 singleBranch['City'].replace(/\"/g, "\'\'") + '", "' +
-                                singleBranch['Address'].replace(/\"/g, "\'\'") + '", "0", 0)';
+                                singleBranch['Address'].replace(/\"/g, "\'\'") + '", 0, 0)';
                             tx.executeSql(sqlQuery)
                         }
                     }
@@ -107,14 +101,13 @@ angular.module('ComparePrices.services', ['ngResource'])
             })
         }
 
-        // TODO: add index
         function CreateProductTableForSingleShop(tableName, fileName, chainID, storeID)
         {
             // TODO: change back to query after prices update
             ReadJson.get({jsonName:fileName}, function (response) {
                 db.transaction(function (tx) {
                     tx.executeSql('DROP TABLE IF EXISTS ' + tableName);
-                    tx.executeSql('CREATE TABLE IF NOT EXISTS ' + tableName + ' (ItemCode, ItemPrice)')
+                    tx.executeSql('CREATE TABLE IF NOT EXISTS ' + tableName + ' (ItemCode TEXT PRIMARY KEY, ItemPrice TEXT)')
                     var products = response['items'];
                     var numOfProducts = products.length;
                     // TODO: how better mask ' and "
@@ -165,6 +158,7 @@ angular.module('ComparePrices.services', ['ngResource'])
         // TODO: add flag to mask all prints
         function errorCB(err) {
             console.log("Error processing SQL: " + err.code);
+            console.log("Error processing SQL: " + err.message);
         }
 
         function successCB() {
@@ -508,6 +502,8 @@ angular.module('ComparePrices.services', ['ngResource'])
                         continue;
                     }
                     result[i].shopInfo['CartPrice'] = CalculatePriceForShop(cart, result[i].rows);
+                    // Add brand image
+                    result[i].shopInfo['BrandImage'] = '/img/markets/' + result[i].shopInfo['BrandName'] + '.jpg';
                 }
 
                 var minimumPrice    = 0;

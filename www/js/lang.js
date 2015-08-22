@@ -27,7 +27,11 @@
         'TotalCartsSelected': 'סלים נבחרו',
         'ChooseYourAddressInSettings': 'קודם תבחר מיקומך בהגדרות',
         'ChooseCartsFirst': 'קודם תבחר סלים',
-        'MyAddress': 'כתובת שלי'
+        'MyAddress': 'כתובת שלי',
+        'StoreName': 'שם רשת: ',
+        'PriceInStore': 'מחיר: ',
+        'DistanceToStore': 'מרחק לחנות:',
+        'StoreAddress': 'כתובת החנות: '
     };
 
     document.selectLanguage = function(lang)
