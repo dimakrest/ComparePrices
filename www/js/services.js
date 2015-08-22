@@ -118,7 +118,11 @@ angular.module('ComparePrices.services', ['ngResource'])
                             singleProduct['IP'] + '")';
                         tx.executeSql(sqlQuery)
                     }
-                }, errorCB, SuccessTableCreation(chainID, storeID, defer)); // TODO: need to handle the error case and promises
+                }, function() {
+                    defer.resolve();
+                }, SuccessTableCreation(chainID, storeID, defer));
+            }, function() {
+                defer.resolve();
             });
             return defer.promise;
         }
@@ -129,7 +133,7 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             // get all shops in defined radius
             // read json and create table
-            IssueShopsInRadiusQuery(radius).then(function(shopsInfo) {
+            IssueShopsInRadiusQuery(radius, false).then(function(shopsInfo) {
                 var numOfShops = shopsInfo.rows.length;
                 var promises = [];
 
@@ -145,7 +149,9 @@ angular.module('ComparePrices.services', ['ngResource'])
                     var storeID     = singleShop['StoreID'];
                     promises.push(CreateProductTableForSingleShop(tableName, fileName, chainID, storeID));
                 }
-                $q.all(promises).then(defer.resolve);
+                $q.all(promises).then(function() {
+                    defer.resolve();
+                });
             });
 
             return defer.promise;
@@ -198,13 +204,16 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             // TODO: check if I need all the fields
         // onlyWithLocation fag says if return all fields or only then ones that have products json
-        function IssueShopsInRadiusQuery(radius) {
+        function IssueShopsInRadiusQuery(radius, showOnlyWithProductLists) {
             var d = $q.defer();
 
             var response = {};
             response.rows = [];
             // TODO: do I need all the elements?
-            var selectQuery = "SELECT * FROM tbStoresLocation WHERE Distance < " + radius  + ' AND ProductListExists = 1';
+            var selectQuery = "SELECT * FROM tbStoresLocation WHERE Distance < " + radius;
+            if (showOnlyWithProductLists) {
+                selectQuery +=  ' AND ProductListExists = 1';
+            }
             db.transaction(function (tx) {
                 tx.executeSql(selectQuery, [], function (tx, rawresults) {
                     var len = rawresults.rows.length;
@@ -346,7 +355,7 @@ angular.module('ComparePrices.services', ['ngResource'])
             GetProductsPerShopAndShops : function (productCodes, radius) {
                 var defer = $q.defer();
 
-                IssueShopsInRadiusQuery(radius).then(function(response) {
+                IssueShopsInRadiusQuery(radius, true).then(function(response) {
                     var shopsInfo = response.rows;
                     var numOfShops = shopsInfo.length;
                     var promises = [];
