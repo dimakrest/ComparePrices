@@ -7,19 +7,22 @@
 
     <ion-content class="content-bg">
 
-        <ion-list>
-            <!--TODO: add track by something-->
-            <ion-item class="item item-avatar-right item-checkbox" ng-repeat="shop in shopsNear">
-                <img ng-src={{product['ImagePath']}}> <!-- TODO: put an image -->
+        <div class="list">
+            <div class="item item-avatar-right item-checkbox" ng-repeat="shop in shopsNear track by $index">
+                <img ng-src={{::shop['BrandImage']}}>
                 <label class="checkbox">
                     <input type="checkbox" ng-checked="shop.IsChecked" ng-model="shop.IsChecked">
                 </label>
-                <h2 style="text-align:right">Store Name: {{shop["StoreName"]}}</h2>
-                <h2 style="text-align:right">Price in Store: {{shop["CartPrice"]}}</h2>
-                <h2 style="text-align:right">Store Address: {{shop["Address"]}}</h2>
-                <h2 style="text-align:right">Distance to Store: {{shop["Distance"]}}</h2>
-            </ion-item>
-        </ion-list>
+
+                <div style="text-align:right">
+                    <h2>{{::c.localize.strings['StoreName']}} {{shop["BrandNameHeb"]}}</h2>
+                    <h2>{{::c.localize.strings['PriceInStore']}} {{shop["CartPrice"]}}</h2>
+                    <h2>{{::c.localize.strings['DistanceToStore']}} {{shop["Distance"]}}</h2>
+                    <h2>{{::c.localize.strings['StoreAddress']}} {{shop["Address"]}}</h2>
+                </div>
+            </div>
+        </div>
+
     </ion-content>
 </ion-modal-view>
 
