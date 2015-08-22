@@ -41,7 +41,7 @@ angular.module('ComparePrices.controllers', [])
       };
     })
 
-    .controller('RootCtrl', function($scope, $ionicPopover, ComparePricesStorage) {
+    .controller('RootCtrl', function($scope, $ionicPopover, $ionicLoading, ComparePricesStorage) {
         $scope.c = {};
 
         $scope.c.currentCartName = "";
@@ -54,9 +54,17 @@ angular.module('ComparePrices.controllers', [])
 
         $scope.c.lastAddress = localStorage.getItem('lastAddress') || "";
 
+        // Loading functions
+        $scope.c.ShowLoading = function(templateText) {
+            // Show loading
+            $ionicLoading.show({
+                template: templateText
+            });
+        };
 
-
-
+        $scope.c.HideLoading = function() {
+            $ionicLoading.hide();
+        };
 
         // wa for ionic and google autocomplete service
         $scope.DisableTap = function(){

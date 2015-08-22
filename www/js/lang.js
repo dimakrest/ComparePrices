@@ -31,7 +31,8 @@
         'StoreName': 'שם רשת: ',
         'PriceInStore': 'מחיר: ',
         'DistanceToStore': 'מרחק לחנות:',
-        'StoreAddress': 'כתובת החנות: '
+        'StoreAddress': 'כתובת החנות: ',
+        'UpdatingListOfStores': '... מעדכן את רשימת החנויות'
     };
 
     document.selectLanguage = function(lang)

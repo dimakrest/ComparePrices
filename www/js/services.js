@@ -49,7 +49,6 @@ angular.module('ComparePrices.services', ['ngResource'])
             });
         }
 
-        // TODO: add index
         function CreateStoresLocationTable()
         {
             ReadJson.query({jsonName:'stores'}, function (storesInfo) {
@@ -130,7 +129,7 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             // get all shops in defined radius
             // read json and create table
-            IssueShopsInRadiusQuery(radius, false).then(function(shopsInfo) {
+            IssueShopsInRadiusQuery(radius).then(function(shopsInfo) {
                 var numOfShops = shopsInfo.rows.length;
                 var promises = [];
 
@@ -199,16 +198,13 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             // TODO: check if I need all the fields
         // onlyWithLocation fag says if return all fields or only then ones that have products json
-        function IssueShopsInRadiusQuery(radius, onlyWithProductList) {
+        function IssueShopsInRadiusQuery(radius) {
             var d = $q.defer();
 
             var response = {};
             response.rows = [];
             // TODO: do I need all the elements?
-            var selectQuery = "SELECT * FROM tbStoresLocation WHERE Distance < " + radius;
-            if (onlyWithProductList) {
-                selectQuery += ' AND ProductListExists = 1';
-            }
+            var selectQuery = "SELECT * FROM tbStoresLocation WHERE Distance < " + radius  + ' AND ProductListExists = 1';
             db.transaction(function (tx) {
                 tx.executeSql(selectQuery, [], function (tx, rawresults) {
                     var len = rawresults.rows.length;
@@ -350,7 +346,7 @@ angular.module('ComparePrices.services', ['ngResource'])
             GetProductsPerShopAndShops : function (productCodes, radius) {
                 var defer = $q.defer();
 
-                IssueShopsInRadiusQuery(radius, true).then(function(response) {
+                IssueShopsInRadiusQuery(radius).then(function(response) {
                     var shopsInfo = response.rows;
                     var numOfShops = shopsInfo.length;
                     var promises = [];
