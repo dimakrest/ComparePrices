@@ -55,13 +55,13 @@ angular.module('ComparePrices.services', ['ngResource'])
             ReadJson.query({jsonName:'stores'}, function (storesInfo) {
                 db.transaction(function (tx) {
                     tx.executeSql('DROP TABLE IF EXISTS tbStoresLocation');
-                    tx.executeSql('CREATE TABLE IF NOT EXISTS tbStoresLocation (ChainID TEXT, BrandName TEXT, BrandNameHeb TEXT, StoreID TEXT, StoreName TEXT, Lat TEXT, Lon TEXT, ' +
-                                  'City TEXT, Address TEXT, Distance INTEGER, ProductListExists INTEGER, PRIMARY KEY (ChainID, StoreID))')
+                    tx.executeSql('CREATE TABLE IF NOT EXISTS tbStoresLocation (ChainID TEXT, BrandName TEXT, BrandNameHeb TEXT, StoreID TEXT, Lat REAL, Lon REAL, ' +
+                                  'City TEXT, Address TEXT, Distance INTEGER, ProductListExists INTEGER, PRIMARY KEY (ChainID, StoreID))');
                     var numOfBrands = storesInfo.length;
                     for (var brandIndex=0; brandIndex < numOfBrands; brandIndex++) {
                         var brandInfo = storesInfo[brandIndex];
                         var brandName       = brandInfo['brand'];
-                        var brandNameHeb    = brandInfo['brand']; // TODO: change to brandHeb when have the coreect json
+                        var brandNameHeb    = brandInfo['heb'];
                         var chainID         = brandInfo['ChainId'];
 
                         if (typeof (chainID) == "undefined" || chainID == "undefined") {
@@ -80,10 +80,9 @@ angular.module('ComparePrices.services', ['ngResource'])
                                 chainID + '", "' +
                                 brandName + '", "' +
                                 brandNameHeb + '", "' +
-                                singleBranch['StoreId'] + '", "' +
-                                singleBranch['StoreName'].replace(/\"/g, "\'\'") + '", "' +
-                                singleBranch['Lat'] + '", "' +
-                                singleBranch['Lng'] + '", "' +
+                                singleBranch['StoreId'] + '", ' +
+                                singleBranch['Lat'] + ', ' +
+                                singleBranch['Lng'] + ', "' +
                                 singleBranch['City'].replace(/\"/g, "\'\'") + '", "' +
                                 singleBranch['Address'].replace(/\"/g, "\'\'") + '", 0, 0)';
                             tx.executeSql(sqlQuery)
@@ -94,23 +93,25 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
 
         // Function to mark that for this store products json exists
-        function SuccessTableCreation(chainID, storeID) {
+        function SuccessTableCreation(chainID, storeID, defer) {
             db.transaction(function (tx) {
-                var sqlQuery = 'UPDATE tbStoresLocation SET ProductListExists=1 WHERE ChainID="' + chainID + '" AND StoreID="' + storeID + '";'
+                var sqlQuery = 'UPDATE tbStoresLocation SET ProductListExists=1 WHERE ChainID="' + chainID + '" AND StoreID="' + storeID + '";';
                 tx.executeSql(sqlQuery);
-            })
+            }, errorCB, function() {
+                defer.resolve();
+            });
         }
 
         function CreateProductTableForSingleShop(tableName, fileName, chainID, storeID)
         {
+            var defer = $q.defer();
             // TODO: change back to query after prices update
             ReadJson.get({jsonName:fileName}, function (response) {
                 db.transaction(function (tx) {
                     tx.executeSql('DROP TABLE IF EXISTS ' + tableName);
-                    tx.executeSql('CREATE TABLE IF NOT EXISTS ' + tableName + ' (ItemCode TEXT PRIMARY KEY, ItemPrice TEXT)')
+                    tx.executeSql('CREATE TABLE IF NOT EXISTS ' + tableName + ' (ItemCode TEXT PRIMARY KEY, ItemPrice TEXT)');
                     var products = response['items'];
                     var numOfProducts = products.length;
-                    // TODO: how better mask ' and "
                     for (var i = 0; i < numOfProducts; i++) {
                         var singleProduct = products[i];
                         var sqlQuery = 'INSERT INTO ' + tableName + ' VALUES ("' +
@@ -118,16 +119,21 @@ angular.module('ComparePrices.services', ['ngResource'])
                             singleProduct['IP'] + '")';
                         tx.executeSql(sqlQuery)
                     }
-                }, errorCB, SuccessTableCreation(chainID, storeID))
+                }, errorCB, SuccessTableCreation(chainID, storeID, defer)); // TODO: need to handle the error case and promises
             });
+            return defer.promise;
         }
 
         function CreateProductTablesForShops(radius)
         {
+            var defer = $q.defer();
+
             // get all shops in defined radius
             // read json and create table
             IssueShopsInRadiusQuery(radius, false).then(function(shopsInfo) {
                 var numOfShops = shopsInfo.rows.length;
+                var promises = [];
+
                 for (var i=0; i < numOfShops; i++) {
                     // need to pad store id with zeroes to get the right name
                     var singleShop  = shopsInfo.rows[i];
@@ -136,9 +142,14 @@ angular.module('ComparePrices.services', ['ngResource'])
 
                     var tableName   = 'tb_' + singleShop['BrandName'] + '_' + singleShop['StoreID'];
                     var fileName    =  'stores\/' + singleShop['BrandName'] + '\/price-' + singleShop['BrandName'] + '-' + storeID;
-                    CreateProductTableForSingleShop(tableName, fileName, singleShop['ChainID'], singleShop['StoreID']);
+                    var chainID     = singleShop['ChainID'];
+                    var storeID     = singleShop['StoreID'];
+                    promises.push(CreateProductTableForSingleShop(tableName, fileName, chainID, storeID));
                 }
+                $q.all(promises).then(defer.resolve);
             });
+
+            return defer.promise;
         }
 
         function logError(errorCallBack) {
@@ -212,6 +223,8 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
 
         function UpdateStoreRadiusFromLocations(myLat, myLon) {
+            var defer = $q.defer();
+
             var sqlQuery = "SELECT ChainID, StoreID, Lat, Lon FROM tbStoresLocation;";
             db.transaction(function (tx) {
                 tx.executeSql(sqlQuery, [], function (tx, rawresults) {
@@ -219,8 +232,8 @@ angular.module('ComparePrices.services', ['ngResource'])
                     var len = rawresults.rows.length;
                     for (var i = 0; i < len; i++) {
                         var singleStore = rawresults.rows.item(i);
-                        var storeLat = parseFloat(singleStore['Lat']);
-                        var storeLon = parseFloat(singleStore['Lon']);
+                        var storeLat = singleStore['Lat'];
+                        var storeLon = singleStore['Lon'];
 
                         var R = 6371; // Radius of the earth in km
                         var dLat = (myLat - storeLat) * Math.PI / 180;  // deg2rad below
@@ -233,10 +246,12 @@ angular.module('ComparePrices.services', ['ngResource'])
                         tx.executeSql(sqlQuery);
                     }
                 })
-            })
+            }, errorCB, function(){
+                defer.resolve();
+            });
+            return defer.promise;
         }
 
-        // TODO: success, error handlers
         return {
 
             CreatePredefinedCarts: function ()
@@ -328,7 +343,11 @@ angular.module('ComparePrices.services', ['ngResource'])
                 return response;
             },
 
-            GetProductsPerShopAndShops : function (productCodes, radius, success) {
+            // 1) get all shops in radius
+            // 2) for these shops get prices for products in cart
+            GetProductsPerShopAndShops : function (productCodes, radius) {
+                var defer = $q.defer();
+
                 IssueShopsInRadiusQuery(radius, true).then(function(response) {
                     var shopsInfo = response.rows;
                     var numOfShops = shopsInfo.length;
@@ -338,12 +357,12 @@ angular.module('ComparePrices.services', ['ngResource'])
                         promises.push(IssueProductsSelectQuery(productCodes, tableName, shopsInfo[i]));
                     }
 
-                    $q.all(promises).then(function (data) {
-                        if (success) {
-                            success(data);
-                        }
+                    $q.all(promises).then(function(data) {
+                        defer.resolve(data);
                     });
                 });
+
+                return defer.promise;
             },
 
             GetAllCarts: function (success) {
@@ -394,10 +413,14 @@ angular.module('ComparePrices.services', ['ngResource'])
             },
 
             UpdateStoresInfo : function(myLat, myLon) {
+                var defer = $q.defer();
+
                 // Each time we update user location we have to recalculate distance to
-                // each shop and if needed download/creat missing jsons/tables.
-                UpdateStoreRadiusFromLocations(myLat, myLon);
-                CreateProductTablesForShops(ComparePricesConstants.RADIUS);
+                // each shop and if needed download/create missing jsons/tables.
+                $q.all([UpdateStoreRadiusFromLocations(myLat, myLon),
+                        CreateProductTablesForShops(ComparePricesConstants.RADIUS)]).then(defer.resolve);
+
+                return defer.promise;
             },
 
             UpdateImageUrl: function(productCode, targetPath) {
@@ -494,7 +517,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 productCodesInMyCart.push(singleItem['ItemCode'])
             });
 
-            ComparePricesStorage.GetProductsPerShopAndShops(productCodesInMyCart, ComparePricesConstants.RADIUS, function(result) {
+            ComparePricesStorage.GetProductsPerShopAndShops(productCodesInMyCart, ComparePricesConstants.RADIUS).then(function(result) {
                 var numOfResults = result.length;
                 for (var i=0; i < numOfResults; i++) {
                     result[i].shopInfo['NumOfProducts'] = result[i].rows.length;

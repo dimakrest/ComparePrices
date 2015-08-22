@@ -21,7 +21,7 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
 })
 
     //////////////// Location calculation + auto complete /////////////////
-.directive('googleAutocomplete', ['$rootScope', 'ComparePricesStorage', function($rootScope, ComparePricesStorage) {
+.directive('googleAutocomplete', ['$rootScope', '$ionicLoading', 'ComparePricesStorage', function($rootScope, $ionicLoading, ComparePricesStorage) {
     return {
         restrict: 'E',
         replace: 'false',
@@ -38,15 +38,14 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                     return;
                 }
 
+                // Show loading
                 $ionicLoading.show({
                     template: 'Loading...'
                 });
 
-                ComparePricesStorage.UpdateStoresInfo(place.geometry.location.G, place.geometry.location.K);
-                $ionicLoading.hide();
-
                 $scope.c.lastAddress = place.formatted_address;
                 localStorage.setItem('lastAddress', $scope.c.lastAddress)
+                ComparePricesStorage.UpdateStoresInfo(place.geometry.location.G, place.geometry.location.K).then($ionicLoading.hide);
             });
         }
     }
