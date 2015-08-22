@@ -154,11 +154,11 @@ angular.module('ComparePrices.controllers', [])
                 }
                 else
                 {
+                    $scope.c.ShowLoading($scope.c.localize.strings['LookingForBestShop']);
                     ComparePricesStorage.GetMyCarts(cartIDs, function (myCart) {
                         FindBestShops($scope, myCart.rows).then(function () {
-                            setTimeout(function () {
-                                ShowModal($scope, 'templates/best_shops.html')
-                            }, 100)
+                            $scope.c.HideLoading();
+                            ShowModal($scope, 'templates/best_shops.html');
                         })
                     });
                 }
@@ -285,7 +285,12 @@ angular.module('ComparePrices.controllers', [])
             else
             {
                 $scope.shopsNear = [];
-                FindBestShops($scope, $scope.myCart).then(ShowModal($scope, 'templates/best_shops.html'));
+
+                $scope.c.showLoading($scope.c.localize.strings['LookingForBestShop']);
+                FindBestShops($scope, $scope.myCart).then(function() {
+                    $scope.c.hideLoading();
+                    ShowModal($scope, 'templates/best_shops.html');
+                });
             }
         };
 

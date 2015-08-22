@@ -32,7 +32,8 @@
         'PriceInStore': 'מחיר: ',
         'DistanceToStore': 'מרחק לחנות:',
         'StoreAddress': 'כתובת החנות: ',
-        'UpdatingListOfStores': '... מעדכן את רשימת החנויות'
+        'UpdatingListOfStores': '... מעדכן את רשימת החנויות',
+        'LookingForBestShop': 'מחפש את החנות הזולה'
     };
 
     document.selectLanguage = function(lang)

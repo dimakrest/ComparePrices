@@ -533,7 +533,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     }
                     result[i].shopInfo['CartPrice'] = CalculatePriceForShop(cart, result[i].rows);
                     // Add brand image
-                    result[i].shopInfo['BrandImage'] = '/img/markets/' + result[i].shopInfo['BrandName'] + '.jpg';
+                    result[i].shopInfo['BrandImage'] = 'img/markets/' + result[i].shopInfo['BrandName'] + '.jpg';
                 }
 
                 var minimumPrice    = 0;
