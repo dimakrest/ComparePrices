@@ -24,38 +24,9 @@ angular.module('ComparePrices.services', ['ngResource'])
         if (initProductList == 1) {
             CreateTbProducts();
             CreateStoresLocationTable();
-            CreatePredefinedCarts();
 
             // For now do this only once
             localStorage.setItem('initProductList', 0);
-        }
-
-
-        function CreatePredefinedCarts()
-        {
-            var lastCartID = 1;
-
-            ReadJson.query({jsonName:'user_defined_carts'}, function (userCarts) {
-                var carts = userCarts;
-                var products;
-
-                db.transaction(function (tx) {
-                    carts.forEach(function(singleCart) {
-                        tx.executeSql('INSERT INTO tbCarts (CartID, CartName, ImageUrl, CheckboxColor, IsPredefined)' +
-                        'VALUES (' + lastCartID + ', "' + singleCart['CartName'] + '", "' + singleCart['ImageUrl'] + '", "' + singleCart['CheckboxColor'] + '",1)');
-
-                        products = singleCart['Products'];
-
-                        for (var productId in products)
-                        {
-                                tx.executeSql('INSERT INTO tbUserCarts (CartID, ItemCode, Amount)' +
-                                'VALUES (' + lastCartID + ', "' + productId + '", ' + products[productId] + ')');
-                        }
-                        lastCartID++;
-                    });
-                });
-            });
-
         }
 
         // TODO: add index
@@ -271,9 +242,41 @@ angular.module('ComparePrices.services', ['ngResource'])
             })
         }
 
-        // TODO: succes, error handlers
+        // TODO: success, error handlers
         return {
 
+            CreatePredefinedCarts: function ()
+            {
+                var lastCartID = 1;
+                var defer = $q.defer();
+
+                ReadJson.query({jsonName:'user_defined_carts'}, function (userCarts) {
+                    var carts = userCarts;
+                    var products;
+
+                    db.transaction(function (tx) {
+                        carts.forEach(function(singleCart) {
+                            tx.executeSql('INSERT INTO tbCarts (CartID, CartName, ImageUrl, CheckboxColor, IsPredefined)' +
+                            'VALUES (' + lastCartID + ', "' + singleCart['CartName'] + '", "' + singleCart['ImageUrl'] + '", "' + singleCart['CheckboxColor'] + '",1)');
+
+                            products = singleCart['Products'];
+
+                            for (var productId in products)
+                            {
+                                tx.executeSql('INSERT INTO tbUserCarts (CartID, ItemCode, Amount)' +
+                                'VALUES (' + lastCartID + ', "' + productId + '", ' + products[productId] + ')');
+                            }
+                            lastCartID++;
+                        });
+
+                    }, errorCB, function(){
+                        defer.resolve();
+                    });
+                });
+                return defer.promise;
+            },
+
+            // success is a function that is passed here
             GetAllProducts: function (success) {
                 console.log("GetAllProducts: Init");
                 var response = {};
@@ -285,12 +288,13 @@ angular.module('ComparePrices.services', ['ngResource'])
                         for (var i = 0; i < len; i++) {
                             response.rows.push(rawresults.rows.item(i));
                         }
+                        // check that success function exists
                         if (success) {
-                            success(response)
+                            success(response);
                         }
                     });
                 });
-                return response
+                return response;
             },
 
             UpdateCart: function (cartID, newCart) {

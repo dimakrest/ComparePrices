@@ -61,7 +61,15 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
             views: {
                 'tabMyCarts': {
                 templateUrl: "templates/my_carts.html",
-                controller: 'MyCartsCtrl'
+                controller: 'MyCartsCtrl',
+                    resolve: {
+                        "ComparePrices": function (ComparePricesStorage)
+                        {
+                            var initProductList = localStorage.getItem('initProductList') || 1;
+                            if (initProductList == 1) {
+                                return ComparePricesStorage.CreatePredefinedCarts();
+                            }
+                        }}
                 }
             }
         })

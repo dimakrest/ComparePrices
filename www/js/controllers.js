@@ -54,19 +54,7 @@ angular.module('ComparePrices.controllers', [])
 
         $scope.c.lastAddress = localStorage.getItem('lastAddress') || "";
 
-        ComparePricesStorage.GetAllCarts(function(result) {
-            $scope.$apply(function() {
-                $scope.c.myCartsInfo = result.rows;
-                // check if user has own carts
-                var numOfCarts = $scope.c.myCartsInfo.length;
-                for (var i=0; i < numOfCarts; i++) {
-                    if ($scope.c.myCartsInfo[i]['IsPredefined'] == 0) {
-                        $scope.c.hasUserCarts = 1;
-                        break;
-                    }
-                }
-            })
-        });
+
 
 
 
@@ -91,6 +79,20 @@ angular.module('ComparePrices.controllers', [])
         $scope.totalCartsSelected = 0;
         $scope.newCartName = "";
         $scope.shopsNear = [];
+
+        ComparePricesStorage.GetAllCarts(function(result) {
+            $scope.$apply(function() {
+                $scope.c.myCartsInfo = result.rows;
+                // check if user has own carts
+                var numOfCarts = $scope.c.myCartsInfo.length;
+                for (var i=0; i < numOfCarts; i++) {
+                    if ($scope.c.myCartsInfo[i]['IsPredefined'] == 0) {
+                        $scope.c.hasUserCarts = 1;
+                        break;
+                    }
+                }
+            })
+        });
 
         $scope.lastCartID = localStorage.getItem('lastCartID') || "100";
         $scope.lastCartID = parseInt($scope.lastCartID);
