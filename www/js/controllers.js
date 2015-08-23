@@ -41,12 +41,45 @@ angular.module('ComparePrices.controllers', [])
       };
     })
 
-    .controller('RootCtrl', function($scope, $ionicPopover, $ionicLoading, ComparePricesStorage) {
+    .controller('RootCtrl', function($scope, $ionicPopover, $ionicLoading, $timeout, $ionicSideMenuDelegate, ComparePricesConstants, PopUpFactory) {
         $scope.c = {};
 
         $scope.c.currentCartName = "";
         $scope.c.isCurrentCartPredefined = 0;
         $scope.c.hasUserCarts = 0;
+
+        // choose range bar
+        $scope.c.rangeForShops = parseInt(localStorage.getItem('RangeForShops')) || ComparePricesConstants.DEFAULT_SHOPS_RANGE;
+        var rangeForShopsChangedPromise;
+        // Update the local storage only when user finishes to enter the value
+        $scope.c.UpdateRangeForShops = function(){
+            if(rangeForShopsChangedPromise){
+                $timeout.cancel(rangeForShopsChangedPromise);
+            }
+            rangeForShopsChangedPromise = $timeout(function() {
+                localStorage.setItem('RangeForShops', $scope.c.rangeForShops)
+            },500);
+        };
+
+        // toggle button allow my current location
+        $scope.c.isUserAllowedCurrentLocation = parseInt(localStorage.getItem('IsUserAllowedCurrentLocation')) || 0;
+        $scope.c.LocationToggleChanged = function() {
+            if ($scope.c.isUserAllowedCurrentLocation) {
+                // succes handler and then error handler
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var lat = position.coords.latitude;
+                    var lon = position.coords.longitude;
+                    // Get an address from google
+                }, function(error) {
+                    var text = $scope.c.localize.strings['CannotGetCurrentLocation'];
+                    PopUpFactory.ErrorPopUp($scope, text, function() {
+                        $ionicSideMenuDelegate.toggleRight();
+                        $scope.c.isUserAllowedCurrentLocation = 0;
+                    });
+                });
+            };
+            localStorage.setItem('IsUserAllowedCurrentLocation', $scope.c.isUserAllowedCurrentLocation ? 1 : 0);
+        };
 
         // init localization array
         $scope.c.localize = document.localize;
@@ -76,10 +109,13 @@ angular.module('ComparePrices.controllers', [])
                 document.getElementById('searchBar').blur();
             });
         };
-    })
 
-    .controller('SuggestedCtrl', function() {
-        console.log("Here")
+        $scope.c.HandleAddressIsNotSet = function() {
+            var text  = $scope.c.localize.strings['ChooseYourAddressInSettings'];
+            PopUpFactory.ErrorPopUp($scope, text, function() {
+                $ionicSideMenuDelegate.toggleRight();
+            });
+        };
     })
 
     .controller('MyCartsCtrl', function($scope, $ionicPopup, PopUpFactory, ComparePricesStorage, ComparePricesConstants, FindBestShops, ShowModal, ionicMaterialInk, ionicMaterialMotion) {
@@ -134,8 +170,7 @@ angular.module('ComparePrices.controllers', [])
         $scope.FindBestShop = function() {
             if ($scope.c.lastAddress == '')
             {
-                var text  = $scope.c.localize.strings['ChooseYourAddressInSettings'];
-                PopUpFactory.ErrorPopUp($scope, text);
+                $scope.c.HandleAddressIsNotSet();
             }
             else
             {
@@ -156,7 +191,7 @@ angular.module('ComparePrices.controllers', [])
                 {
                     $scope.c.ShowLoading($scope.c.localize.strings['LookingForBestShop']);
                     ComparePricesStorage.GetMyCarts(cartIDs, function (myCart) {
-                        FindBestShops($scope, myCart.rows).then(function () {
+                        FindBestShops($scope, myCart.rows, $scope.c.rangeForShops).then(function () {
                             $scope.c.HideLoading();
                             ShowModal($scope, 'templates/best_shops.html');
                         })
@@ -279,15 +314,14 @@ angular.module('ComparePrices.controllers', [])
         $scope.FindBestShop = function() {
             if ($scope.c.lastAddress == '')
             {
-                var text  = $scope.c.localize.strings['ChooseYourAddressInSettings'];
-                PopUpFactory.ErrorPopUp($scope, text);
+                $scope.c.HandleAddressIsNotSet();
             }
             else
             {
                 $scope.shopsNear = [];
 
                 $scope.c.showLoading($scope.c.localize.strings['LookingForBestShop']);
-                FindBestShops($scope, $scope.myCart).then(function() {
+                FindBestShops($scope, $scope.myCart, $scope.c.rangeForShops).then(function() {
                     $scope.c.hideLoading();
                     ShowModal($scope, 'templates/best_shops.html');
                 });
