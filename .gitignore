@@ -5,3 +5,4 @@ node_modules/
 platforms/
 plugins/*
 !plugins/fetch.json
+*.json
