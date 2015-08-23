@@ -330,9 +330,18 @@ angular.module('ComparePrices.services', ['ngResource'])
             GetProductsInfo: function (itemCodes) {
                 var d = $q.defer();
 
+                var response = {};
+                response.rows = [];
+
                 db.transaction(function (tx) {
-                    tx.executeSql('SELECT ItemCode, ItemName, ImagePath FROM tbProducts WHERE ItemCode IN (' + itemCodes.join() + ')', [], function (tx, result) {
-                        d.resolve(result.rows);
+                    tx.executeSql('SELECT ItemCode, ItemName, ImagePath FROM tbProducts WHERE ItemCode IN (' + itemCodes.join() + ')', [], function (tx, rawresults) {
+                        var len = rawresults.rows.length;
+                        for (var i = 0; i < len; i++) {
+                            // Amount is changed in the cart, so I have to make a copy,
+                            // otherwise it doesn't work in Safari. The properties are immutable.
+                            response.rows.push(rawresults.rows.item(i));
+                        }
+                        d.resolve(response);
                     });
                 }, errorCB, successCB);
 
@@ -619,7 +628,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 if (TwoArraysAreIdentical(productsInCartWithMaxAmount,shops[i].rows))
                 {
                     shops[i].shopInfo['CartPrice'] = CalculatePriceForShop(cart, shops[i].rows);
-                    shops[i].shopInfo['BrandImage'] = '/img/markets/' + shops[i].shopInfo['BrandName'] + '.jpg';
+                    shops[i].shopInfo['BrandImage'] = 'img/markets/' + shops[i].shopInfo['BrandName'] + '.jpg';
 
                     suitableShops.push(shops[i]);
                 }
@@ -651,7 +660,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     }
                     result[i].shopInfo['CartPrice'] = CalculatePriceForShop(cart, result[i].rows);
                     // Add brand image
-                    result[i].shopInfo['BrandImage'] = '/img/markets/' + result[i].shopInfo['BrandName'] + '.jpg';
+                    result[i].shopInfo['BrandImage'] = 'img/markets/' + result[i].shopInfo['BrandName'] + '.jpg';
                 }
 
                 var suitableShops = FindMaxShopsWithMaxCommonProducts(cart, result);

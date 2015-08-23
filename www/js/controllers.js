@@ -235,8 +235,8 @@ angular.module('ComparePrices.controllers', [])
                         FindBestShops($scope, myCart.rows, $scope.c.rangeForShops).then(function (productsInfo) {
 
                             for (var i=0; i < productsInfo.length; i++) {
-                                $scope.c.comparedProducts[productsInfo[i].ItemCode]['Image'] = productsInfo[i].ImagePath;
-                                $scope.c.comparedProducts[productsInfo[i].ItemCode]['Name'] = productsInfo[i].ItemName;
+                                $scope.c.comparedProducts[productsInfo.rows[i].ItemCode]['Image'] = productsInfo.rows[i].ImagePath;
+                                $scope.c.comparedProducts[productsInfo.rows[i].ItemCode]['Name'] = productsInfo.rows[i].ItemName;
                             }
 
                             $scope.c.HideLoading();
@@ -378,9 +378,9 @@ angular.module('ComparePrices.controllers', [])
 
                 FindBestShops($scope, $scope.myCart, $scope.c.rangeForShops).then(function(productsInfo) {
 
-                    for (var i=0; i < productsInfo.length; i++) {
-                        $scope.c.comparedProducts[productsInfo[i].ItemCode]['Image'] = productsInfo[i].ImagePath;
-                        $scope.c.comparedProducts[productsInfo[i].ItemCode]['Name'] = productsInfo[i].ItemName;
+                    for (var i=0; i < productsInfo.rows.length; i++) {
+                        $scope.c.comparedProducts[productsInfo.rows[i].ItemCode]['Image'] = productsInfo.rows[i].ImagePath;
+                        $scope.c.comparedProducts[productsInfo.rows[i].ItemCode]['Name'] = productsInfo.rows[i].ItemName;
                     }
                     $scope.c.HideLoading();
                     ShowModal($scope, 'templates/best_shops.html');
