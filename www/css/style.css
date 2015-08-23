@@ -6,7 +6,8 @@ table.bottomBorder td { text-align:center; padding:3px;}
     line-height: 27px;
     padding-top: 0;
     padding-bottom: 0;
-    transition: 0.05s all linear;
+    transition: 0.09s all linear;
+    -webkit-transition: 0.09s all linear;
 }
 .list .item.item-accordion.ng-hide {
     line-height: 0px;

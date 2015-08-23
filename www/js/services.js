@@ -318,6 +318,14 @@ angular.module('ComparePrices.services', ['ngResource'])
                 });
             },
 
+            GetProductsInfo: function (itemCodes, success, error) {
+                db.transaction(function (tx) {
+                    tx.executeSql('SELECT ItemName, ImagePath FROM tbProducts WHERE ItemCode IN (' + itemCodes.join() + ')', [], function (tx, result) {
+                            return result.rows;
+                    });
+                }, errorCB, successCB);
+            },
+
             GetMyCarts: function (cartIDs, success, error) {
                 console.log("GetMyCarts: Init " + cartIDs.join("\",\"") );
                 var response = {};
@@ -510,30 +518,123 @@ angular.module('ComparePrices.services', ['ngResource'])
             return Math.round(totalPrice);
         }
 
+        function TwoArraysAreIdentical(Array1, Array2) {
+            var tmpArray1 = angular.copy(Array1);
+
+            // below filter find common items in unsorted arrays
+            tmpArray1.filter(function(n) {
+                return (Array2.indexOf(n) != -1);
+            });
+
+            // if lengths of tmpArray1 still the same, two arrays are identical
+            if (tmpArray1.length == Array2.length)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        function FindMaxShopsWithMaxCommonProducts(cart, shops) {
+            var maxNumOfProducts = 0;
+            var optionalCartsWithMaxNumOfProducts = [];
+
+            // find max number of products in any carts and optional carts with maximum products
+            // For example found that 3 items is max, but 3 optional carts with 3 items: [1,2,3],[1,2,3],[1,2,4]
+            for (var i=0; i < shops.length; i++) {
+                shops[i].shopInfo['NumOfProducts'] = shops[i].rows.length;
+                if (shops[i].shopInfo['NumOfProducts'] != 0)
+                {
+                    // found new max amount of products
+                    if (shops[i].shopInfo['NumOfProducts'] > maxNumOfProducts)
+                    {
+                        maxNumOfProducts = shops[i].shopInfo['NumOfProducts'];
+                        // start filling optional carts from beginning
+                        optionalCartsWithMaxNumOfProducts = [];
+                        optionalCartsWithMaxNumOfProducts.push({"shopsWithThisCart":1,"productsInCart":shops[i].rows});
+                    }
+                    else
+                    {
+                        // we already have this amount, now need to understand if we already have the same cart or it is new
+                        if (shops[i].shopInfo['NumOfProducts'] == maxNumOfProducts) {
+                            var cartAlreadyPresent = 0;
+                            for (var j = 0; j < optionalCartsWithMaxNumOfProducts.length; j++) {
+                                if (TwoArraysAreIdentical(optionalCartsWithMaxNumOfProducts[j].productsInCart, shops[i].rows)) {
+                                    optionalCartsWithMaxNumOfProducts[j].shopsWithThisCart++;
+                                    cartAlreadyPresent = 1
+                                    break;
+                                }
+                            }
+                            // new cart type
+                            if (cartAlreadyPresent == 0) {
+                                // add optional cart
+                                optionalCartsWithMaxNumOfProducts.push({
+                                    "shopsWithThisCart": 1,
+                                    "productsInCart": shops[i].rows
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+
+            console.log("All possible shops");
+            console.log(shops);
+            console.log("All optional carts with max amount of products");
+            console.log(optionalCartsWithMaxNumOfProducts);
+
+            // go over optional carts, and find max carts for the max amount of products.
+            // For example above ([1,2,3],[1,2,3],[1,2,4]), we have 2 carts of [1,2,3] and 1 cart [1,2,4]
+            var maxCartsWithMaxAmountOfProducts = 0;
+            var productsInCartWithMaxAmount = [];
+            for (var i=0; i < optionalCartsWithMaxNumOfProducts.length; i++) {
+                if (optionalCartsWithMaxNumOfProducts[i].shopsWithThisCart > maxCartsWithMaxAmountOfProducts) {
+                    maxCartsWithMaxAmountOfProducts = optionalCartsWithMaxNumOfProducts[i].shopsWithThisCart;
+                    productsInCartWithMaxAmount = optionalCartsWithMaxNumOfProducts[i].productsInCart;
+                }
+            }
+
+            console.log("Cart with maximum number of shops");
+            console.log(productsInCartWithMaxAmount);
+
+            // take only shops that have needed cart of products
+            var suitableShops = [];
+            for (var i=0; i < shops.length; i++)
+            {
+                if (TwoArraysAreIdentical(productsInCartWithMaxAmount,shops[i].rows))
+                {
+                    shops[i].shopInfo['CartPrice'] = CalculatePriceForShop(cart, shops[i].rows);
+                    shops[i].shopInfo['BrandImage'] = '/img/markets/' + shops[i].shopInfo['BrandName'] + '.jpg';
+
+                    suitableShops.push(shops[i]);
+                }
+            }
+
+            console.log("Suitable Shops with max amount of products");
+            console.log(suitableShops);
+
+            return suitableShops;
+        }
+
+
+
         return function($scope, cart) {
             var d = $q.defer();
 
             // At first get from myCart only ItemCodes
             var productCodesInMyCart = [];
             cart.forEach(function(singleItem) {
-                productCodesInMyCart.push(singleItem['ItemCode'])
+                productCodesInMyCart.push(singleItem['ItemCode']);
             });
 
+
+
             ComparePricesStorage.GetProductsPerShopAndShops(productCodesInMyCart, ComparePricesConstants.RADIUS).then(function(result) {
-                var numOfResults = result.length;
-                for (var i=0; i < numOfResults; i++) {
-                    result[i].shopInfo['NumOfProducts'] = result[i].rows.length;
-                    if (result[i].shopInfo['NumOfProducts'] == 0) {
-                        continue;
-                    }
-                    result[i].shopInfo['CartPrice'] = CalculatePriceForShop(cart, result[i].rows);
-                    // Add brand image
-                    result[i].shopInfo['BrandImage'] = '/img/markets/' + result[i].shopInfo['BrandName'] + '.jpg';
-                }
+
+                var suitableShops = FindMaxShopsWithMaxCommonProducts(cart, result);
 
                 var minimumPrice    = 0;
                 // Find the lowest price
-                result.forEach(function(singleShopInfo) {
+                suitableShops.forEach(function(singleShopInfo) {
                     // skip stores without products
                     if (singleShopInfo.shopInfo['NumOfProducts'] == 0) {
                         return;
@@ -544,14 +645,18 @@ angular.module('ComparePrices.services', ['ngResource'])
                 });
 
                 // TODO: sort rhe shops near array to show at first shops that match the best))
-                result.forEach(function(singleShopInfo) {
+                suitableShops.forEach(function(singleShopInfo) {
                     if (singleShopInfo.shopInfo['NumOfProducts'] == 0) {
                         return;
                     }
                     singleShopInfo.shopInfo['IsChecked'] = (singleShopInfo.shopInfo['CartPrice'] == minimumPrice);
+                    singleShopInfo.shopInfo['Products'] = singleShopInfo.rows;
                     $scope.shopsNear.push(singleShopInfo.shopInfo);
                 });
-                d.resolve();
+
+                var productsInfo = ComparePricesStorage.GetProductsInfo(productCodesInMyCart);
+
+                d.resolve(productsInfo);
             });
             return d.promise;
         }

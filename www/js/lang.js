@@ -22,7 +22,7 @@
         'AreYouSureWantToDeleteCartText': '?אתה בטוח שאתה רוצה למחוק את הסל',
         'YesButton': 'כן',
         'NoButton': 'לא',
-        'ShareHeader': 'שתף',
+        'BestShopsHeader': 'השוואת מחירים',
         'FindBestShop': 'לבדוק מחירים',
         'TotalCartsSelected': 'סלים נבחרו',
         'ChooseYourAddressInSettings': 'קודם תבחר מיקומך בהגדרות',

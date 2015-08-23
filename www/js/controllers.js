@@ -54,8 +54,39 @@ angular.module('ComparePrices.controllers', [])
 
         $scope.c.lastAddress = localStorage.getItem('lastAddress') || "";
 
+        $scope.showPriceDetailsForShop = [];
+        // TODO: in case we will see more than 100 shops it can be a problem, need to limit it
+        for (var i=0; i<100; i++) {
+            $scope.showPriceDetailsForShop[i] = 0;
+        }
 
+        // 2 function for product details in accordion in best_shops.html
+        $scope.getProductImagePath = function(itemCode) {
+            ComparePricesStorage.GetProductInfo(itemCode, function(result) {
+                console.log(result);
+                $scope.$apply(function() {
+                    return result['ItemName'];
+                })
 
+            });
+        };
+        $scope.getProductImageName = function(itemCode) {
+            ComparePricesStorage.GetProductInfo(itemCode, function(result) {
+                return result['ItemName'];
+            });
+        };
+
+        // 2 function for toggling accordion in best_shops.html
+        $scope.toggleDetails = function(shopId) {
+            if ($scope.isDetailsShown(shopId)) {
+                $scope.showPriceDetailsForShop[shopId] = 0;
+            } else {
+                $scope.showPriceDetailsForShop[shopId] = 1;
+            }
+        };
+        $scope.isDetailsShown = function(shopId) {
+            return $scope.showPriceDetailsForShop[shopId] == 1;
+        };
 
 
         // wa for ionic and google autocomplete service
@@ -417,12 +448,6 @@ angular.module('ComparePrices.controllers', [])
                     ComparePricesStorage.UpdateCart($scope.cartID, $scope.myCart);
                 }
             }
-        };
-
-        // TODO: maybe there's a prettier way, no need to change the entire cart
-        $scope.ItemWasClickedInEditCart = function(clickedItem) {
-            $scope.UpdateProductAmountFromEditCart(clickedItem, 1);
-            PopUpFactory.PopUpWithDuration(400, $scope.c.localize.strings['AddedProduct'])
         };
 
         // TODO: don't want to initalize this every time, need to do this only when we want to update

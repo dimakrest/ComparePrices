@@ -1,27 +1,45 @@
 <ion-modal-view >
     <ion-header-bar class="positive-bg text-center">
-        <div class="h1 title light">{{::c.localize.strings['ShareHeader']}}</div>
+        <div class="h1 title light">{{::c.localize.strings['BestShopsHeader']}}</div>
         <button class="button button-icon icon ion-ios-upload-outline light" ng-click="ShareCartAndShopDetails()"></button>
         <button class="button button-icon icon ion-ios-close-empty light" ng-click="modal.close()"></button>
     </ion-header-bar>
 
     <ion-content class="content-bg">
 
-        <div class="list">
-            <div class="item item-avatar-right item-checkbox" ng-repeat="shop in shopsNear track by $index">
-                <img ng-src={{::shop['BrandImage']}}>
-                <label class="checkbox">
-                    <input type="checkbox" ng-checked="shop.IsChecked" ng-model="shop.IsChecked">
-                </label>
+        <ion-list>
+            <div ng-repeat="shop in shopsNear track by $index" ng-init="parentIndex = $index">
+                <ion-item class="item-avatar-right"
+                          ng-click="toggleDetails($index)"
+                          ng-class="{active: isDetailsShown($index)}">
+                <!--<div class="item item-avatar-right item-checkbox" ng-repeat="shop in shopsNear track by $index">-->
+                    <img ng-src={{::shop['BrandImage']}}>
+                    <i class="icon" ng-class="isDetailsShown($index) ? 'ion-minus' : 'ion-plus'"></i>
 
-                <div style="text-align:right">
-                    <h2>{{::c.localize.strings['StoreName']}} {{shop["BrandNameHeb"]}}</h2>
-                    <h2>{{::c.localize.strings['PriceInStore']}} {{shop["CartPrice"]}}</h2>
-                    <h2>{{::c.localize.strings['DistanceToStore']}} {{shop["Distance"]}}</h2>
-                    <h2>{{::c.localize.strings['StoreAddress']}} {{shop["Address"]}}</h2>
+                    <!--<label class="checkbox">-->
+                        <!--<input type="checkbox" ng-checked="shop.IsChecked" ng-model="shop.IsChecked">-->
+                    <!--</label>                -->
+
+                    <div style="text-align:right">
+                        <h2>{{::c.localize.strings['StoreName']}} {{shop["BrandNameHeb"]}}</h2>
+                        <h2>{{::c.localize.strings['PriceInStore']}} {{shop["CartPrice"]}}</h2>
+                        <h2>{{::c.localize.strings['DistanceToStore']}} {{shop["Distance"]}}</h2>
+                        <h2>{{::c.localize.strings['StoreAddress']}} {{shop["City"]}}, {{shop["Address"]}}</h2>
+                    </div>
+                </ion-item>
+
+                <div ng-repeat="product in shop.Products">
+                    <ion-item class="item-accordion" ng-show="isDetailsShown(parentIndex)">
+                        {{product.ItemPrice}}
+                        {{product.ItemCode}}
+                        {{getProductImagePath(product.ItemCode)}}
+                    </ion-item>
                 </div>
+
             </div>
-        </div>
+        </ion-list>
+
+
 
     </ion-content>
 </ion-modal-view>
