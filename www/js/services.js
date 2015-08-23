@@ -10,8 +10,8 @@ angular.module('ComparePrices.services', ['ngResource'])
             })
         }])
 
-    .factory('ComparePricesStorage', ['ReadJson', 'ComparePricesConstants', '$q',
-        function (ReadJson, ComparePricesConstants, $q) {
+    .factory('ComparePricesStorage', ['ReadJson', '$q',
+        function (ReadJson, $q) {
 
         var createUserCartsTbQuery  = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID INTEGER, ItemCode TEXT, Amount INTEGER)';
         var createCartsTbQuery      = 'CREATE TABLE IF NOT EXISTS tbCarts (CartID INTEGER PRIMARY KEY, CartName TEXT, ImageUrl TEXT, CheckboxColor TEXT, IsPredefined INTEGER)';
@@ -49,7 +49,6 @@ angular.module('ComparePrices.services', ['ngResource'])
             });
         }
 
-        // TODO: add index
         function CreateStoresLocationTable()
         {
             ReadJson.query({jsonName:'stores'}, function (storesInfo) {
@@ -119,7 +118,11 @@ angular.module('ComparePrices.services', ['ngResource'])
                             singleProduct['IP'] + '")';
                         tx.executeSql(sqlQuery)
                     }
-                }, errorCB, SuccessTableCreation(chainID, storeID, defer)); // TODO: need to handle the error case and promises
+                }, function() {
+                    defer.resolve();
+                }, SuccessTableCreation(chainID, storeID, defer));
+            }, function() {
+                defer.resolve();
             });
             return defer.promise;
         }
@@ -146,7 +149,9 @@ angular.module('ComparePrices.services', ['ngResource'])
                     var storeID     = singleShop['StoreID'];
                     promises.push(CreateProductTableForSingleShop(tableName, fileName, chainID, storeID));
                 }
-                $q.all(promises).then(defer.resolve);
+                $q.all(promises).then(function() {
+                    defer.resolve();
+                });
             });
 
             return defer.promise;
@@ -199,15 +204,15 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             // TODO: check if I need all the fields
         // onlyWithLocation fag says if return all fields or only then ones that have products json
-        function IssueShopsInRadiusQuery(radius, onlyWithProductList) {
+        function IssueShopsInRadiusQuery(radius, showOnlyWithProductLists) {
             var d = $q.defer();
 
             var response = {};
             response.rows = [];
             // TODO: do I need all the elements?
             var selectQuery = "SELECT * FROM tbStoresLocation WHERE Distance < " + radius;
-            if (onlyWithProductList) {
-                selectQuery += ' AND ProductListExists = 1';
+            if (showOnlyWithProductLists) {
+                selectQuery +=  ' AND ProductListExists = 1';
             }
             db.transaction(function (tx) {
                 tx.executeSql(selectQuery, [], function (tx, rawresults) {
@@ -220,6 +225,16 @@ angular.module('ComparePrices.services', ['ngResource'])
             });
 
             return d.promise;
+        }
+
+        function CalculateDistanceToShop(myLat, myLon, storeLat, storeLon) {
+            var R = 6371; // Radius of the earth in km
+            var dLat = (myLat - storeLat) * Math.PI / 180;  // deg2rad below
+            var dLon = (myLon - storeLon) * Math.PI / 180;
+            var a = 0.5 - Math.cos(dLat) / 2 + Math.cos(storeLat * Math.PI / 180) * Math.cos(myLat * Math.PI / 180) * (1 - Math.cos(dLon)) / 2;
+            var distance = Math.round(R * 2 * Math.asin(Math.sqrt(a)));
+
+            return distance;
         }
 
         function UpdateStoreRadiusFromLocations(myLat, myLon) {
@@ -235,12 +250,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                         var storeLat = singleStore['Lat'];
                         var storeLon = singleStore['Lon'];
 
-                        var R = 6371; // Radius of the earth in km
-                        var dLat = (myLat - storeLat) * Math.PI / 180;  // deg2rad below
-                        var dLon = (myLon - storeLon) * Math.PI / 180;
-                        var a = 0.5 - Math.cos(dLat) / 2 + Math.cos(storeLat * Math.PI / 180) * Math.cos(myLat * Math.PI / 180) * (1 - Math.cos(dLon)) / 2;
-                        var distance = Math.round(R * 2 * Math.asin(Math.sqrt(a)));
-
+                        var distance = CalculateDistanceToShop(myLat, myLon, storeLat, storeLon);
                         var sqlQuery = 'UPDATE tbStoresLocation SET Distance=' + distance + ' WHERE ChainID="' + singleStore['ChainID'] + '" AND StoreID="' +
                                         singleStore['StoreID'] + '";';
                         tx.executeSql(sqlQuery);
@@ -422,13 +432,13 @@ angular.module('ComparePrices.services', ['ngResource'])
                 });
             },
 
-            UpdateStoresInfo : function(myLat, myLon) {
+            UpdateStoresInfo : function(myLat, myLon, radius) {
                 var defer = $q.defer();
 
                 // Each time we update user location we have to recalculate distance to
                 // each shop and if needed download/create missing jsons/tables.
                 $q.all([UpdateStoreRadiusFromLocations(myLat, myLon),
-                        CreateProductTablesForShops(ComparePricesConstants.RADIUS)]).then(defer.resolve);
+                        CreateProductTablesForShops(radius)]).then(defer.resolve);
 
                 return defer.promise;
             },
@@ -445,10 +455,13 @@ angular.module('ComparePrices.services', ['ngResource'])
     .factory('PopUpFactory', ['$ionicLoading', '$ionicPopup', function($ionicLoading, $ionicPopup) {
         return {
 
-            ErrorPopUp: function($scope, popUpText) {
-                $ionicPopup.alert({
-                    template: '<div style="text-align:right">' + popUpText + '</div>'
-                });
+            ErrorPopUp: function($scope, popUpText, callback) {
+                var alertPopup = $ionicPopup.alert({
+                                        template: '<div style="text-align:right">' + popUpText + '</div>'
+                                    });
+                if (callback) {
+                    alertPopup.then(callback);
+                }
             },
 
             ConfirmationPopUp: function($scope, popUpTitle, popUpText) {
@@ -501,7 +514,7 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
     }])
 
-    .factory('FindBestShops', ['ComparePricesStorage', 'ComparePricesConstants', '$q', function(ComparePricesStorage, ComparePricesConstants, $q) {
+    .factory('FindBestShops', ['ComparePricesStorage', '$q', function(ComparePricesStorage, $q) {
 
         function CalculatePriceForShop(productCart, productPriceInStore) {
             var totalPrice = 0.0;
@@ -617,7 +630,7 @@ angular.module('ComparePrices.services', ['ngResource'])
 
 
 
-        return function($scope, cart) {
+        return function($scope, cart, radius) {
             var d = $q.defer();
 
             // At first get from myCart only ItemCodes
@@ -626,9 +639,17 @@ angular.module('ComparePrices.services', ['ngResource'])
                 productCodesInMyCart.push(singleItem['ItemCode']);
             });
 
-
-
-            ComparePricesStorage.GetProductsPerShopAndShops(productCodesInMyCart, ComparePricesConstants.RADIUS).then(function(result) {
+            ComparePricesStorage.GetProductsPerShopAndShops(productCodesInMyCart, radius).then(function(result) {
+                var numOfResults = result.length;
+                for (var i=0; i < numOfResults; i++) {
+                    result[i].shopInfo['NumOfProducts'] = result[i].rows.length;
+                    if (result[i].shopInfo['NumOfProducts'] == 0) {
+                        continue;
+                    }
+                    result[i].shopInfo['CartPrice'] = CalculatePriceForShop(cart, result[i].rows);
+                    // Add brand image
+                    result[i].shopInfo['BrandImage'] = '/img/markets/' + result[i].shopInfo['BrandName'] + '.jpg';
+                }
 
                 var suitableShops = FindMaxShopsWithMaxCommonProducts(cart, result);
 

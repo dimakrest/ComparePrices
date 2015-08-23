@@ -6,3 +6,5 @@ platforms/
 plugins/*
 !plugins/fetch.json
 *.json
+npm-debug.log
+workspace.xml

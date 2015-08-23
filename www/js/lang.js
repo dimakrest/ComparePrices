@@ -31,7 +31,12 @@
         'StoreName': 'שם רשת: ',
         'PriceInStore': 'מחיר: ',
         'DistanceToStore': 'מרחק לחנות:',
-        'StoreAddress': 'כתובת החנות: '
+        'StoreAddress': 'כתובת החנות: ',
+        'UpdatingListOfStores': '... מעדכן את רשימת החנויות',
+        'LookingForBestShop': 'מחפש את החנות הזולה',
+        'ToggleMyLocation': 'השתמש במיקום הנוכחי',
+        'DistanceToShop': 'מרחק',
+        'CannotGetCurrentLocation': 'לא הצחנו לקבל את מיקומל, אנא נסה שנית'
     };
 
     document.selectLanguage = function(lang)

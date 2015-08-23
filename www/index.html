@@ -66,16 +66,44 @@
       <!-- Right menu -->
       <ion-side-menu side="right">
 
-          <h2 style="text-align:center">{{::c.localize.strings['MyAddress']}}</h2>
+          <div>
+              <h2 style="text-align:center">{{::c.localize.strings['MyAddress']}}</h2>
+          </div>
+
+          <div class="item" style="color:#a3a3a3" ng-if="c.lastAddress != ''">
+              {{c.lastAddress}}
+          </div>
+
+          <div>
+            <span> {{c.localize.strings['DistanceToShop']}}</span>
+            <span> {{c.rangeForShops}} </span>
+          </div>
+
+          <div class="item range range-positive" style="border: none">
+              <input type="range" min="5" max="100" value="c.rangeForShops" ng-model="c.rangeForShops" ng-change="c.UpdateRangeForShops()">
+          </div>
+
+          <!--<ion-toggle ng-model="airplaneMode" toggle-class="left-toggle-positive">{{::c.localize.strings['ToggleMyLocation']}}</ion-toggle>-->
+          <div class="item item-toggle">
+              <span>{{::c.localize.strings['ToggleMyLocation']}}</span>
+
+              <label class="toggle toggle-positive">
+                  <input type="checkbox" ng-checked="c.isUserAllowedCurrentLocation" ng-model="c.isUserAllowedCurrentLocation" ng-click="c.LocationToggleChanged()">
+                  <div class="track">
+                      <div class="handle"></div>
+                  </div>
+              </label>
+          </div>
+
           <div class="bar bar-header item-input-inset">
               <google-autocomplete></google-autocomplete>
               <button class="button button-clear">
                   {{::c.localize.strings['FindLocationButton']}}
               </button>
           </div>
-          <div class="item" style="color:#a3a3a3" ng-if="c.lastAddress != ''">
-              {{c.lastAddress}}
-          </div>
+
+          <button ng-click="TakeMyCurrentGeolocation()">
+          </button>
       </ion-side-menu>
   </ion-side-menus>
   </body>
