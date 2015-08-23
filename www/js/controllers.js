@@ -47,6 +47,8 @@ angular.module('ComparePrices.controllers', [])
         $scope.c.currentCartName = "";
         $scope.c.isCurrentCartPredefined = 0;
         $scope.c.hasUserCarts = 0;
+        $scope.c.comparedProducts = [];
+        $scope.c.showPriceDetailsForShop = [];
 
         // choose range bar
         $scope.c.rangeForShops = parseInt(localStorage.getItem('RangeForShops')) || ComparePricesConstants.DEFAULT_SHOPS_RANGE;
@@ -59,6 +61,13 @@ angular.module('ComparePrices.controllers', [])
             rangeForShopsChangedPromise = $timeout(function() {
                 localStorage.setItem('RangeForShops', $scope.c.rangeForShops)
             },500);
+        };
+
+        $scope.c.ClearShowPriceDetailsForShop = function(){
+            // TODO: in case we will see more than 100 shops it can be a problem, need to limit it
+            for (var i=0; i<100; i++) {
+                $scope.c.showPriceDetailsForShop[i] = 0;
+            }
         };
 
         // toggle button allow my current location
@@ -87,11 +96,7 @@ angular.module('ComparePrices.controllers', [])
 
         $scope.c.lastAddress = localStorage.getItem('lastAddress') || "";
 
-        $scope.showPriceDetailsForShop = [];
-        // TODO: in case we will see more than 100 shops it can be a problem, need to limit it
-        for (var i=0; i<100; i++) {
-            $scope.showPriceDetailsForShop[i] = 0;
-        }
+
         // Loading functions
         $scope.c.ShowLoading = function(templateText) {
             // Show loading
@@ -104,34 +109,17 @@ angular.module('ComparePrices.controllers', [])
             $ionicLoading.hide();
         };
 
-        // 2 function for product details in accordion in best_shops.html
-        $scope.getProductImagePath = function(itemCode) {
-            ComparePricesStorage.GetProductInfo(itemCode, function(result) {
-                console.log(result);
-                $scope.$apply(function() {
-                    return result['ItemName'];
-                })
-
-            });
-        };
-        $scope.getProductImageName = function(itemCode) {
-            ComparePricesStorage.GetProductInfo(itemCode, function(result) {
-                return result['ItemName'];
-            });
-        };
-
         // 2 function for toggling accordion in best_shops.html
         $scope.toggleDetails = function(shopId) {
             if ($scope.isDetailsShown(shopId)) {
-                $scope.showPriceDetailsForShop[shopId] = 0;
+                $scope.c.showPriceDetailsForShop[shopId] = 0;
             } else {
-                $scope.showPriceDetailsForShop[shopId] = 1;
+                $scope.c.showPriceDetailsForShop[shopId] = 1;
             }
         };
         $scope.isDetailsShown = function(shopId) {
-            return $scope.showPriceDetailsForShop[shopId] == 1;
+            return $scope.c.showPriceDetailsForShop[shopId] == 1;
         };
-
 
         // wa for ionic and google autocomplete service
         $scope.DisableTap = function(){
@@ -224,8 +212,31 @@ angular.module('ComparePrices.controllers', [])
                 else
                 {
                     $scope.c.ShowLoading($scope.c.localize.strings['LookingForBestShop']);
+                    $scope.c.ClearShowPriceDetailsForShop();
                     ComparePricesStorage.GetMyCarts(cartIDs, function (myCart) {
-                        FindBestShops($scope, myCart.rows, $scope.c.rangeForShops).then(function () {
+
+                        $scope.c.comparedProducts = [];
+                        myCart.rows.forEach(function(singleProduct)
+                        {
+                            if (typeof($scope.c.comparedProducts[singleProduct.ItemCode]) == 'undefined')
+                            {
+                                $scope.c.comparedProducts[singleProduct.ItemCode] = [];
+                                $scope.c.comparedProducts[singleProduct.ItemCode]['Amount'] = singleProduct.Amount;
+                            }
+                            else
+                            {
+                                $scope.c.comparedProducts[singleProduct.ItemCode]['Amount'] += singleProduct.Amount;
+                            }
+
+                        });
+
+                        FindBestShops($scope, myCart.rows, $scope.c.rangeForShops).then(function (productsInfo) {
+
+                            for (var i=0; i < productsInfo.length; i++) {
+                                $scope.c.comparedProducts[productsInfo[i].ItemCode]['Image'] = productsInfo[i].ImagePath;
+                                $scope.c.comparedProducts[productsInfo[i].ItemCode]['Name'] = productsInfo[i].ItemName;
+                            }
+
                             $scope.c.HideLoading();
                             ShowModal($scope, 'templates/best_shops.html');
                         })
@@ -354,9 +365,22 @@ angular.module('ComparePrices.controllers', [])
             {
                 $scope.shopsNear = [];
 
-                $scope.c.showLoading($scope.c.localize.strings['LookingForBestShop']);
-                FindBestShops($scope, $scope.myCart, $scope.c.rangeForShops).then(function() {
-                    $scope.c.hideLoading();
+                $scope.c.ShowLoading($scope.c.localize.strings['LookingForBestShop']);
+                $scope.c.ClearShowPriceDetailsForShop();
+
+                $scope.c.comparedProducts = [];
+                $scope.myCart.forEach(function(singleProduct) {
+                    $scope.c.comparedProducts[singleProduct.ItemCode] = [];
+                    $scope.c.comparedProducts[singleProduct.ItemCode]['Amount'] = singleProduct.Amount;
+                });
+
+                FindBestShops($scope, $scope.myCart, $scope.c.rangeForShops).then(function(productsInfo) {
+
+                    for (var i=0; i < productsInfo.length; i++) {
+                        $scope.c.comparedProducts[productsInfo[i].ItemCode]['Image'] = productsInfo[i].ImagePath;
+                        $scope.c.comparedProducts[productsInfo[i].ItemCode]['Name'] = productsInfo[i].ItemName;
+                    }
+                    $scope.c.HideLoading();
                     ShowModal($scope, 'templates/best_shops.html');
                 });
             }

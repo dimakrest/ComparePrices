@@ -328,12 +328,16 @@ angular.module('ComparePrices.services', ['ngResource'])
                 });
             },
 
-            GetProductsInfo: function (itemCodes, success, error) {
+            GetProductsInfo: function (itemCodes) {
+                var d = $q.defer();
+
                 db.transaction(function (tx) {
-                    tx.executeSql('SELECT ItemName, ImagePath FROM tbProducts WHERE ItemCode IN (' + itemCodes.join() + ')', [], function (tx, result) {
-                            return result.rows;
+                    tx.executeSql('SELECT ItemCode, ItemName, ImagePath FROM tbProducts WHERE ItemCode IN (' + itemCodes.join() + ')', [], function (tx, result) {
+                        d.resolve(result.rows);
                     });
                 }, errorCB, successCB);
+
+                return d.promise;
             },
 
             GetMyCarts: function (cartIDs, success, error) {
@@ -675,9 +679,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     $scope.shopsNear.push(singleShopInfo.shopInfo);
                 });
 
-                var productsInfo = ComparePricesStorage.GetProductsInfo(productCodesInMyCart);
-
-                d.resolve(productsInfo);
+                d.resolve(ComparePricesStorage.GetProductsInfo(productCodesInMyCart));
             });
             return d.promise;
         }

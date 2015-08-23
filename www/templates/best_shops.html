@@ -9,7 +9,7 @@
 
         <ion-list>
             <div ng-repeat="shop in shopsNear track by $index" ng-init="parentIndex = $index">
-                <ion-item class="item-avatar-right"
+                <ion-item class="item-avatar-right item-stable"
                           ng-click="toggleDetails($index)"
                           ng-class="{active: isDetailsShown($index)}">
                 <!--<div class="item item-avatar-right item-checkbox" ng-repeat="shop in shopsNear track by $index">-->
@@ -22,20 +22,16 @@
 
                     <div style="text-align:right">
                         <h2>{{::c.localize.strings['StoreName']}} {{shop["BrandNameHeb"]}}</h2>
-                        <h2>{{::c.localize.strings['PriceInStore']}} {{shop["CartPrice"]}}</h2>
+                        <h2 style="color:green">{{::c.localize.strings['CurrencySign']}}{{::c.localize.strings['PriceInStore']}} {{shop["CartPrice"]}}</h2>
                         <h2>{{::c.localize.strings['DistanceToStore']}} {{shop["Distance"]}}</h2>
                         <h2>{{::c.localize.strings['StoreAddress']}} {{shop["City"]}}, {{shop["Address"]}}</h2>
                     </div>
                 </ion-item>
 
-                <div ng-repeat="product in shop.Products">
-                    <ion-item class="item-accordion" ng-show="isDetailsShown(parentIndex)">
-                        {{product.ItemPrice}}
-                        {{product.ItemCode}}
-                        {{getProductImagePath(product.ItemCode)}}
-                    </ion-item>
-                </div>
-
+                <ion-item class="item-accordion" ng-repeat="product in shop.Products" ng-show="isDetailsShown(parentIndex)">
+                    <h2 style="text-align:right">{{c.comparedProducts[product.ItemCode].Name}}</h2>
+                    <h2 style="text-align:left; color:green">{{::c.localize.strings['CurrencySign']}}{{c.comparedProducts[product.ItemCode].Amount * product.ItemPrice}} = {{c.comparedProducts[product.ItemCode].Amount}} * {{::c.localize.strings['CurrencySign']}}{{product.ItemPrice * 1}}</h2>
+                </ion-item>
             </div>
         </ion-list>
 
