@@ -39,12 +39,14 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                 }
 
                 $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
-
                 $scope.c.lastAddress = place.formatted_address;
                 localStorage.setItem('lastAddress', $scope.c.lastAddress);
 
                 ComparePricesStorage.UpdateStoresInfo(place.geometry.location.G, place.geometry.location.K, $scope.c.rangeForShops).then(function() {
                     $scope.c.HideLoading();
+                    // Change the useUsersCurrentLocation variable, so we know that now we should use address from google autocompletion
+                    $scope.c.useUsersCurrentLocation = false;
+                    localStorage.setItem('UseUsersCurrentLocation', 0);
                 });
             });
         }
