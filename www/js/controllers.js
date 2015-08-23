@@ -76,7 +76,7 @@ angular.module('ComparePrices.controllers', [])
                     var text = $scope.c.localize.strings['CannotGetCurrentLocation'];
                     PopUpFactory.ErrorPopUp($scope, text, function() {
                         $ionicSideMenuDelegate.toggleRight();
-                        $scope.c.isUserAllowedCurrentLocation = 0;
+                        $scope.c.useUsersCurrentLocation = 0;
                     });
                 });
             };

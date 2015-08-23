@@ -107,7 +107,7 @@ angular.module('ComparePrices.services', ['ngResource'])
             ReadJson.get({jsonName:fileName}, function (response) {
                 db.transaction(function (tx) {
                     tx.executeSql('DROP TABLE IF EXISTS ' + tableName);
-                    tx.executeSql('CREATE TABLE IF NOT EXISTS ' + tableName + ' (ItemCode TEXT PRIMARY KEY, ItemPrice TEXT)');
+                    tx.executeSql('CREATE TABLE IF NOT EXISTS ' + tableName + ' (ItemCode TEXT PRIMARY KEY, ItemPrice TEXT)'); // TODO: change item price to be double
                     var products = response['items'];
                     var numOfProducts = products.length;
                     for (var i = 0; i < numOfProducts; i++) {
@@ -743,10 +743,9 @@ angular.module('ComparePrices.services', ['ngResource'])
 
     .factory('GoogleReverseGeocoding', ['$resource', function($resource) {
         return function(lat, lon) {
-            var googleReverseGeocoding = $resource('https://maps.googleapis.com/maps/api/geocode/json',  {'latlng':lat + ',' + lon, key:'AIzaSyBaHL-Agrso7SJGqUK5rfS0WQtpRlJdKF4',
+            var googleReverseGeocoding = $resource('https://maps.googleapis.com/maps/api/geocode/json',  {latlng:lat + ',' + lon, key:'AIzaSyBaHL-Agrso7SJGqUK5rfS0WQtpRlJdKF4',
                 'language':'iw'});
             googleReverseGeocoding.get(function(result) {
-                console.log(result);
                 var addressComponents = result['results'][0]['address_components'];
                 var numOfAddressComponents = addressComponents.length;
                 var fullAddress = {};
@@ -775,7 +774,6 @@ angular.module('ComparePrices.services', ['ngResource'])
                         break;
                     }
                 }
-                console.log(fullAddress);
             });
         };
     }]);
