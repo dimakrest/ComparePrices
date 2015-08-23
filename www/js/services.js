@@ -6,8 +6,7 @@ angular.module('ComparePrices.services', ['ngResource'])
 
     .factory('ReadJson', ['$resource',
         function($resource){
-            return $resource('resources/:jsonName.json', {}, {
-            })
+            return $resource('resources/:jsonName.json', {}, {});
         }])
 
     .factory('ComparePricesStorage', ['ReadJson', '$q',
@@ -108,7 +107,7 @@ angular.module('ComparePrices.services', ['ngResource'])
             ReadJson.get({jsonName:fileName}, function (response) {
                 db.transaction(function (tx) {
                     tx.executeSql('DROP TABLE IF EXISTS ' + tableName);
-                    tx.executeSql('CREATE TABLE IF NOT EXISTS ' + tableName + ' (ItemCode TEXT PRIMARY KEY, ItemPrice TEXT)');
+                    tx.executeSql('CREATE TABLE IF NOT EXISTS ' + tableName + ' (ItemCode TEXT PRIMARY KEY, ItemPrice TEXT)'); // TODO: change item price to be double
                     var products = response['items'];
                     var numOfProducts = products.length;
                     for (var i = 0; i < numOfProducts; i++) {
@@ -742,4 +741,41 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             }
         }
+    }])
+
+    .factory('GoogleReverseGeocoding', ['$resource', function($resource) {
+        return function(lat, lon) {
+            var googleReverseGeocoding = $resource('https://maps.googleapis.com/maps/api/geocode/json',  {latlng:lat + ',' + lon, key:'AIzaSyBaHL-Agrso7SJGqUK5rfS0WQtpRlJdKF4',
+                'language':'iw'});
+            googleReverseGeocoding.get(function(result) {
+                var addressComponents = result['results'][0]['address_components'];
+                var numOfAddressComponents = addressComponents.length;
+                var fullAddress = {};
+                var numOfFieldsInFullAddress = 0;
+                for (var i=0; i < numOfAddressComponents; i++) {
+                    var typesOfComponents = addressComponents[i]['types'];
+                    if (typesOfComponents.indexOf('street_number') > -1) {
+                        fullAddress['streetNumber'] = addressComponents[i]['long_name'];
+                        numOfFieldsInFullAddress++
+                    }
+                    if (typesOfComponents.indexOf('route') > -1) {
+                        fullAddress['route'] = addressComponents[i]['long_name'];
+                        numOfFieldsInFullAddress++
+                    }
+                    if ((typesOfComponents.indexOf('locality') > -1) && (typesOfComponents.indexOf('political') > -1)) {
+                        fullAddress['locality'] = addressComponents[i]['long_name'];
+                        numOfFieldsInFullAddress++
+                    }
+                    if ((typesOfComponents.indexOf('country') > -1) && (typesOfComponents.indexOf('political') > -1)) {
+                        fullAddress['country'] = addressComponents[i]['long_name'];
+                        numOfFieldsInFullAddress++
+                    }
+                    if (numOfFieldsInFullAddress == 4) {
+                        var fullAddressString = fullAddress['route'] + ' ' + fullAddress['streetNumber'] + ',' + fullAddress['locality'] + ',' + fullAddress['country'];
+                        localStorage.setItem('lastAddress', fullAddressString);
+                        break;
+                    }
+                }
+            });
+        };
     }]);

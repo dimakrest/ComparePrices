@@ -41,7 +41,7 @@ angular.module('ComparePrices.controllers', [])
       };
     })
 
-    .controller('RootCtrl', function($scope, $ionicPopover, $ionicLoading, $timeout, $ionicSideMenuDelegate, ComparePricesConstants, PopUpFactory) {
+    .controller('RootCtrl', function($scope, $ionicPopover, $ionicLoading, $timeout, $ionicSideMenuDelegate, ComparePricesConstants, PopUpFactory, GoogleReverseGeocoding) {
         $scope.c = {};
 
         $scope.c.currentCartName = "";
@@ -71,23 +71,25 @@ angular.module('ComparePrices.controllers', [])
         };
 
         // toggle button allow my current location
-        $scope.c.isUserAllowedCurrentLocation = parseInt(localStorage.getItem('IsUserAllowedCurrentLocation')) || 0;
+        $scope.c.useUsersCurrentLocation = parseInt(localStorage.getItem('UseUsersCurrentLocation')) || 0;
+        $scope.c.useUsersCurrentLocation = $scope.c.useUsersCurrentLocation == 1;
         $scope.c.LocationToggleChanged = function() {
-            if ($scope.c.isUserAllowedCurrentLocation) {
+            if ($scope.c.useUsersCurrentLocation) {
                 // succes handler and then error handler
                 navigator.geolocation.getCurrentPosition(function(position) {
                     var lat = position.coords.latitude;
                     var lon = position.coords.longitude;
                     // Get an address from google
+                    GoogleReverseGeocoding(lat, lon);
                 }, function(error) {
                     var text = $scope.c.localize.strings['CannotGetCurrentLocation'];
                     PopUpFactory.ErrorPopUp($scope, text, function() {
                         $ionicSideMenuDelegate.toggleRight();
-                        $scope.c.isUserAllowedCurrentLocation = 0;
+                        $scope.c.useUsersCurrentLocation = 0;
                     });
                 });
             };
-            localStorage.setItem('IsUserAllowedCurrentLocation', $scope.c.isUserAllowedCurrentLocation ? 1 : 0);
+            localStorage.setItem('UseUsersCurrentLocation', $scope.c.useUsersCurrentLocation ? 1 : 0);
         };
 
         // init localization array

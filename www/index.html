@@ -88,7 +88,7 @@
               <span>{{::c.localize.strings['ToggleMyLocation']}}</span>
 
               <label class="toggle toggle-positive">
-                  <input type="checkbox" ng-checked="c.isUserAllowedCurrentLocation" ng-model="c.isUserAllowedCurrentLocation" ng-click="c.LocationToggleChanged()">
+                  <input type="checkbox" ng-checked="c.useUsersCurrentLocation" ng-model="c.useUsersCurrentLocation" ng-click="c.LocationToggleChanged()">
                   <div class="track">
                       <div class="handle"></div>
                   </div>
@@ -102,8 +102,6 @@
               </button>
           </div>
 
-          <button ng-click="TakeMyCurrentGeolocation()">
-          </button>
       </ion-side-menu>
   </ion-side-menus>
   </body>
