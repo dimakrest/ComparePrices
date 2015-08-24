@@ -41,6 +41,8 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                 $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
                 $scope.c.lastAddress = place.formatted_address;
                 localStorage.setItem('lastAddress', $scope.c.lastAddress);
+                localStorage.setItem('Lat', place.geometry.location.G);
+                localStorage.setItem('Lon', place.geometry.location.K);
 
                 ComparePricesStorage.UpdateStoresInfo(place.geometry.location.G, place.geometry.location.K, $scope.c.rangeForShops).then(function() {
                     $scope.c.HideLoading();

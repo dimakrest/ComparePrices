@@ -9,8 +9,8 @@ angular.module('ComparePrices.services', ['ngResource'])
             return $resource('resources/:jsonName.json', {}, {});
         }])
 
-    .factory('ComparePricesStorage', ['ReadJson', '$q',
-        function (ReadJson, $q) {
+    .factory('ComparePricesStorage', ['ReadJson', 'MiscFunctions', '$q',
+        function (ReadJson, MiscFunctions, $q) {
 
         var createUserCartsTbQuery  = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID INTEGER, ItemCode TEXT, Amount INTEGER)';
         var createCartsTbQuery      = 'CREATE TABLE IF NOT EXISTS tbCarts (CartID INTEGER PRIMARY KEY, CartName TEXT, ImageUrl TEXT, CheckboxColor TEXT, IsPredefined INTEGER)';
@@ -106,7 +106,6 @@ angular.module('ComparePrices.services', ['ngResource'])
             // TODO: change back to query after prices update
             ReadJson.get({jsonName:fileName}, function (response) {
                 db.transaction(function (tx) {
-                    tx.executeSql('DROP TABLE IF EXISTS ' + tableName);
                     tx.executeSql('CREATE TABLE IF NOT EXISTS ' + tableName + ' (ItemCode TEXT PRIMARY KEY, ItemPrice TEXT)'); // TODO: change item price to be double
                     var products = response['items'];
                     var numOfProducts = products.length;
@@ -226,16 +225,6 @@ angular.module('ComparePrices.services', ['ngResource'])
             return d.promise;
         }
 
-        function CalculateDistanceToShop(myLat, myLon, storeLat, storeLon) {
-            var R = 6371; // Radius of the earth in km
-            var dLat = (myLat - storeLat) * Math.PI / 180;  // deg2rad below
-            var dLon = (myLon - storeLon) * Math.PI / 180;
-            var a = 0.5 - Math.cos(dLat) / 2 + Math.cos(storeLat * Math.PI / 180) * Math.cos(myLat * Math.PI / 180) * (1 - Math.cos(dLon)) / 2;
-            var distance = Math.round(R * 2 * Math.asin(Math.sqrt(a)));
-
-            return distance;
-        }
-
         function UpdateStoreRadiusFromLocations(myLat, myLon) {
             var defer = $q.defer();
 
@@ -249,7 +238,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                         var storeLat = singleStore['Lat'];
                         var storeLon = singleStore['Lon'];
 
-                        var distance = CalculateDistanceToShop(myLat, myLon, storeLat, storeLon);
+                        var distance = MiscFunctions.CalculateDistance(myLat, myLon, storeLat, storeLon);
                         var sqlQuery = 'UPDATE tbStoresLocation SET Distance=' + distance + ' WHERE ChainID="' + singleStore['ChainID'] + '" AND StoreID="' +
                                         singleStore['StoreID'] + '";';
                         tx.executeSql(sqlQuery);
@@ -298,7 +287,6 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             // success is a function that is passed here
             GetAllProducts: function (success) {
-                console.log("GetAllProducts: Init");
                 var response = {};
                 response.rows = [];
                 db.transaction(function (tx) {
@@ -823,8 +811,10 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
     }])
 
-    .factory('GoogleReverseGeocoding', ['$resource', function($resource) {
+    .factory('GoogleReverseGeocoding', ['$q', '$resource', function($q, $resource) {
         return function(lat, lon) {
+            var defer = $q.defer();
+
             var googleReverseGeocoding = $resource('https://maps.googleapis.com/maps/api/geocode/json',  {latlng:lat + ',' + lon, key:'AIzaSyBaHL-Agrso7SJGqUK5rfS0WQtpRlJdKF4',
                 'language':'iw'});
             googleReverseGeocoding.get(function(result) {
@@ -832,7 +822,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 var numOfAddressComponents = addressComponents.length;
                 var fullAddress = {};
                 var numOfFieldsInFullAddress = 0;
-                for (var i=0; i < numOfAddressComponents; i++) {
+                for (var i = 0; i < numOfAddressComponents; i++) {
                     var typesOfComponents = addressComponents[i]['types'];
                     if (typesOfComponents.indexOf('street_number') > -1) {
                         fullAddress['streetNumber'] = addressComponents[i]['long_name'];
@@ -851,11 +841,109 @@ angular.module('ComparePrices.services', ['ngResource'])
                         numOfFieldsInFullAddress++
                     }
                     if (numOfFieldsInFullAddress == 4) {
-                        var fullAddressString = fullAddress['route'] + ' ' + fullAddress['streetNumber'] + ',' + fullAddress['locality'] + ',' + fullAddress['country'];
-                        localStorage.setItem('lastAddress', fullAddressString);
+                        var fullAddress = fullAddress['route'] + ' ' + fullAddress['streetNumber'] + ',' + fullAddress['locality'] + ',' + fullAddress['country'];
+                        defer.resolve(fullAddress);
                         break;
                     }
                 }
             });
+            return defer.promise;
         };
+    }])
+
+    .factory('MiscFunctions', [ function() {
+        return {
+            CalculateDistance: function (myLat, myLon, storeLat, storeLon) {
+                var R = 6371; // Radius of the earth in km
+                var dLat = (myLat - storeLat) * Math.PI / 180;  // deg2rad below
+                var dLon = (myLon - storeLon) * Math.PI / 180;
+                var a = 0.5 - Math.cos(dLat) / 2 + Math.cos(storeLat * Math.PI / 180) * Math.cos(myLat * Math.PI / 180) * (1 - Math.cos(dLon)) / 2;
+                var distance = Math.round(R * 2 * Math.asin(Math.sqrt(a)));
+
+                return distance;
+            }
+        }
+    }])
+
+    .factory('UpdateStores', ['$q', '$ionicSideMenuDelegate', 'GoogleReverseGeocoding', 'MiscFunctions', 'ComparePricesConstants', 'ComparePricesStorage', 'PopUpFactory', function($q, $ionicSideMenuDelegate, GoogleReverseGeocoding, MiscFunctions, ComparePricesConstants, ComparePricesStorage, PopUpFactory) {
+
+        function ReverseGeocodingAndUpdateStore($scope, distanceBetweenTwoLocations, lat, lon) {
+            GoogleReverseGeocoding(lat, lon).then(function (fullAddress) {
+
+                if (distanceBetweenTwoLocations > ComparePricesConstants.LOCATION_CHANGES_MARGIN) {
+                    $scope.c.lastAddress = fullAddress;
+                    localStorage.setItem('lastAddress', fullAddress);
+                    localStorage.setItem('Lat', lat);
+                    localStorage.setItem('Lon', lon);
+
+                    // Need to recalculate and create missing stores info
+                    ComparePricesStorage.UpdateStoresInfo(lat, lon, $scope.c.rangeForShops).then(function () {
+                        defer.resolve();
+                        $scope.c.HideLoading();
+                    });
+                }
+            })
+        }
+
+        return {
+            UpdateStoresInfoIfRequired: function ($scope) {
+                var defer = $q.defer();
+
+                $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
+
+                navigator.geolocation.getCurrentPosition(function (position) {
+
+                        var lat = position.coords.latitude;
+                        var lon = position.coords.longitude;
+                        var savedLat = localStorage.getItem('Lat') || "";
+                        var savedLon = localStorage.getItem('Lon') || "";
+
+                        var addressAlreadySet = ((savedLat != "") && (savedLon != ""));
+                        var distanceBetweenTwoLocations = 0;
+                        // if address is set need to calculate what's the distance between previous and current location
+                        if (addressAlreadySet) {
+                            distanceBetweenTwoLocations = MiscFunctions.CalculateDistance(savedLat, savedLon, lat, lon);
+                        }
+
+                        // if address is set and distance is less than margin => nothing to do
+                        if (addressAlreadySet && (distanceBetweenTwoLocations < ComparePricesConstants.LOCATION_CHANGES_MARGIN)) {
+                            $scope.c.HideLoading();
+                            defer.resolve();
+                            return;
+                        }
+
+                        // We get here in two cases:
+                        // 1) address is not set => it's our first visit and we have to create tables
+                        // 2) distance between previous and current location is greater than margin and we have to look for new shops
+                        // Get an address from google
+                        // in this case we have to show confirmation popup
+                        if (addressAlreadySet) {
+                            var popUpTitle  = $scope.c.localize.strings['LocationUpdatePopupTitle'];
+                            var popUpText   = $scope.c.localize.strings['LocationUpdatePopupText'];
+                            $scope.c.HideLoading();
+                            PopUpFactory.ConfirmationPopUp($scope, popUpTitle, popUpText).then(function (confirmed) {
+                                if (confirmed) {
+                                    $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
+                                    ReverseGeocodingAndUpdateStore($scope, distanceBetweenTwoLocations, lat, lon);
+                                } else {
+                                    $scope.c.HideLoading();
+                                    defer.resolve();
+                                }
+                            })
+                        } else {
+                            ReverseGeocodingAndUpdateStore($scope, distanceBetweenTwoLocations, lat, lon);
+                        }
+                    } , function (error) {
+                            defer.resolve();
+                            $scope.c.HideLoading();
+                            var text = $scope.c.localize.strings['CannotGetCurrentLocation'];
+                            PopUpFactory.ErrorPopUp($scope, text, function () {
+                                $ionicSideMenuDelegate.toggleRight(); // TODO: do I need this here?, why I need to toggle right?
+                                $scope.c.useUsersCurrentLocation = 0;
+                            });
+                        }
+                );
+                return defer.promise;
+            }
+        }
     }]);
