@@ -526,7 +526,7 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
     }])
 
-    .factory('FindBestShops', ['ComparePricesStorage', '$q', function(ComparePricesStorage, $q) {
+    .factory('FindBestShops', ['ComparePricesStorage', 'ComparePricesConstants', '$q', function(ComparePricesStorage, ComparePricesConstants, $q) {
 
         function CalculatePriceForShop(productCart, productPriceInStore) {
             var totalPrice = 0.0;
@@ -560,13 +560,14 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
 
         function FindMaxShopsWithMaxCommonProducts(cart, shops) {
-            var maxNumOfProducts = 0;
+            var maxNumOfProducts = 1; // we don't want to end with shops that have 0 products
             var optionalCartsWithMaxNumOfProducts = [];
 
             // find max number of products in any carts and optional carts with maximum products
             // For example found that 3 items is max, but 3 optional carts with 3 items: [1,2,3],[1,2,3],[1,2,4]
             for (var i=0; i < shops.length; i++) {
                 shops[i].shopInfo['NumOfProducts'] = shops[i].rows.length;
+                shops[i].shopInfo['Products'] = shops[i].rows;
                 if (shops[i].shopInfo['NumOfProducts'] != 0)
                 {
                     // found new max amount of products
@@ -630,7 +631,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     shops[i].shopInfo['CartPrice'] = CalculatePriceForShop(cart, shops[i].rows);
                     shops[i].shopInfo['BrandImage'] = 'img/markets/' + shops[i].shopInfo['BrandName'] + '.jpg';
 
-                    suitableShops.push(shops[i]);
+                    suitableShops.push(shops[i].shopInfo);
                 }
             }
 
@@ -640,7 +641,37 @@ angular.module('ComparePrices.services', ['ngResource'])
             return suitableShops;
         }
 
+        function dynamicSort(property) {
+            var sortOrder = 1;
+            if(property[0] === "-") {
+                sortOrder = -1;
+                property = property.substr(1);
+            }
+            return function (a,b) {
+                var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+                return result * sortOrder;
+            }
+        }
 
+        function dynamicSortMultiple() {
+            /*
+             * save the arguments object as it will be overwritten
+             * note that arguments object is an array-like object
+             * consisting of the names of the properties to sort by
+             */
+            var props = arguments;
+            return function (obj1, obj2) {
+                var i = 0, result = 0, numberOfProperties = props.length;
+                /* try getting a different result from 0 (equal)
+                 * as long as we have extra properties to compare
+                 */
+                while(result === 0 && i < numberOfProperties) {
+                    result = dynamicSort(props[i])(obj1, obj2);
+                    i++;
+                }
+                return result;
+            }
+        }
 
         return function($scope, cart, radius) {
             var d = $q.defer();
@@ -664,29 +695,50 @@ angular.module('ComparePrices.services', ['ngResource'])
                 }
 
                 var suitableShops = FindMaxShopsWithMaxCommonProducts(cart, result);
+                // sort shops by price
+                suitableShops.sort(dynamicSortMultiple("CartPrice", "Distance"));
 
-                var minimumPrice    = 0;
-                // Find the lowest price
-                suitableShops.forEach(function(singleShopInfo) {
-                    // skip stores without products
-                    if (singleShopInfo.shopInfo['NumOfProducts'] == 0) {
-                        return;
-                    }
-                    if (minimumPrice == 0 || ((minimumPrice != 0) && (singleShopInfo.shopInfo['CartPrice'] < minimumPrice))) {
-                        minimumPrice = singleShopInfo.shopInfo['CartPrice'];
-                    }
-                });
+                var totalShops = 0;
+                var shopsOfSpecificBrand = [];
+                var minimalPrice = suitableShops[0]['CartPrice'];
 
-                // TODO: sort rhe shops near array to show at first shops that match the best))
-                suitableShops.forEach(function(singleShopInfo) {
-                    if (singleShopInfo.shopInfo['NumOfProducts'] == 0) {
-                        return;
-                    }
-                    singleShopInfo.shopInfo['IsChecked'] = (singleShopInfo.shopInfo['CartPrice'] == minimumPrice);
-                    singleShopInfo.shopInfo['Products'] = singleShopInfo.rows;
-                    $scope.shopsNear.push(singleShopInfo.shopInfo);
-                });
+                for (var i=0; i < suitableShops.length; i++)
+                {
+                    if (totalShops < ComparePricesConstants.MAX_SHOPS_TO_SHOW)
+                    {
+                        if (suitableShops[i]['CartPrice'] > minimalPrice)
+                        {
+                            suitableShops[i]['PercentsToShowNearPrice'] = '(+' + Math.round((suitableShops[i]['CartPrice']/minimalPrice-1)*100) + '%)';
+                        }
+                        else
+                        {
+                            suitableShops[i]['PercentsToShowNearPrice'] = "";
+                        }
 
+                        var brandName = suitableShops[i]['BrandName'];
+                        if (typeof (shopsOfSpecificBrand[brandName]) == "undefined")
+                        {
+                            shopsOfSpecificBrand[brandName] = 1;
+                            //singleShopInfo.shopInfo['IsChecked'] = (singleShopInfo.shopInfo['CartPrice'] == minimumPrice);
+                            $scope.shopsNearThatHaveNeededProducts.push(suitableShops[i]);
+                            totalShops++;
+                        }
+                        else {
+                            if (shopsOfSpecificBrand[brandName] < ComparePricesConstants.MAX_SHOPS_OF_THE_SAME_BRAND) {
+                                shopsOfSpecificBrand[brandName]++;
+                                //singleShopInfo.shopInfo['IsChecked'] = (singleShopInfo.shopInfo['CartPrice'] == minimumPrice);
+                                $scope.shopsNearThatHaveNeededProducts.push(suitableShops[i]);
+                                totalShops++;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                // after all we need products names, images to show in accordions
                 d.resolve(ComparePricesStorage.GetProductsInfo(productCodesInMyCart));
             });
             return d.promise;
