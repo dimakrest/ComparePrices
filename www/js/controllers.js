@@ -106,6 +106,24 @@ angular.module('ComparePrices.controllers', [])
         $scope.c.lastAddress = localStorage.getItem('lastAddress') || "";
 
 
+
+        // TODO: need to restructure this, need to print the list in a pretty way
+        $scope.c.ShareCartAndShopDetails = function() {
+            var subject = 'Products List and shops info';
+            var message = '';
+
+            $scope.shopsNearThatHaveNeededProducts.forEach(function(singleShop) {
+                if (singleShop['IsChecked']) {
+                    message += 'Info about shop: \n';
+                    message += 'Store Name: ' + singleShop["StoreName"] + '\n';
+                    message += 'Price in Store: ' + singleShop["Price"] + '\n';
+                    message += 'Store Address: ' + singleShop["Address"] + '\n';
+                    message += 'Distance to Store: ' + singleShop["Distance"] + '\n';
+                }
+            });
+            window.plugins.socialsharing.share(message, subject);
+        };
+
         // Loading functions
         $scope.c.ShowLoading = function(templateText) {
             // Show loading
@@ -153,7 +171,7 @@ angular.module('ComparePrices.controllers', [])
 
         $scope.totalCartsSelected = 0;
         $scope.newCartName = "";
-        $scope.shopsNear = [];
+        $scope.shopsNearThatHaveNeededProducts = [];
 
         ComparePricesStorage.GetAllCarts(function(result) {
             $scope.$apply(function() {
@@ -239,7 +257,7 @@ angular.module('ComparePrices.controllers', [])
             else
             {
                 var cartIDs = [];
-                $scope.shopsNear = [];
+                $scope.shopsNearThatHaveNeededProducts = [];
                 $scope.c.myCartsInfo.forEach(function(singleCart) {
                     if (singleCart['IsChecked']) {
                         cartIDs.push(singleCart['CartID']);
@@ -253,6 +271,7 @@ angular.module('ComparePrices.controllers', [])
                 }
                 else
                 {
+<<<<<<< HEAD
                     // if user wants to use his current location, need to check if his location changed
                     if ($scope.c.useUsersCurrentLocation) {
                         UpdateStores.UpdateStoresInfoIfRequired($scope).then(function() {
@@ -261,26 +280,41 @@ angular.module('ComparePrices.controllers', [])
                     } else {
                         $scope.FindBestShopPrivate(cartIDs);
                     }
+=======
+                    $scope.c.ShowLoading($scope.c.localize.strings['LookingForBestShop']);
+                    // closes opened accordions in best_shops.html
+                    $scope.c.ClearShowPriceDetailsForShop();
+                    ComparePricesStorage.GetMyCarts(cartIDs, function (myCart) {
+
+                        $scope.c.comparedProducts = [];
+                        myCart.rows.forEach(function(singleProduct)
+                        {
+                            if (typeof($scope.c.comparedProducts[singleProduct.ItemCode]) == 'undefined')
+                            {
+                                $scope.c.comparedProducts[singleProduct.ItemCode] = [];
+                                $scope.c.comparedProducts[singleProduct.ItemCode]['Amount'] = singleProduct.Amount;
+                            }
+                            else
+                            {
+                                $scope.c.comparedProducts[singleProduct.ItemCode]['Amount'] += singleProduct.Amount;
+                            }
+
+                        });
+
+                        FindBestShops($scope, myCart.rows, $scope.c.rangeForShops).then(function (productsInfo) {
+
+                            for (var i=0; i < productsInfo.rows.length; i++) {
+                                $scope.c.comparedProducts[productsInfo.rows[i].ItemCode]['Image'] = productsInfo.rows[i].ImagePath;
+                                $scope.c.comparedProducts[productsInfo.rows[i].ItemCode]['Name'] = productsInfo.rows[i].ItemName;
+                            }
+
+                            $scope.c.HideLoading();
+                            ShowModal($scope, 'templates/best_shops.html');
+                        })
+                    });
+>>>>>>> f83e02e3818e6e9e78c303f1b7f8631f1e2a7ac6
                 }
             }
-        };
-
-
-        // TODO: need to restructure this, need to print the list in a pretty way
-        $scope.ShareCartAndShopDetails = function() {
-            var subject = 'Products List and shops info';
-            var message = '';
-
-            $scope.shopsNear.forEach(function(singleShop) {
-                if (singleShop['IsChecked']) {
-                    message += 'Info about shop: \n';
-                    message += 'Store Name: ' + singleShop["StoreName"] + '\n';
-                    message += 'Price in Store: ' + singleShop["Price"] + '\n';
-                    message += 'Store Address: ' + singleShop["Address"] + '\n';
-                    message += 'Distance to Store: ' + singleShop["Distance"] + '\n';
-                }
-            });
-            window.plugins.socialsharing.share(message, subject);
         };
 
         // TODO: return my popup and handle the response in calling function. same way as in confirm delete product
@@ -368,7 +402,7 @@ angular.module('ComparePrices.controllers', [])
         $scope.myCart      = [];
         $scope.cartID = $stateParams.cartID;
 
-        $scope.shopsNear = [];
+        $scope.shopsNearThatHaveNeededProducts = [];
 
         ComparePricesStorage.GetMyCarts([$scope.cartID], function(result) {
             $scope.$apply(function() {
@@ -406,6 +440,7 @@ angular.module('ComparePrices.controllers', [])
             }
             else
             {
+<<<<<<< HEAD
                 if ($scope.c.useUsersCurrentLocation) {
                     UpdateStores.UpdateStoresInfoIfRequired($scope).then(function() {
                         $scope.FindBestShopPrivate();
@@ -413,6 +448,21 @@ angular.module('ComparePrices.controllers', [])
                 } else {
                     $scope.FindBestShopPrivate();
                 }
+=======
+                $scope.shopsNearThatHaveNeededProducts = [];
+
+                $scope.c.ShowLoading($scope.c.localize.strings['LookingForBestShop']);
+                // closes opened accordions in best_shops.html
+                $scope.c.ClearShowPriceDetailsForShop();
+
+                $scope.c.comparedProducts = [];
+                $scope.myCart.forEach(function(singleProduct) {
+                    $scope.c.comparedProducts[singleProduct.ItemCode] = [];
+                    $scope.c.comparedProducts[singleProduct.ItemCode]['Amount'] = singleProduct.Amount;
+                });
+
+                FindBestShops($scope, $scope.myCart, $scope.c.rangeForShops).then(function(productsInfo) {
+>>>>>>> f83e02e3818e6e9e78c303f1b7f8631f1e2a7ac6
 
             }
         };
@@ -444,22 +494,6 @@ angular.module('ComparePrices.controllers', [])
                     $ionicHistory.goBack();
                 }
             });
-        };
-
-        $scope.ShareCartAndShopDetails = function() {
-            var subject = 'Products List and shops info';
-            var message = '';
-
-            $scope.shopsNear.forEach(function(singleShop) {
-                if (singleShop['IsChecked']) {
-                    message += 'Info about shop: \n';
-                    message += 'Store Name: ' + singleShop["StoreName"] + '\n';
-                    message += 'Price in Store: ' + singleShop["Price"] + '\n';
-                    message += 'Store Address: ' + singleShop["Address"] + '\n';
-                    message += 'Distance to Store: ' + singleShop["Distance"] + '\n';
-                }
-            });
-            window.plugins.socialsharing.share(message, subject);
         };
 
         $scope.DeleteProduct = function(product) {

@@ -1,18 +1,18 @@
 <ion-modal-view >
     <ion-header-bar class="positive-bg text-center">
         <div class="h1 title light">{{::c.localize.strings['BestShopsHeader']}}</div>
-        <button class="button button-icon icon ion-ios-upload-outline light" ng-click="ShareCartAndShopDetails()"></button>
+        <button class="button button-icon icon ion-ios-upload-outline light" ng-click="c.ShareCartAndShopDetails()"></button>
         <button class="button button-icon icon ion-ios-close-empty light" ng-click="modal.close()"></button>
     </ion-header-bar>
 
     <ion-content class="content-bg">
 
         <ion-list>
-            <div ng-repeat="shop in shopsNear track by $index" ng-init="parentIndex = $index">
+            <div ng-repeat="shop in shopsNearThatHaveNeededProducts track by $index" ng-init="parentIndex = $index">
                 <ion-item class="item-avatar-right item-stable"
                           ng-click="toggleDetails($index)"
                           ng-class="{active: isDetailsShown($index)}">
-                <!--<div class="item item-avatar-right item-checkbox" ng-repeat="shop in shopsNear track by $index">-->
+                <!--<div class="item item-avatar-right item-checkbox" ng-repeat="shop in shopsNearThatHaveNeededProducts track by $index">-->
                     <img ng-src={{::shop['BrandImage']}}>
                     <i class="icon" ng-class="isDetailsShown($index) ? 'ion-minus' : 'ion-plus'"></i>
 
@@ -22,15 +22,15 @@
 
                     <div style="text-align:right">
                         <h2>{{::c.localize.strings['StoreName']}} {{shop["BrandNameHeb"]}}</h2>
-                        <h2 style="color:green">{{::c.localize.strings['CurrencySign']}}{{::c.localize.strings['PriceInStore']}} {{shop["CartPrice"]}}</h2>
-                        <h2>{{::c.localize.strings['DistanceToStore']}} {{shop["Distance"]}}</h2>
-                        <h2>{{::c.localize.strings['StoreAddress']}} {{shop["City"]}}, {{shop["Address"]}}</h2>
+                        <h2 style="color:green">{{::c.localize.strings['CurrencySign']}}{{::c.localize.strings['PriceInStore']}} {{shop["PercentsToShowNearPrice"]}}{{shop["CartPrice"]}}</h2>
+                        <h4>{{::c.localize.strings['StoreAddress']}} {{shop["City"]}}, {{shop["Address"]}}</h4>
+                        <h4>{{::c.localize.strings['DistanceToStore']}} {{shop["Distance"]}} {{::c.localize.strings['Kilometer']}}</h4>
                     </div>
                 </ion-item>
 
                 <ion-item class="item-accordion" ng-repeat="product in shop.Products" ng-show="isDetailsShown(parentIndex)">
                     <h2 style="text-align:right">{{c.comparedProducts[product.ItemCode].Name}}</h2>
-                    <h2 style="text-align:left; color:green">{{::c.localize.strings['CurrencySign']}}{{c.comparedProducts[product.ItemCode].Amount * product.ItemPrice}} = {{c.comparedProducts[product.ItemCode].Amount}} * {{::c.localize.strings['CurrencySign']}}{{product.ItemPrice * 1}}</h2>
+                    <h2 style="text-align:left; color:green">{{::c.localize.strings['CurrencySign']}}{{c.comparedProducts[product.ItemCode].Amount * product.ItemPrice  | number : 2}} = {{c.comparedProducts[product.ItemCode].Amount}} * {{::c.localize.strings['CurrencySign']}}{{product.ItemPrice * 1 | number : 2}}</h2>
                 </ion-item>
             </div>
         </ion-list>
