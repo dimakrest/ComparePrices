@@ -218,6 +218,7 @@ angular.module('ComparePrices.controllers', [])
 
         $scope.FindBestShopPrivate = function(cartIDs) {
             $scope.c.ShowLoading($scope.c.localize.strings['LookingForBestShop']);
+            // closes opened accordions in best_shops.html
             $scope.c.ClearShowPriceDetailsForShop();
             ComparePricesStorage.GetMyCarts(cartIDs, function (myCart) {
 
@@ -238,7 +239,7 @@ angular.module('ComparePrices.controllers', [])
 
                 FindBestShops($scope, myCart.rows, $scope.c.rangeForShops).then(function (productsInfo) {
 
-                    for (var i=0; i < productsInfo.length; i++) {
+                    for (var i=0; i < productsInfo.rows.length; i++) {
                         $scope.c.comparedProducts[productsInfo.rows[i].ItemCode]['Image'] = productsInfo.rows[i].ImagePath;
                         $scope.c.comparedProducts[productsInfo.rows[i].ItemCode]['Name'] = productsInfo.rows[i].ItemName;
                     }
@@ -271,7 +272,6 @@ angular.module('ComparePrices.controllers', [])
                 }
                 else
                 {
-<<<<<<< HEAD
                     // if user wants to use his current location, need to check if his location changed
                     if ($scope.c.useUsersCurrentLocation) {
                         UpdateStores.UpdateStoresInfoIfRequired($scope).then(function() {
@@ -280,39 +280,6 @@ angular.module('ComparePrices.controllers', [])
                     } else {
                         $scope.FindBestShopPrivate(cartIDs);
                     }
-=======
-                    $scope.c.ShowLoading($scope.c.localize.strings['LookingForBestShop']);
-                    // closes opened accordions in best_shops.html
-                    $scope.c.ClearShowPriceDetailsForShop();
-                    ComparePricesStorage.GetMyCarts(cartIDs, function (myCart) {
-
-                        $scope.c.comparedProducts = [];
-                        myCart.rows.forEach(function(singleProduct)
-                        {
-                            if (typeof($scope.c.comparedProducts[singleProduct.ItemCode]) == 'undefined')
-                            {
-                                $scope.c.comparedProducts[singleProduct.ItemCode] = [];
-                                $scope.c.comparedProducts[singleProduct.ItemCode]['Amount'] = singleProduct.Amount;
-                            }
-                            else
-                            {
-                                $scope.c.comparedProducts[singleProduct.ItemCode]['Amount'] += singleProduct.Amount;
-                            }
-
-                        });
-
-                        FindBestShops($scope, myCart.rows, $scope.c.rangeForShops).then(function (productsInfo) {
-
-                            for (var i=0; i < productsInfo.rows.length; i++) {
-                                $scope.c.comparedProducts[productsInfo.rows[i].ItemCode]['Image'] = productsInfo.rows[i].ImagePath;
-                                $scope.c.comparedProducts[productsInfo.rows[i].ItemCode]['Name'] = productsInfo.rows[i].ItemName;
-                            }
-
-                            $scope.c.HideLoading();
-                            ShowModal($scope, 'templates/best_shops.html');
-                        })
-                    });
->>>>>>> f83e02e3818e6e9e78c303f1b7f8631f1e2a7ac6
                 }
             }
         };
@@ -411,9 +378,10 @@ angular.module('ComparePrices.controllers', [])
         });
 
         $scope.FindBestShopPrivate = function() {
-            $scope.shopsNear = [];
+            $scope.shopsNearThatHaveNeededProducts = [];
 
             $scope.c.ShowLoading($scope.c.localize.strings['LookingForBestShop']);
+            // closes opened accordions in best_shops.html
             $scope.c.ClearShowPriceDetailsForShop();
 
             $scope.c.comparedProducts = [];
@@ -440,7 +408,6 @@ angular.module('ComparePrices.controllers', [])
             }
             else
             {
-<<<<<<< HEAD
                 if ($scope.c.useUsersCurrentLocation) {
                     UpdateStores.UpdateStoresInfoIfRequired($scope).then(function() {
                         $scope.FindBestShopPrivate();
@@ -448,22 +415,6 @@ angular.module('ComparePrices.controllers', [])
                 } else {
                     $scope.FindBestShopPrivate();
                 }
-=======
-                $scope.shopsNearThatHaveNeededProducts = [];
-
-                $scope.c.ShowLoading($scope.c.localize.strings['LookingForBestShop']);
-                // closes opened accordions in best_shops.html
-                $scope.c.ClearShowPriceDetailsForShop();
-
-                $scope.c.comparedProducts = [];
-                $scope.myCart.forEach(function(singleProduct) {
-                    $scope.c.comparedProducts[singleProduct.ItemCode] = [];
-                    $scope.c.comparedProducts[singleProduct.ItemCode]['Amount'] = singleProduct.Amount;
-                });
-
-                FindBestShops($scope, $scope.myCart, $scope.c.rangeForShops).then(function(productsInfo) {
->>>>>>> f83e02e3818e6e9e78c303f1b7f8631f1e2a7ac6
-
             }
         };
 
