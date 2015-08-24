@@ -37,7 +37,9 @@
         'LookingForBestShop': 'מחפש את החנות הזולה',
         'ToggleMyLocation': 'השתמש במיקום הנוכחי',
         'DistanceToShop': 'מרחק',
-        'CannotGetCurrentLocation': 'לא הצחנו לקבל את מיקומל, אנא נסה שנית'
+        'CannotGetCurrentLocation': 'לא הצחנו לקבל את מיקומל, אנא נסה שנית',
+        'LocationUpdatePopupTitle': 'עידכון מיקום',
+        'LocationUpdatePopupText': 'האם אתה רוצה לעדכן את מיקומך?'
     };
 
     document.selectLanguage = function(lang)
