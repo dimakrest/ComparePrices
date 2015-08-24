@@ -14,7 +14,6 @@
                           ng-class="{active: isDetailsShown($index)}">
                 <!--<div class="item item-avatar-right item-checkbox" ng-repeat="shop in shopsNearThatHaveNeededProducts track by $index">-->
                     <img ng-src={{::shop['BrandImage']}}>
-                    <i class="icon" ng-class="isDetailsShown($index) ? 'ion-minus' : 'ion-plus'"></i>
 
                     <!--<label class="checkbox">-->
                         <!--<input type="checkbox" ng-checked="shop.IsChecked" ng-model="shop.IsChecked">-->
@@ -22,10 +21,11 @@
 
                     <div style="text-align:right">
                         <h2>{{::c.localize.strings['StoreName']}} {{shop["BrandNameHeb"]}}</h2>
-                        <h2 style="color:green">{{::c.localize.strings['CurrencySign']}}{{::c.localize.strings['PriceInStore']}} {{shop["PercentsToShowNearPrice"]}}{{shop["CartPrice"]}}</h2>
+                        <h2 style="color:green">{{shop["PercentsToShowNearPrice"]}}{{::c.localize.strings['CurrencySign']}}{{::c.localize.strings['PriceInStore']}} {{shop["CartPrice"]}}</h2>
                         <h4>{{::c.localize.strings['StoreAddress']}} {{shop["City"]}}, {{shop["Address"]}}</h4>
                         <h4>{{::c.localize.strings['DistanceToStore']}} {{shop["Distance"]}} {{::c.localize.strings['Kilometer']}}</h4>
                     </div>
+                    <i class="icon" ng-class="isDetailsShown($index) ? 'ion-android-arrow-dropup-circle' : 'ion-android-arrow-dropdown-circle'"></i>
                 </ion-item>
 
                 <ion-item class="item-accordion" ng-repeat="product in shop.Products" ng-show="isDetailsShown(parentIndex)">

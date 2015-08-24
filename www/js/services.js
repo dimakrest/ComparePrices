@@ -638,7 +638,22 @@ angular.module('ComparePrices.services', ['ngResource'])
             console.log("Suitable Shops with max amount of products");
             console.log(suitableShops);
 
-            return suitableShops;
+            // calculate missing items
+            var productCodesInMyCart = [];
+            var productCodesInCartWithMaxAmount = [];
+            cart.forEach(function(singleItem) {
+                productCodesInMyCart.push(singleItem['ItemCode']);
+            });
+            productsInCartWithMaxAmount.forEach(function(singleItem) {
+                productCodesInCartWithMaxAmount.push(singleItem['ItemCode']);
+            });
+
+            var missingProducts = productCodesInMyCart.filter(function(n) {
+                return (productCodesInCartWithMaxAmount.indexOf(n) == -1);
+            });
+            console.log(missingProducts);
+
+            return {"suitableShops":suitableShops,"missingProducts":missingProducts};
         }
 
         function dynamicSort(property) {
@@ -694,7 +709,10 @@ angular.module('ComparePrices.services', ['ngResource'])
                     result[i].shopInfo['BrandImage'] = 'img/markets/' + result[i].shopInfo['BrandName'] + '.jpg';
                 }
 
-                var suitableShops = FindMaxShopsWithMaxCommonProducts(cart, result);
+                var findShopsResponse = FindMaxShopsWithMaxCommonProducts(cart, result);
+                var suitableShops = findShopsResponse['suitableShops'];
+                $scope.missingProducts = findShopsResponse['missingProducts'];
+
                 // sort shops by price
                 suitableShops.sort(dynamicSortMultiple("CartPrice", "Distance"));
 
@@ -708,7 +726,8 @@ angular.module('ComparePrices.services', ['ngResource'])
                     {
                         if (suitableShops[i]['CartPrice'] > minimalPrice)
                         {
-                            suitableShops[i]['PercentsToShowNearPrice'] = '(+' + Math.round((suitableShops[i]['CartPrice']/minimalPrice-1)*100) + '%)';
+                            var percentsToShowNearPrice = Math.round((suitableShops[i]['CartPrice'] / minimalPrice - 1) * 100);
+                            suitableShops[i]['PercentsToShowNearPrice'] = (percentsToShowNearPrice == 0) ? "" : ' (+' + percentsToShowNearPrice + '%) ';
                         }
                         else
                         {
