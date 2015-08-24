@@ -172,6 +172,7 @@ angular.module('ComparePrices.controllers', [])
         $scope.totalCartsSelected = 0;
         $scope.newCartName = "";
         $scope.shopsNearThatHaveNeededProducts = [];
+        $scope.missingProducts = [];
 
         ComparePricesStorage.GetAllCarts(function(result) {
             $scope.$apply(function() {
@@ -217,6 +218,7 @@ angular.module('ComparePrices.controllers', [])
         };
 
         $scope.FindBestShopPrivate = function(cartIDs) {
+            $scope.missingProducts = [];
             $scope.c.ShowLoading($scope.c.localize.strings['LookingForBestShop']);
             // closes opened accordions in best_shops.html
             $scope.c.ClearShowPriceDetailsForShop();
@@ -370,6 +372,7 @@ angular.module('ComparePrices.controllers', [])
         $scope.cartID = $stateParams.cartID;
 
         $scope.shopsNearThatHaveNeededProducts = [];
+        $scope.missingProducts = [];
 
         ComparePricesStorage.GetMyCarts([$scope.cartID], function(result) {
             $scope.$apply(function() {
@@ -379,7 +382,7 @@ angular.module('ComparePrices.controllers', [])
 
         $scope.FindBestShopPrivate = function() {
             $scope.shopsNearThatHaveNeededProducts = [];
-
+            $scope.missingProducts = [];
             $scope.c.ShowLoading($scope.c.localize.strings['LookingForBestShop']);
             // closes opened accordions in best_shops.html
             $scope.c.ClearShowPriceDetailsForShop();
