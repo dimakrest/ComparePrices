@@ -21,7 +21,7 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
 })
 
     //////////////// Location calculation + auto complete /////////////////
-.directive('googleAutocomplete', ['$rootScope', 'ComparePricesStorage', function($rootScope, ComparePricesStorage) {
+.directive('googleAutocomplete', ['$rootScope', 'ComparePricesStorage', '$cordovaGoogleAnalytics', function($rootScope, ComparePricesStorage, $cordovaGoogleAnalytics) {
     return {
         restrict: 'E',
         replace: 'false',
@@ -40,6 +40,7 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
 
                 $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
                 $scope.c.lastAddress = place.formatted_address;
+                $cordovaGoogleAnalytics.trackEvent('Settings', 'Change address', $scope.c.lastAddress, $scope.c.rangeForShops);
                 localStorage.setItem('lastAddress', $scope.c.lastAddress);
                 localStorage.setItem('Lat', place.geometry.location.G);
                 localStorage.setItem('Lon', place.geometry.location.K);

@@ -532,15 +532,13 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
 
         function TwoArraysAreIdentical(Array1, Array2) {
-            var tmpArray1 = angular.copy(Array1);
-
             // below filter find common items in unsorted arrays
-            tmpArray1.filter(function(n) {
+            var tmpArray1 = Array1.filter(function(n) {
                 return (Array2.indexOf(n) != -1);
             });
 
             // if lengths of tmpArray1 still the same, two arrays are identical
-            if (tmpArray1.length == Array2.length)
+            if (tmpArray1.length == Array1.length)
             {
                 return true;
             }
@@ -554,8 +552,13 @@ angular.module('ComparePrices.services', ['ngResource'])
             // find max number of products in any carts and optional carts with maximum products
             // For example found that 3 items is max, but 3 optional carts with 3 items: [1,2,3],[1,2,3],[1,2,4]
             for (var i=0; i < shops.length; i++) {
+                var productCodesInShop = [];
+                shops[i].rows.forEach(function(singleItem) {
+                    productCodesInShop.push(singleItem['ItemCode']);
+                });
                 shops[i].shopInfo['NumOfProducts'] = shops[i].rows.length;
                 shops[i].shopInfo['Products'] = shops[i].rows;
+
                 if (shops[i].shopInfo['NumOfProducts'] != 0)
                 {
                     // found new max amount of products
@@ -564,7 +567,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                         maxNumOfProducts = shops[i].shopInfo['NumOfProducts'];
                         // start filling optional carts from beginning
                         optionalCartsWithMaxNumOfProducts = [];
-                        optionalCartsWithMaxNumOfProducts.push({"shopsWithThisCart":1,"productsInCart":shops[i].rows});
+                        optionalCartsWithMaxNumOfProducts.push({"shopsWithThisCart":1,"productsInCart":productCodesInShop});
                     }
                     else
                     {
@@ -572,7 +575,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                         if (shops[i].shopInfo['NumOfProducts'] == maxNumOfProducts) {
                             var cartAlreadyPresent = 0;
                             for (var j = 0; j < optionalCartsWithMaxNumOfProducts.length; j++) {
-                                if (TwoArraysAreIdentical(optionalCartsWithMaxNumOfProducts[j].productsInCart, shops[i].rows)) {
+                                if (TwoArraysAreIdentical(optionalCartsWithMaxNumOfProducts[j].productsInCart, productCodesInShop)) {
                                     optionalCartsWithMaxNumOfProducts[j].shopsWithThisCart++;
                                     cartAlreadyPresent = 1
                                     break;
@@ -581,10 +584,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                             // new cart type
                             if (cartAlreadyPresent == 0) {
                                 // add optional cart
-                                optionalCartsWithMaxNumOfProducts.push({
-                                    "shopsWithThisCart": 1,
-                                    "productsInCart": shops[i].rows
-                                });
+                                optionalCartsWithMaxNumOfProducts.push({ "shopsWithThisCart": 1,"productsInCart": productCodesInShop});
                             }
                         }
                     }
@@ -607,14 +607,15 @@ angular.module('ComparePrices.services', ['ngResource'])
                 }
             }
 
-            console.log("Cart with maximum number of shops");
-            console.log(productsInCartWithMaxAmount);
-
             // take only shops that have needed cart of products
             var suitableShops = [];
             for (var i=0; i < shops.length; i++)
             {
-                if (TwoArraysAreIdentical(productsInCartWithMaxAmount,shops[i].rows))
+                var productCodesInShop = [];
+                shops[i].rows.forEach(function(singleItem) {
+                    productCodesInShop.push(singleItem['ItemCode']);
+                });
+                if (TwoArraysAreIdentical(productsInCartWithMaxAmount,productCodesInShop))
                 {
                     shops[i].shopInfo['CartPrice'] = CalculatePriceForShop(cart, shops[i].rows);
                     shops[i].shopInfo['BrandImage'] = 'img/markets/' + shops[i].shopInfo['BrandName'] + '.jpg';
@@ -628,17 +629,14 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             // calculate missing items
             var productCodesInMyCart = [];
-            var productCodesInCartWithMaxAmount = [];
             cart.forEach(function(singleItem) {
                 productCodesInMyCart.push(singleItem['ItemCode']);
             });
-            productsInCartWithMaxAmount.forEach(function(singleItem) {
-                productCodesInCartWithMaxAmount.push(singleItem['ItemCode']);
-            });
 
             var missingProducts = productCodesInMyCart.filter(function(n) {
-                return (productCodesInCartWithMaxAmount.indexOf(n) == -1);
+                return (productsInCartWithMaxAmount.indexOf(n) == -1);
             });
+            console.log("Missing products");
             console.log(missingProducts);
 
             return {"suitableShops":suitableShops,"missingProducts":missingProducts};
@@ -865,13 +863,14 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
     }])
 
-    .factory('UpdateStores', ['$q', '$ionicSideMenuDelegate', 'GoogleReverseGeocoding', 'MiscFunctions', 'ComparePricesConstants', 'ComparePricesStorage', 'PopUpFactory', function($q, $ionicSideMenuDelegate, GoogleReverseGeocoding, MiscFunctions, ComparePricesConstants, ComparePricesStorage, PopUpFactory) {
+    .factory('UpdateStores', ['$q', '$ionicSideMenuDelegate', 'GoogleReverseGeocoding', 'MiscFunctions', 'ComparePricesConstants', 'ComparePricesStorage', 'PopUpFactory', '$cordovaGoogleAnalytics', function($q, $ionicSideMenuDelegate, GoogleReverseGeocoding, MiscFunctions, ComparePricesConstants, ComparePricesStorage, PopUpFactory, $cordovaGoogleAnalytics) {
 
         function ReverseGeocodingAndUpdateStore($scope, distanceBetweenTwoLocations, lat, lon) {
             GoogleReverseGeocoding(lat, lon).then(function (fullAddress) {
 
                 if (distanceBetweenTwoLocations > ComparePricesConstants.LOCATION_CHANGES_MARGIN) {
                     $scope.c.lastAddress = fullAddress;
+                    $cordovaGoogleAnalytics.trackEvent('Settings', 'Change address', $scope.c.lastAddress, $scope.c.rangeForShops);
                     localStorage.setItem('lastAddress', fullAddress);
                     localStorage.setItem('Lat', lat);
                     localStorage.setItem('Lon', lon);

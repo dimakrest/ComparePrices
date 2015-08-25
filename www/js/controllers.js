@@ -41,7 +41,7 @@ angular.module('ComparePrices.controllers', [])
       };
     })
 
-    .controller('RootCtrl', function($scope, $ionicPopover, $ionicLoading, $timeout, $ionicSideMenuDelegate, PopUpFactory, ComparePricesStorage, ComparePricesConstants, UpdateStores) {
+    .controller('RootCtrl', function($scope, $ionicPopover, $ionicLoading, $timeout, $ionicSideMenuDelegate, PopUpFactory, ComparePricesStorage, ComparePricesConstants, UpdateStores, $cordovaGoogleAnalytics) {
         $scope.c = {};
 
         $scope.c.currentCartName = "";
@@ -49,6 +49,28 @@ angular.module('ComparePrices.controllers', [])
         $scope.c.hasUserCarts = 0;
         $scope.c.comparedProducts = [];
         $scope.c.showPriceDetailsForShop = [];
+
+        function generateGuid() {
+            function s4() {
+                return Math.floor((1 + Math.random()) * 0x10000)
+                    .toString(16)
+                    .substring(1);
+            }
+            return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+                s4() + '-' + s4() + s4() + s4();
+        }
+
+        document.addEventListener("deviceready", function () {
+            $cordovaGoogleAnalytics.startTrackerWithId('UA-61254051-2');
+            var UUID = localStorage.getItem('UUID') || "";
+            if (UUID == "")
+            {
+                UUID = generateGuid();
+                console.log("UUID: " + UUID)
+                localStorage.setItem('UUID', UUID);
+            }
+            $cordovaGoogleAnalytics.setUserId(UUID);
+        }, false);
 
         // choose range bar
         $scope.c.rangeForShops = parseInt(localStorage.getItem('RangeForShops')) || ComparePricesConstants.DEFAULT_SHOPS_RANGE;
@@ -68,6 +90,8 @@ angular.module('ComparePrices.controllers', [])
                 if (lat == "" || lon == "" || $scope.c.lastAddress == "") {
                     return;
                 }
+
+                $cordovaGoogleAnalytics.trackEvent('Settings', 'Change range', $scope.c.lastAddress, $scope.c.rangeForShops);
 
                 // update stores info only when user sets range bigger than default
                 if (parseInt($scope.c.rangeForShops) < previousRangeForShops) {

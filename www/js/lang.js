@@ -39,6 +39,8 @@
         'ToggleMyLocation': 'השתמש במיקום הנוכחי',
         'DistanceToShop': 'מרחק',
         'CannotGetCurrentLocation': 'לא הצחנו לקבל את מיקומל, אנא נסה שנית',
+        'DontHaveAllProducts': 'לא נמצא חנות הכולל את כל המוצרים. ',
+        'ShowShopsThatPartiallySuit': 'חנוית להלן כוללים את כל המוצרים חוץ מ: ',
         'LocationUpdatePopupTitle': 'עידכון מיקום',
         'LocationUpdatePopupText': 'האם אתה רוצה לעדכן את מיקומך?'
     };
