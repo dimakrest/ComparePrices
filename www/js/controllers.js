@@ -41,7 +41,7 @@ angular.module('ComparePrices.controllers', [])
       };
     })
 
-    .controller('RootCtrl', function($scope, $ionicPopover, $ionicLoading, $timeout, $ionicSideMenuDelegate, PopUpFactory, ComparePricesStorage, ComparePricesConstants, UpdateStores) {
+    .controller('RootCtrl', function($scope, $ionicPopover, $ionicLoading, $timeout, $ionicSideMenuDelegate, PopUpFactory, ComparePricesStorage, ComparePricesConstants, UpdateStores, ngProgressFactory) {
         $scope.c = {};
 
         $scope.c.currentCartName = "";
@@ -50,11 +50,24 @@ angular.module('ComparePrices.controllers', [])
         $scope.c.comparedProducts = [];
         $scope.c.showPriceDetailsForShop = [];
 
+        $scope.c.variableForPercentage = 123;
+
+        $scope.progressbar = ngProgressFactory.createInstance();
+        $scope.progressbar.setHeight('10px');
+
+
         // choose range bar
         $scope.c.rangeForShops = parseInt(localStorage.getItem('RangeForShops')) || ComparePricesConstants.DEFAULT_SHOPS_RANGE;
         var rangeForShopsChangedPromise;
         // Update the local storage only when user finishes to enter the value
         $scope.c.UpdateRangeForShops = function(){
+
+            // TODO: maybe remove this, used to instantiate loading and then use it to add loading bar
+            $ionicLoading.show({
+                template: "Loading"
+            });
+            $ionicLoading.hide();
+
             if(rangeForShopsChangedPromise){
                 $timeout.cancel(rangeForShopsChangedPromise);
             }
@@ -130,9 +143,19 @@ angular.module('ComparePrices.controllers', [])
             $ionicLoading.show({
                 template: templateText
             });
+
+            var container   = document.getElementsByClassName('loading-container');
+            var loading     = document.getElementsByClassName('loading');
+//            $scope.progressbar.setParent(loading[0]);
+            $scope.progressbar.setParent(container[0]);
+
+            $scope.progressbar.start();
         };
 
         $scope.c.HideLoading = function() {
+            $scope.progressbar.complete();
+//            $scope.progressbar.reset();
+
             $ionicLoading.hide();
         };
 
