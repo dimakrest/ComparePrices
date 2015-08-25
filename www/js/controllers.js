@@ -41,7 +41,7 @@ angular.module('ComparePrices.controllers', [])
       };
     })
 
-    .controller('RootCtrl', function($scope, $ionicPopover, $ionicLoading, $timeout, $ionicSideMenuDelegate, PopUpFactory, ComparePricesStorage, ComparePricesConstants, UpdateStores, $cordovaGoogleAnalytics, ngProgressFactory) {
+    .controller('RootCtrl', function($scope, $ionicPopover, $ionicLoading, $timeout, $ionicSideMenuDelegate, PopUpFactory, ComparePricesStorage, ComparePricesConstants, UpdateStores, $cordovaGoogleAnalytics) {
         $scope.c = {};
 
         $scope.c.currentCartName = "";
@@ -60,6 +60,11 @@ angular.module('ComparePrices.controllers', [])
                 s4() + '-' + s4() + s4() + s4();
         }
 
+        // to distinguish real devices from development environment , we set a variable in local storage
+        document.addEventListener("deviceready", function () {
+            localStorage.setItem('IsRunningOnDevice', 1);
+        }, false);
+
         document.addEventListener("deviceready", function () {
             $cordovaGoogleAnalytics.startTrackerWithId('UA-61254051-2');
             var UUID = localStorage.getItem('UUID') || "";
@@ -73,10 +78,6 @@ angular.module('ComparePrices.controllers', [])
         }, false);
 
         $scope.c.variableForPercentage = 123;
-
-        $scope.progressbar = ngProgressFactory.createInstance();
-        $scope.progressbar.setHeight('10px');
-
 
         // choose range bar
         $scope.c.rangeForShops = parseInt(localStorage.getItem('RangeForShops')) || ComparePricesConstants.DEFAULT_SHOPS_RANGE;
@@ -104,7 +105,9 @@ angular.module('ComparePrices.controllers', [])
                     return;
                 }
 
-                $cordovaGoogleAnalytics.trackEvent('Settings', 'Change range', $scope.c.lastAddress, $scope.c.rangeForShops);
+                if ((localStorage.getItem('IsRunningOnDevice') || "0") != "0") {
+                    $cordovaGoogleAnalytics.trackEvent('Settings', 'Change range', $scope.c.lastAddress, $scope.c.rangeForShops);
+                }
 
                 // update stores info only when user sets range bigger than default
                 if (parseInt($scope.c.rangeForShops) < previousRangeForShops) {
@@ -165,21 +168,12 @@ angular.module('ComparePrices.controllers', [])
         $scope.c.ShowLoading = function(templateText) {
             // Show loading
             $ionicLoading.show({
-                template: templateText
+                template: '{{}}'// templateText
             });
 
-            var container   = document.getElementsByClassName('loading-container');
-            var loading     = document.getElementsByClassName('loading');
-//            $scope.progressbar.setParent(loading[0]);
-            $scope.progressbar.setParent(container[0]);
-
-            $scope.progressbar.start();
         };
 
         $scope.c.HideLoading = function() {
-            $scope.progressbar.complete();
-//            $scope.progressbar.reset();
-
             $ionicLoading.hide();
         };
 
@@ -214,7 +208,7 @@ angular.module('ComparePrices.controllers', [])
         };
     })
 
-    .controller('MyCartsCtrl', function($scope, $ionicPopup, PopUpFactory, ComparePricesStorage, ComparePricesConstants, FindBestShops, ShowModal, ionicMaterialInk, ionicMaterialMotion, UpdateStores) {
+    .controller('MyCartsCtrl', function($scope, $resource, $ionicPopup, PopUpFactory, ComparePricesStorage, ComparePricesConstants, FindBestShops, ShowModal, ionicMaterialInk, ionicMaterialMotion, UpdateStores) {
 
         $scope.totalCartsSelected = 0;
         $scope.newCartName = "";

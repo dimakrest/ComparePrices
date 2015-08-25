@@ -4,7 +4,7 @@
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
 // 'starter.controllers' is found in controllers.js
-angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngProgress', 'ngCordova', 'ComparePrices.controllers', 'ComparePrices.services', 'ComparePrices.constants', 'jett.ionic.filter.bar'])
+angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'ComparePrices.controllers', 'ComparePrices.services', 'ComparePrices.constants', 'jett.ionic.filter.bar'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
@@ -40,7 +40,9 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngProgress', 'ngCor
 
                 $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
                 $scope.c.lastAddress = place.formatted_address;
-                $cordovaGoogleAnalytics.trackEvent('Settings', 'Change address', $scope.c.lastAddress, $scope.c.rangeForShops);
+                if ((localStorage.getItem('IsRunningOnDevice') || "0") != "0") {
+                    $cordovaGoogleAnalytics.trackEvent('Settings', 'Change address', $scope.c.lastAddress, $scope.c.rangeForShops);
+                }
                 localStorage.setItem('lastAddress', $scope.c.lastAddress);
                 localStorage.setItem('Lat', place.geometry.location.G);
                 localStorage.setItem('Lon', place.geometry.location.K);

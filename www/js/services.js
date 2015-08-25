@@ -9,8 +9,8 @@ angular.module('ComparePrices.services', ['ngResource'])
             return $resource('resources/:jsonName.json', {}, {});
         }])
 
-    .factory('ComparePricesStorage', ['ReadJson', 'MiscFunctions', '$q',
-        function (ReadJson, MiscFunctions, $q) {
+    .factory('ComparePricesStorage', ['ReadJson', 'MiscFunctions', '$q', '$resource',
+        function (ReadJson, MiscFunctions, $q, $resource) {
 
         var createUserCartsTbQuery  = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID INTEGER, ItemCode TEXT, Amount INTEGER)';
         var createCartsTbQuery      = 'CREATE TABLE IF NOT EXISTS tbCarts (CartID INTEGER PRIMARY KEY, CartName TEXT, ImageUrl TEXT, CheckboxColor TEXT, IsPredefined INTEGER)';
@@ -39,8 +39,8 @@ angular.module('ComparePrices.services', ['ngResource'])
                     for (var i = 0; i < numOfProducts; i++) {
                         var singleProduct = products[i];
                         var sqlQuery = 'INSERT INTO tbProducts VALUES ("' +
-                            singleProduct['ItemCode'] + '", "' +
-                            singleProduct['ItemName'].replace(/\"/g, "\'\'") + '", "' +
+                            singleProduct['IC'] + '", "' +
+                            singleProduct['IN'].replace(/\"/g, "\'\'") + '", "' +
                             singleProduct['ImagePath'] + '")';
                         tx.executeSql(sqlQuery)
                     }
@@ -103,8 +103,10 @@ angular.module('ComparePrices.services', ['ngResource'])
         function CreateProductTableForSingleShop(tableName, fileName, chainID, storeID)
         {
             var defer = $q.defer();
+
+            var storeJson = $resource('https://s3.amazonaws.com/compare.prices/' + fileName,  {});
             // TODO: change back to query after prices update
-            ReadJson.get({jsonName:fileName}, function (response) {
+            storeJson.get(function(response) {
                 db.transaction(function (tx) {
                     tx.executeSql('CREATE TABLE IF NOT EXISTS ' + tableName + ' (ItemCode TEXT PRIMARY KEY, ItemPrice TEXT)'); // TODO: change item price to be double
                     var products = response['items'];
@@ -142,7 +144,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     storeID  = storeID.substr(storeID.length - 3);
 
                     var tableName   = 'tb_' + singleShop['BrandName'] + '_' + singleShop['StoreID'];
-                    var fileName    =  'stores\/' + singleShop['BrandName'] + '\/price-' + singleShop['BrandName'] + '-' + storeID;
+                    var fileName    =  'stores\/' + singleShop['BrandName'] + '\/price-' + singleShop['BrandName'] + '-' + storeID + '.json';
                     var chainID     = singleShop['ChainID'];
                     var storeID     = singleShop['StoreID'];
                     promises.push(CreateProductTableForSingleShop(tableName, fileName, chainID, storeID));
@@ -870,7 +872,9 @@ angular.module('ComparePrices.services', ['ngResource'])
 
                 if (distanceBetweenTwoLocations > ComparePricesConstants.LOCATION_CHANGES_MARGIN) {
                     $scope.c.lastAddress = fullAddress;
-                    $cordovaGoogleAnalytics.trackEvent('Settings', 'Change address', $scope.c.lastAddress, $scope.c.rangeForShops);
+                    if ((localStorage.getItem('IsRunningOnDevice') || "0") != "0") {
+                        $cordovaGoogleAnalytics.trackEvent('Settings', 'Change address', $scope.c.lastAddress, $scope.c.rangeForShops);
+                    }
                     localStorage.setItem('lastAddress', fullAddress);
                     localStorage.setItem('Lat', lat);
                     localStorage.setItem('Lon', lon);
