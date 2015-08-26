@@ -50,6 +50,18 @@ angular.module('ComparePrices.controllers', [])
         $scope.c.comparedProducts = [];
         $scope.c.showPriceDetailsForShop = [];
 
+        // init localization array
+        $scope.c.localize = document.localize;
+        document.selectLanguage('heb');
+
+        $scope.c.lastAddress = localStorage.getItem('lastAddress') || "";
+
+        $scope.c.variableForPercentage = 123;
+        $scope.c.rangeForShops = parseInt(localStorage.getItem('RangeForShops')) || ComparePricesConstants.DEFAULT_SHOPS_RANGE;
+
+        $scope.c.useUsersCurrentLocation = parseInt(localStorage.getItem('UseUsersCurrentLocation')) || 0;
+        $scope.c.useUsersCurrentLocation = $scope.c.useUsersCurrentLocation == 1;
+
         function generateGuid() {
             function s4() {
                 return Math.floor((1 + Math.random()) * 0x10000)
@@ -77,12 +89,24 @@ angular.module('ComparePrices.controllers', [])
             $cordovaGoogleAnalytics.setUserId(UUID);
         }, false);
 
-        $scope.c.variableForPercentage = 123;
+        document.addEventListener("resume", function () {
+            // app comes from background after user clicked settings button
+            var userClickedSettingsLocation = localStorage.getItem('UserClickedSettingsLocation') || "0";
+            userClickedSettingsLocation = (userClickedSettingsLocation == "1");
+            if (userClickedSettingsLocation) {
+                $scope.c.useUsersCurrentLocation = true;
+                $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
+                UpdateStores.UpdateStoresInfoIfRequired($scope).then(function() {
+                    localStorage.setItem('UserClickedSettingsLocation', 0);
+                    localStorage.setItem('UseUsersCurrentLocation', $scope.c.useUsersCurrentLocation ? 1 : 0);
+                    $scope.c.HideLoading();
+                });
+            }
+        }, false);
 
-        // choose range bar
-        $scope.c.rangeForShops = parseInt(localStorage.getItem('RangeForShops')) || ComparePricesConstants.DEFAULT_SHOPS_RANGE;
-        var rangeForShopsChangedPromise;
         // Update the local storage only when user finishes to enter the value
+        // choose range bar
+        var rangeForShopsChangedPromise;
         $scope.c.UpdateRangeForShops = function(){
 
             // TODO: maybe remove this, used to instantiate loading and then use it to add loading bar
@@ -130,22 +154,15 @@ angular.module('ComparePrices.controllers', [])
         };
 
         // toggle button allow my current location
-        $scope.c.useUsersCurrentLocation = parseInt(localStorage.getItem('UseUsersCurrentLocation')) || 0;
-        $scope.c.useUsersCurrentLocation = $scope.c.useUsersCurrentLocation == 1;
         $scope.c.LocationToggleChanged = function() {
             if ($scope.c.useUsersCurrentLocation) {
-                UpdateStores.UpdateStoresInfoIfRequired($scope);
-            };
-            localStorage.setItem('UseUsersCurrentLocation', $scope.c.useUsersCurrentLocation ? 1 : 0);
+                $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
+                UpdateStores.UpdateStoresInfoIfRequired($scope).then(function () {
+                    localStorage.setItem('UseUsersCurrentLocation', $scope.c.useUsersCurrentLocation ? 1 : 0);
+                    $scope.c.HideLoading();
+                });
+            }
         };
-
-        // init localization array
-        $scope.c.localize = document.localize;
-        document.selectLanguage('heb');
-
-        $scope.c.lastAddress = localStorage.getItem('lastAddress') || "";
-
-
 
         // TODO: need to restructure this, need to print the list in a pretty way
         $scope.c.ShareCartAndShopDetails = function() {
@@ -317,6 +334,7 @@ angular.module('ComparePrices.controllers', [])
                 {
                     // if user wants to use his current location, need to check if his location changed
                     if ($scope.c.useUsersCurrentLocation) {
+                        $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
                         UpdateStores.UpdateStoresInfoIfRequired($scope).then(function() {
                             $scope.FindBestShopPrivate(cartIDs);
                         });
@@ -453,6 +471,7 @@ angular.module('ComparePrices.controllers', [])
             else
             {
                 if ($scope.c.useUsersCurrentLocation) {
+                    $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
                     UpdateStores.UpdateStoresInfoIfRequired($scope).then(function() {
                         $scope.FindBestShopPrivate();
                     })
