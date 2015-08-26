@@ -41,7 +41,7 @@ angular.module('ComparePrices.controllers', [])
       };
     })
 
-    .controller('RootCtrl', function($scope, $ionicPopover, $ionicLoading, $timeout, $ionicSideMenuDelegate, PopUpFactory, ComparePricesStorage, ComparePricesConstants, UpdateStores, $cordovaGoogleAnalytics, ngProgressFactory) {
+    .controller('RootCtrl', function($scope, $ionicPopover, $ionicLoading, $timeout, $ionicSideMenuDelegate, PopUpFactory, ComparePricesStorage, ComparePricesConstants, UpdateStores, $cordovaGoogleAnalytics) {
         $scope.c = {};
 
         $scope.c.currentCartName = "";
@@ -52,6 +52,18 @@ angular.module('ComparePrices.controllers', [])
         $scope.c.comparedProducts = [];
         $scope.c.showPriceDetailsForShop = [];
 
+        // init localization array
+        $scope.c.localize = document.localize;
+        document.selectLanguage('heb');
+
+        $scope.c.lastAddress = localStorage.getItem('lastAddress') || "";
+
+        $scope.c.variableForPercentage = 123;
+        $scope.c.rangeForShops = parseInt(localStorage.getItem('RangeForShops')) || ComparePricesConstants.DEFAULT_SHOPS_RANGE;
+
+        $scope.c.useUsersCurrentLocation = parseInt(localStorage.getItem('UseUsersCurrentLocation')) || 0;
+        $scope.c.useUsersCurrentLocation = $scope.c.useUsersCurrentLocation == 1;
+
         function generateGuid() {
             function s4() {
                 return Math.floor((1 + Math.random()) * 0x10000)
@@ -61,6 +73,11 @@ angular.module('ComparePrices.controllers', [])
             return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
                 s4() + '-' + s4() + s4() + s4();
         }
+
+        // to distinguish real devices from development environment , we set a variable in local storage
+        document.addEventListener("deviceready", function () {
+            localStorage.setItem('IsRunningOnDevice', 1);
+        }, false);
 
         document.addEventListener("deviceready", function () {
             $cordovaGoogleAnalytics.startTrackerWithId('UA-61254051-2');
@@ -74,16 +91,24 @@ angular.module('ComparePrices.controllers', [])
             $cordovaGoogleAnalytics.setUserId(UUID);
         }, false);
 
-        $scope.c.variableForPercentage = 123;
+        document.addEventListener("resume", function () {
+            // app comes from background after user clicked settings button
+            var userClickedSettingsLocation = localStorage.getItem('UserClickedSettingsLocation') || "0";
+            userClickedSettingsLocation = (userClickedSettingsLocation == "1");
+            if (userClickedSettingsLocation) {
+                $scope.c.useUsersCurrentLocation = true;
+                $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
+                UpdateStores.UpdateStoresInfoIfRequired($scope).then(function() {
+                    localStorage.setItem('UserClickedSettingsLocation', 0);
+                    localStorage.setItem('UseUsersCurrentLocation', $scope.c.useUsersCurrentLocation ? 1 : 0);
+                    $scope.c.HideLoading();
+                });
+            }
+        }, false);
 
-        $scope.progressbar = ngProgressFactory.createInstance();
-        $scope.progressbar.setHeight('10px');
-
-
-        // choose range bar
-        $scope.c.rangeForShops = parseInt(localStorage.getItem('RangeForShops')) || ComparePricesConstants.DEFAULT_SHOPS_RANGE;
-        var rangeForShopsChangedPromise;
         // Update the local storage only when user finishes to enter the value
+        // choose range bar
+        var rangeForShopsChangedPromise;
         $scope.c.UpdateRangeForShops = function(){
 
             // TODO: maybe remove this, used to instantiate loading and then use it to add loading bar
@@ -106,7 +131,9 @@ angular.module('ComparePrices.controllers', [])
                     return;
                 }
 
-                $cordovaGoogleAnalytics.trackEvent('Settings', 'Change range', $scope.c.lastAddress, $scope.c.rangeForShops);
+                if ((localStorage.getItem('IsRunningOnDevice') || "0") != "0") {
+                    $cordovaGoogleAnalytics.trackEvent('Settings', 'Change range', $scope.c.lastAddress, $scope.c.rangeForShops);
+                }
 
                 // update stores info only when user sets range bigger than default
                 if (parseInt($scope.c.rangeForShops) < previousRangeForShops) {
@@ -129,22 +156,15 @@ angular.module('ComparePrices.controllers', [])
         };
 
         // toggle button allow my current location
-        $scope.c.useUsersCurrentLocation = parseInt(localStorage.getItem('UseUsersCurrentLocation')) || 0;
-        $scope.c.useUsersCurrentLocation = $scope.c.useUsersCurrentLocation == 1;
         $scope.c.LocationToggleChanged = function() {
             if ($scope.c.useUsersCurrentLocation) {
-                UpdateStores.UpdateStoresInfoIfRequired($scope);
-            };
-            localStorage.setItem('UseUsersCurrentLocation', $scope.c.useUsersCurrentLocation ? 1 : 0);
+                $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
+                UpdateStores.UpdateStoresInfoIfRequired($scope).then(function () {
+                    localStorage.setItem('UseUsersCurrentLocation', $scope.c.useUsersCurrentLocation ? 1 : 0);
+                    $scope.c.HideLoading();
+                });
+            }
         };
-
-        // init localization array
-        $scope.c.localize = document.localize;
-        document.selectLanguage('heb');
-
-        $scope.c.lastAddress = localStorage.getItem('lastAddress') || "";
-
-
 
         // TODO: need to restructure this, need to print the list in a pretty way
         $scope.c.ShareCartAndShopDetails = function() {
@@ -167,21 +187,12 @@ angular.module('ComparePrices.controllers', [])
         $scope.c.ShowLoading = function(templateText) {
             // Show loading
             $ionicLoading.show({
-                template: templateText
+                template: '{{}}'// templateText
             });
 
-            var container   = document.getElementsByClassName('loading-container');
-            var loading     = document.getElementsByClassName('loading');
-//            $scope.progressbar.setParent(loading[0]);
-            $scope.progressbar.setParent(container[0]);
-
-            $scope.progressbar.start();
         };
 
         $scope.c.HideLoading = function() {
-            $scope.progressbar.complete();
-//            $scope.progressbar.reset();
-
             $ionicLoading.hide();
         };
 
@@ -216,7 +227,7 @@ angular.module('ComparePrices.controllers', [])
         };
     })
 
-    .controller('MyCartsCtrl', function($scope, $ionicPopup, PopUpFactory, ComparePricesStorage, ComparePricesConstants, FindBestShops, ShowModal, ionicMaterialInk, ionicMaterialMotion, UpdateStores) {
+    .controller('MyCartsCtrl', function($scope, $resource, $ionicPopup, PopUpFactory, ComparePricesStorage, ComparePricesConstants, FindBestShops, ShowModal, ionicMaterialInk, ionicMaterialMotion, UpdateStores) {
 
         $scope.totalCartsSelected = 0;
         $scope.newCartName = "";
@@ -325,6 +336,7 @@ angular.module('ComparePrices.controllers', [])
                 {
                     // if user wants to use his current location, need to check if his location changed
                     if ($scope.c.useUsersCurrentLocation) {
+                        $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
                         UpdateStores.UpdateStoresInfoIfRequired($scope).then(function() {
                             $scope.FindBestShopPrivate(cartIDs);
                         });
@@ -461,6 +473,7 @@ angular.module('ComparePrices.controllers', [])
             else
             {
                 if ($scope.c.useUsersCurrentLocation) {
+                    $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
                     UpdateStores.UpdateStoresInfoIfRequired($scope).then(function() {
                         $scope.FindBestShopPrivate();
                     })

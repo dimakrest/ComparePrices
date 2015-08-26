@@ -9,8 +9,8 @@ angular.module('ComparePrices.services', ['ngResource'])
             return $resource('resources/:jsonName.json', {}, {});
         }])
 
-    .factory('ComparePricesStorage', ['ReadJson', 'MiscFunctions', '$q',
-        function (ReadJson, MiscFunctions, $q) {
+    .factory('ComparePricesStorage', ['ReadJson', 'MiscFunctions', '$q', '$resource',
+        function (ReadJson, MiscFunctions, $q, $resource) {
 
         var createUserCartsTbQuery  = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID INTEGER, ItemCode TEXT, Amount INTEGER)';
         var createCartsTbQuery      = 'CREATE TABLE IF NOT EXISTS tbCarts (CartID INTEGER PRIMARY KEY, CartName TEXT, ImageUrl TEXT, CheckboxColor TEXT, IsPredefined INTEGER)';
@@ -39,8 +39,8 @@ angular.module('ComparePrices.services', ['ngResource'])
                     for (var i = 0; i < numOfProducts; i++) {
                         var singleProduct = products[i];
                         var sqlQuery = 'INSERT INTO tbProducts VALUES ("' +
-                            singleProduct['ItemCode'] + '", "' +
-                            singleProduct['ItemName'].replace(/\"/g, "\'\'") + '", "' +
+                            singleProduct['IC'] + '", "' +
+                            singleProduct['IN'].replace(/\"/g, "\'\'") + '", "' +
                             singleProduct['ImagePath'] + '")';
                         tx.executeSql(sqlQuery)
                     }
@@ -103,8 +103,10 @@ angular.module('ComparePrices.services', ['ngResource'])
         function CreateProductTableForSingleShop(tableName, fileName, chainID, storeID)
         {
             var defer = $q.defer();
+
+            var storeJson = $resource('https://s3.amazonaws.com/compare.prices/' + fileName,  {});
             // TODO: change back to query after prices update
-            ReadJson.get({jsonName:fileName}, function (response) {
+            storeJson.get(function(response) {
                 db.transaction(function (tx) {
                     tx.executeSql('CREATE TABLE IF NOT EXISTS ' + tableName + ' (ItemCode TEXT PRIMARY KEY, ItemPrice TEXT)'); // TODO: change item price to be double
                     var products = response['items'];
@@ -142,7 +144,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     storeID  = storeID.substr(storeID.length - 3);
 
                     var tableName   = 'tb_' + singleShop['BrandName'] + '_' + singleShop['StoreID'];
-                    var fileName    =  'stores\/' + singleShop['BrandName'] + '\/price-' + singleShop['BrandName'] + '-' + storeID;
+                    var fileName    =  'stores\/' + singleShop['BrandName'] + '\/price-' + singleShop['BrandName'] + '-' + storeID + '.json';
                     var chainID     = singleShop['ChainID'];
                     var storeID     = singleShop['StoreID'];
                     promises.push(CreateProductTableForSingleShop(tableName, fileName, chainID, storeID));
@@ -865,32 +867,31 @@ angular.module('ComparePrices.services', ['ngResource'])
 
     .factory('UpdateStores', ['$q', '$ionicSideMenuDelegate', 'GoogleReverseGeocoding', 'MiscFunctions', 'ComparePricesConstants', 'ComparePricesStorage', 'PopUpFactory', '$cordovaGoogleAnalytics', function($q, $ionicSideMenuDelegate, GoogleReverseGeocoding, MiscFunctions, ComparePricesConstants, ComparePricesStorage, PopUpFactory, $cordovaGoogleAnalytics) {
 
-        function ReverseGeocodingAndUpdateStore($scope, distanceBetweenTwoLocations, lat, lon) {
+        function ReverseGeocodingAndUpdateStore($scope, lat, lon) {
+            var defer = $q.defer();
+
             GoogleReverseGeocoding(lat, lon).then(function (fullAddress) {
-
-                if (distanceBetweenTwoLocations > ComparePricesConstants.LOCATION_CHANGES_MARGIN) {
-                    $scope.c.lastAddress = fullAddress;
+                $scope.c.lastAddress = fullAddress;
+                if ((localStorage.getItem('IsRunningOnDevice') || "0") != "0") {
                     $cordovaGoogleAnalytics.trackEvent('Settings', 'Change address', $scope.c.lastAddress, $scope.c.rangeForShops);
-                    localStorage.setItem('lastAddress', fullAddress);
-                    localStorage.setItem('Lat', lat);
-                    localStorage.setItem('Lon', lon);
-
-                    // Need to recalculate and create missing stores info
-                    ComparePricesStorage.UpdateStoresInfo(lat, lon, $scope.c.rangeForShops).then(function () {
-                        defer.resolve();
-                        $scope.c.HideLoading();
-                    });
                 }
-            })
+                localStorage.setItem('lastAddress', fullAddress);
+                localStorage.setItem('Lat', lat);
+                localStorage.setItem('Lon', lon);
+
+                // Need to recalculate and create missing stores info
+                ComparePricesStorage.UpdateStoresInfo(lat, lon, $scope.c.rangeForShops).then(function () {
+                    defer.resolve();
+                });
+            });
+            return defer.promise;
         }
 
         return {
             UpdateStoresInfoIfRequired: function ($scope) {
                 var defer = $q.defer();
 
-                $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
-
-                navigator.geolocation.getCurrentPosition(function (position) {
+                navigator.geolocation.getCurrentPosition(function (position) { // success callback
 
                         var lat = position.coords.latitude;
                         var lon = position.coords.longitude;
@@ -906,7 +907,6 @@ angular.module('ComparePrices.services', ['ngResource'])
 
                         // if address is set and distance is less than margin => nothing to do
                         if (addressAlreadySet && (distanceBetweenTwoLocations < ComparePricesConstants.LOCATION_CHANGES_MARGIN)) {
-                            $scope.c.HideLoading();
                             defer.resolve();
                             return;
                         }
@@ -923,22 +923,33 @@ angular.module('ComparePrices.services', ['ngResource'])
                             PopUpFactory.ConfirmationPopUp($scope, popUpTitle, popUpText).then(function (confirmed) {
                                 if (confirmed) {
                                     $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
-                                    ReverseGeocodingAndUpdateStore($scope, distanceBetweenTwoLocations, lat, lon);
-                                } else {
-                                    $scope.c.HideLoading();
+                                    ReverseGeocodingAndUpdateStore($scope, lat, lon).then(function() {
+                                        defer.resolve();
+                                    });
+                                } else { // user doesn't want to update his location
                                     defer.resolve();
                                 }
                             })
                         } else {
-                            ReverseGeocodingAndUpdateStore($scope, distanceBetweenTwoLocations, lat, lon);
+                            ReverseGeocodingAndUpdateStore($scope, lat, lon).then(function() {
+                                defer.resolve();
+                            });
                         }
-                    } , function (error) {
+                    } , function (error) { // error callback
                             defer.resolve();
                             $scope.c.HideLoading();
-                            var text = $scope.c.localize.strings['CannotGetCurrentLocation'];
-                            PopUpFactory.ErrorPopUp($scope, text, function () {
-                                $ionicSideMenuDelegate.toggleRight(); // TODO: do I need this here?, why I need to toggle right?
-                                $scope.c.useUsersCurrentLocation = 0;
+
+                            var title = $scope.c.localize.strings['NavigateToSettings'];
+                            var text  = $scope.c.localize.strings['DoYouWantToOpenSettings'];
+                            PopUpFactory.ConfirmationPopUp($scope, title, text).then(function(confirmed) {
+                                if(confirmed) {
+                                    localStorage.setItem('UserClickedSettingsLocation', 1);
+                                    $ionicSideMenuDelegate.toggleRight();
+                                    cordova.plugins.settings.open();
+                                } else {
+                                    $ionicSideMenuDelegate.toggleRight();
+                                    $scope.c.useUsersCurrentLocation = false;
+                                }
                             });
                         }
                 );

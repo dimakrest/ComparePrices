@@ -46,7 +46,9 @@
         'NoResults': 'לא נמצאו מוצרים',
         'AddProduct': 'הוסף מוצר',
         'RemoveProducts': 'מחק מוצרים',
-        'LocationUpdatePopupText': 'האם אתה רוצה לעדכן את מיקומך?'
+        'LocationUpdatePopupText': 'האם אתה רוצה לעדכן את מיקומך?',
+        'NavigateToSettings': 'אפשר מיקומך',
+        'DoYouWantToOpenSettings':'האם אתה רוצה לפתוח הגדרות ולאשר את מיקומך?'
     };
 
     document.selectLanguage = function(lang)
