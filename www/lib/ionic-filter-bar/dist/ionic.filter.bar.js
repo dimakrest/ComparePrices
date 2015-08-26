@@ -16,23 +16,23 @@ angular.module('jett.ionic.filter.bar', ['ionic']);
           filterBarTemplate =
             '<div class="filter-bar-wrapper filter-bar-{{::config.theme}} filter-bar-transition-{{::config.transition}}">' +
               '<div class="bar bar-header bar-{{::config.theme}} item-input-inset">' +
-                '<button class="filter-bar-cancel button button-icon icon {{::config.back}}"></button>' +
                 '<label class="item-input-wrapper">' +
-                  '<input type="search" class="filter-bar-search" ng-model="filterText" placeholder="{{::config.placeholder}}" />' +
                   '<button style="display:none;" class="filter-bar-clear button button-icon icon {{::config.clear}}"></button>' +
+                  '<input style="direction: rtl;" type="search" class="filter-bar-search" ng-model="filterText" placeholder="{{::config.placeholder}}" />' +
                 '</label>' +
+                '<button class="filter-bar-cancel button button-icon icon ion-ios-arrow-forward"></button>' +
               '</div>' +
             '</div>';
         } else {
           filterBarTemplate =
             '<div class="filter-bar-wrapper filter-bar-{{::config.theme}} filter-bar-transition-{{::config.transition}}">' +
               '<div class="bar bar-header bar-{{::config.theme}} item-input-inset">' +
+                '<button class="filter-bar-cancel filter-bar-cancel-ios button button-clear" ng-bind-html="::cancelText"></button>' +
                 '<label class="item-input-wrapper">' +
-                  '<i class="icon {{::config.search}} placeholder-icon"></i>' +
-                  '<input type="search" class="filter-bar-search" ng-model="filterText" placeholder="{{::config.placeholder}}"/>' +
                   '<button style="display:none;" class="filter-bar-clear button button-icon icon {{::config.clear}}"></button>' +
+                  '<input style="direction: rtl;" type="search" class="filter-bar-search" ng-model="filterText" placeholder="{{::config.placeholder}}"/>' +
+                  '<i class="icon {{::config.search}} placeholder-icon"></i>' +
                 '</label>' +
-                '<button class="filter-bar-cancel button button-clear" ng-bind-html="::cancelText"></button>' +
               '</div>' +
             '</div>';
         }
@@ -117,6 +117,7 @@ angular.module('jett.ionic.filter.bar', ['ionic']);
               } else if ($scope.filterText && $scope.filterText.length) {
                 showClearButton();
                 $scope.hideBackdrop();
+                $scope.keyPressed();
               } else {
                 hideClearButton();
                 $scope.showBackdrop();
@@ -376,6 +377,7 @@ angular.module('jett.ionic.filter.bar', ['ionic']);
             config: templateConfig,
             $deregisterBackButton: angular.noop,
             update: angular.noop,
+            keyPressed: angular.noop,
             cancel: angular.noop,
             done: angular.noop,
             scrollDelegate: $ionicScrollDelegate,

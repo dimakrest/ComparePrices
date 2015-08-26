@@ -15,7 +15,7 @@
         'CancelButton': 'בטל',
         'SaveButton': 'שמור',
         'EnterCartName': 'הכנס שם של סל',
-        'Cart': 'סל',
+        'Cart': 'סל שלי',
         'AreYouSureWantToDeleteProductTitle': 'למחוק מוצר',
         'AreYouSureWantToDeleteProductText': '?אתה בטוח שאתה רוצה למחוק את המוצר',
         'AreYouSureWantToDeleteCartTitle': 'למחוק סל',
@@ -38,10 +38,14 @@
         'LookingForBestShop': 'מחפש את החנות הזולה',
         'ToggleMyLocation': 'השתמש במיקום הנוכחי',
         'DistanceToShop': 'מרחק',
+        'CancelSearch': 'ביטול',
         'CannotGetCurrentLocation': 'לא הצחנו לקבל את מיקומל, אנא נסה שנית',
         'DontHaveAllProducts': 'לא נמצא חנות הכולל את כל המוצרים. ',
         'ShowShopsThatPartiallySuit': 'חנוית להלן כוללים את כל המוצרים חוץ מ: ',
         'LocationUpdatePopupTitle': 'עידכון מיקום',
+        'NoResults': 'לא נמצאו מוצרים',
+        'AddProduct': 'הוסף מוצר',
+        'RemoveProducts': 'מחק מוצרים',
         'LocationUpdatePopupText': 'האם אתה רוצה לעדכן את מיקומך?'
     };
 

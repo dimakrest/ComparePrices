@@ -28,7 +28,13 @@
     font-size: 16px; }
 .filter-bar .filter-bar-wrapper .item-input-inset .item-input-wrapper {
     background: #fff;
+    margin-right: 5px;
+    margin-left: 5px;
     height: 28px; }
+.filter-bar .filter-bar-cancel.button.ion-ios-arrow-forward{
+    margin-left: 0px; }
+.filter-bar .filter-bar-cancel.button.filter-bar-cancel-ios{
+    padding-left: 8px;}
 .filter-bar .filter-bar-wrapper .item-input-inset .item-input-wrapper .filter-bar-clear {
     padding: 0 2px 0 0; }
 .filter-bar .filter-bar-wrapper .item-input-inset .item-input-wrapper .filter-bar-clear:before {

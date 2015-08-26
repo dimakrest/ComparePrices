@@ -46,6 +46,8 @@ angular.module('ComparePrices.controllers', [])
 
         $scope.c.currentCartName = "";
         $scope.c.isCurrentCartPredefined = 0;
+        $scope.c.showSearchBar = 0;
+        $scope.c.keyPressed = 0;
         $scope.c.hasUserCarts = 0;
         $scope.c.comparedProducts = [];
         $scope.c.showPriceDetailsForShop = [];
@@ -339,7 +341,7 @@ angular.module('ComparePrices.controllers', [])
             // An elaborate, custom popup
             $scope.popupData = {};
             $scope.popupData.newCartName = "";
-            var placeHolder = $scope.c.localize.strings['Cart'] + ' ' + $scope.lastCartID;
+            var placeHolder = ($scope.lastCartID == 100) ? $scope.c.localize.strings['Cart'] : $scope.c.localize.strings['Cart'] + ' ' + ($scope.lastCartID - 99);
             var myPopup = $ionicPopup.show({
                 template: '<input style="text-align:right" type="text" ng-model="popupData.newCartName", placeholder="' + placeHolder + '">',
                 title: $scope.c.localize.strings['EnterCartName'],
@@ -521,6 +523,11 @@ angular.module('ComparePrices.controllers', [])
             }
             ComparePricesStorage.UpdateCart($scope.cartID, $scope.myCart);
 
+            if ($scope.myCart.length == 0)
+            {
+                $scope.shouldShowDelete = false;
+            }
+
             //// put the animation class back
             //setTimeout(function(){
             //    document.getElementsByTagName('ion-list')[0].className += ' animate-blinds';
@@ -556,6 +563,7 @@ angular.module('ComparePrices.controllers', [])
                     break;
                 }
             }
+            // new product added, need to cache image, we cache only images for products in cart
             if (productIndex == -1) {
                 var newItemInCart = {'CartID': $scope.cartID,
                     'ItemCode': itemInfo['ItemCode'],
@@ -579,9 +587,16 @@ angular.module('ComparePrices.controllers', [])
                             }
                         });
                     }
-                    else {
+                    else
+                    {
                         $scope.myCart.splice(productIndex, 1);
                         ComparePricesStorage.UpdateCart($scope.cartID, $scope.myCart);
+                        // we come here in case we remove items from search. It can be done when ion-minus-circled delete buttons
+                        // Need to turn off ion-minus-circled delete buttons in case we don't have more products
+                        if ($scope.myCart.length == 0)
+                        {
+                            $scope.shouldShowDelete = false;
+                        }
                     }
                 } else {
                     $scope.myCart[productIndex]['Amount'] = newAmount;
@@ -604,6 +619,7 @@ angular.module('ComparePrices.controllers', [])
                 // this function is called when filtering is done
                 // we take filtered items and place items that already in cart in the top of the list
                 update: function (filteredItems) {
+                    $scope.c.showSearchBar = 1;
                     $scope.data.showSearchResults   = true;
                     $scope.data.allProductsFiltered = [];
 
@@ -640,9 +656,18 @@ angular.module('ComparePrices.controllers', [])
                 cancel: function() {
                     $scope.data.allProductsFiltered = [];
                     $scope.data.showSearchResults = false;
+                    $scope.c.showSearchBar = 0;
+                    $scope.c.keyPressed = 0;
                 },
                 debounce: true,
+                cancelText: $scope.c.localize.strings['CancelSearch'],
                 delay: 500,
+                keyPressed: function () {
+                    // this function is needed to hide what is after backdrop, as backdrop dissappears immediately, and results come only after 500ms
+                    $scope.$apply(function() {
+                        $scope.c.keyPressed = 1;
+                    });
+                },
                 filterProperties: 'ItemName'
             });
         };

@@ -17,6 +17,17 @@ table.bottomBorder td { text-align:center; padding:3px;}
     display: block !important;
 }
 
+.item-avatar-right > img:first-child {
+    border-radius: 0;
+}
+
+.no-results {
+    color: gray;
+    font-size: 20px;
+    padding: 50px;
+    text-align: center;
+}
+
 .item-content
 {
     padding: 0px !important;

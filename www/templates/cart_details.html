@@ -1,16 +1,20 @@
-<ion-header-bar ng-if=!c.isCurrentCartPredefined class="bar bar-subheader item-input-inset">
-    <button class="button button-icon icon ion-minus-circled" ng-click="ToggleDeleteValue()"></button>
-    <button class="button button-icon ion-android-search" ng-click="ShowFilterBar()"></button>
+<ion-header-bar style="justify-content: space-between;" ng-if="!c.isCurrentCartPredefined && !c.showSearchBar && !c.keyPressed" class="bar bar-subheader item-input-inset">
+    <div>
+        <span style="color: cornflowerblue; margin-left:10px;  padding:10px;"  ng-hide="myCart.length == 0" ng-click="ToggleDeleteValue()">{{::c.localize.strings['RemoveProducts']}}</span>
+    </div>
+    <div>
+        <span style="color: cornflowerblue; margin-right:10px; padding:10px;" ng-click="ShowFilterBar()">{{::c.localize.strings['AddProduct']}}</span>
+    </div>
 </ion-header-bar>
 
 <ion-view view-title={{::c.currentCartName}}>
 
-    <ion-content class="content-bg" ng-class="{'has-subheader': !c.isCurrentCartPredefined}">
+    <ion-content class="content-bg" ng-class="{'has-subheader': !c.isCurrentCartPredefined && !c.showSearchBar}">
 
         <!-- TODO: ask Karen why if I change it to ng-if it removes the buttons also(even if the buttons are not under ng-if
          and the cart never comes back -->
         <div class="list" ng-show="data.showSearchResults">
-            <div style="background-color: #999999" class="item item-avatar-right" collection-repeat="product in data.allProductsFiltered" divider-collection-repeat>
+            <div class="item item-avatar-right" collection-repeat="product in data.allProductsFiltered" divider-collection-repeat>
                 <img ng-src={{product['ImagePath']}}>
                 <h2 style="text-align: right">{{product['ItemName']}}</h2>
 
@@ -20,9 +24,14 @@
                     <span class="ionic-input-group-addon-right" ng-click="UpdateProductAmount(product, +1, false); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
                 </div>
             </div>
+            <div ng-if="data.allProductsFiltered !== undefined && !data.allProductsFiltered.length" class="no-results">
+                <p>{{::c.localize.strings['NoResults']}}</p>
+            </div>
         </div>
 
-        <div ng-if="!data.showSearchResults">
+
+
+        <div ng-if="!data.showSearchResults && !c.keyPressed">
             <!-- TODO: Is there a way to make swipe right? -->
             <!-- do I need here class == list -->
             <ion-list class="list" class="animate-blinds" show-delete="shouldShowDelete"
@@ -48,10 +57,11 @@
             </ion-list>
 
             <button ng-click="FindBestShop()" class="button button-outline button-positive icon-left ion-ios-compose-outline">Find best shop</button>
-            <button ng-hide=c.isCurrentCartPredefined ng-click="DeleteCart()" class="button button-outline button-positive icon-left ion-ios-compose-outline">Delete cart</button>
+            <button ng-hide="c.isCurrentCartPredefined" ng-click="DeleteCart()" class="button button-outline button-positive icon-left ion-ios-compose-outline">Delete cart</button>
 
         </div>
 
     </ion-content>
+
 
 </ion-view>
