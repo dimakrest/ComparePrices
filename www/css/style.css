@@ -20,6 +20,10 @@ table.bottomBorder td { text-align:center; padding:3px;}
 .item-avatar-right > img:first-child {
     border-radius: 0;
 }
+/* remove transparency from popup*/
+.non-transparent-pop-up .popup {
+    background-color: #ffffff;
+}
 
 .no-results {
     color: gray;

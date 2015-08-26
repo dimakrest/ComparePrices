@@ -100,7 +100,7 @@ angular.module('ComparePrices.services', ['ngResource'])
             });
         }
 
-        function CreateProductTableForSingleShop(tableName, fileName, chainID, storeID)
+        function CreateProductTableForSingleShop($scope, numOfShops, tableName, fileName, chainID, storeID)
         {
             var defer = $q.defer();
 
@@ -119,6 +119,13 @@ angular.module('ComparePrices.services', ['ngResource'])
                         tx.executeSql(sqlQuery)
                     }
                 }, function() {
+                    $scope.c.currentlyShopsDownloaded++;
+                    $scope.c.currentlyShopsDownloadedPercentage = Math.round($scope.c.currentlyShopsDownloaded / numOfShops * 100);
+                    $scope.c.globalProgressLoadingPointer.update($scope.c.currentlyShopsDownloadedPercentage);
+
+                    //var loadingPointer = document.getElementsByClassName("loading-container")[0].getElementsByClassName("loading")[0].firstChild;
+                    //loadingPointer.innerHTML = " " + $scope.c.currentlyShopsDownloadedPercentage + "% " + $scope.c.localize.strings['UpdatingListOfStores'];
+
                     defer.resolve();
                 }, SuccessTableCreation(chainID, storeID, defer));
             }, function() {
@@ -127,9 +134,28 @@ angular.module('ComparePrices.services', ['ngResource'])
             return defer.promise;
         }
 
-        function CreateProductTablesForShops(radius)
+        function CreateProductTablesForShops($scope, radius)
         {
             var defer = $q.defer();
+            $scope.c.currentlyShopsDownloaded = 0;
+            $scope.c.currentlyShopsDownloadedPercentage = 0;
+
+            // TODO: how this can be done without timeout? the problem is that when we come to rhis function there is no yet loading element
+            setTimeout(function()
+            {
+                // this makes text and circle in two lines
+                document.getElementsByClassName("loading-container")[0].getElementsByClassName("loading")[0].firstChild.style.display='block';
+                // create progress with circle
+                $scope.c.globalProgressLoadingPointer = new CircularProgress({
+                    radius: 30,
+                    lineWidth: 3,
+                    font: "15px Arial",
+                    strokeStyle: 'white'
+                });
+
+                document.getElementsByClassName("loading-container")[0].getElementsByClassName("loading")[0].appendChild($scope.c.globalProgressLoadingPointer.el);
+                $scope.c.globalProgressLoadingPointer.update(1);
+            },700);
 
             // get all shops in defined radius
             // read json and create table
@@ -147,7 +173,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     var fileName    =  'stores\/' + singleShop['BrandName'] + '\/price-' + singleShop['BrandName'] + '-' + storeID + '.json';
                     var chainID     = singleShop['ChainID'];
                     var storeID     = singleShop['StoreID'];
-                    promises.push(CreateProductTableForSingleShop(tableName, fileName, chainID, storeID));
+                    promises.push(CreateProductTableForSingleShop($scope, numOfShops, tableName, fileName, chainID, storeID));
                 }
                 $q.all(promises).then(function() {
                     defer.resolve();
@@ -434,13 +460,13 @@ angular.module('ComparePrices.services', ['ngResource'])
                 });
             },
 
-            UpdateStoresInfo : function(myLat, myLon, radius) {
+            UpdateStoresInfo : function($scope, myLat, myLon, radius) {
                 var defer = $q.defer();
 
                 // Each time we update user location we have to recalculate distance to
                 // each shop and if needed download/create missing jsons/tables.
                 $q.all([UpdateStoreRadiusFromLocations(myLat, myLon),
-                        CreateProductTablesForShops(radius)]).then(defer.resolve);
+                        CreateProductTablesForShops($scope, radius)]).then(defer.resolve);
 
                 return defer.promise;
             },
@@ -459,8 +485,9 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             ErrorPopUp: function($scope, popUpText, callback) {
                 var alertPopup = $ionicPopup.alert({
-                                        template: '<div style="text-align:right">' + popUpText + '</div>'
-                                    });
+                                        template: '<div style="text-align:right">' + popUpText + '</div>',
+                                        cssClass: 'non-transparent-pop-up'
+                });
                 if (callback) {
                     alertPopup.then(callback);
                 }
@@ -470,6 +497,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 return $ionicPopup.confirm({
                     title: popUpTitle,
                     template: '<div style="text-align:right">' + popUpText + '</div>',
+                    cssClass: 'non-transparent-pop-up',
                     buttons: [
                         { text: $scope.c.localize.strings['NoButton'],
                             onTap: function(e) {

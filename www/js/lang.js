@@ -48,6 +48,8 @@
         'RemoveProducts': 'מחק מוצרים',
         'LocationUpdatePopupText': 'האם אתה רוצה לעדכן את מיקומך?',
         'NavigateToSettings': 'אפשר מיקומך',
+        'UserDefinedCarts': 'סלים שלי',
+        'PredefinedCarts': 'סלים מוגדרים מראש',
         'DoYouWantToOpenSettings':'האם אתה רוצה לפתוח הגדרות ולאשר את מיקומך?'
     };
 

@@ -51,6 +51,9 @@ angular.module('ComparePrices.controllers', [])
         $scope.c.hasUserCarts = 0;
         $scope.c.comparedProducts = [];
         $scope.c.showPriceDetailsForShop = [];
+        $scope.c.currentlyShopsDownloaded = 0;
+        $scope.c.currentlyShopsDownloadedPercentage = 0;
+        $scope.c.globalProgressLoadingPointer = "";
 
         // init localization array
         $scope.c.localize = document.localize;
@@ -141,7 +144,7 @@ angular.module('ComparePrices.controllers', [])
                 }
                 // Need to recalculate and create missing stores info
                 $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
-                ComparePricesStorage.UpdateStoresInfo(lat, lon, $scope.c.rangeForShops).then(function() {
+                ComparePricesStorage.UpdateStoresInfo($scope, lat, lon, $scope.c.rangeForShops).then(function() {
                     $scope.c.HideLoading();
                 });
 
@@ -149,8 +152,7 @@ angular.module('ComparePrices.controllers', [])
         };
 
         $scope.c.ClearShowPriceDetailsForShop = function(){
-            // TODO: in case we will see more than 100 shops it can be a problem, need to limit it
-            for (var i=0; i<100; i++) {
+            for (var i=0; i<$scope.c.rangeForShops; i++) {
                 $scope.c.showPriceDetailsForShop[i] = 0;
             }
         };
@@ -187,7 +189,7 @@ angular.module('ComparePrices.controllers', [])
         $scope.c.ShowLoading = function(templateText) {
             // Show loading
             $ionicLoading.show({
-                template: '{{}}'// templateText
+                template: templateText
             });
 
         };

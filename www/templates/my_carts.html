@@ -6,9 +6,9 @@
     <ion-content class="content-bg">
 
         <div class="list animate-blinds">
-            <div ng-show=c.hasUserCarts class="item item-divider">
-                User Defined carts
-            </div>
+            <h3 ng-show=c.hasUserCarts class="item item-divider" style="text-align:right;">
+                {{::c.localize.strings['UserDefinedCarts']}}
+            </h3>
             <a class="item item-avatar-right" ng-repeat="cartInfo in c.myCartsInfo | filter:{ 'IsPredefined' : 0 } | orderBy:'-CartID'" ng-click="OpenCartDetails(cartInfo['CartID'])">
                 <img ng-src={{cartInfo['ImageUrl']}}>
                 <h2 style="float:right">{{cartInfo['CartName']}}</h2>
@@ -17,9 +17,9 @@
                     <input type="checkbox" ng-checked="cartInfo.IsChecked" ng-model="cartInfo.IsChecked" ng-click="ChangeCheckbox(); $event.stopPropagation()">
                 </label>
             </a>
-            <div class="item item-divider">
-                Predefined carts
-            </div>
+            <h3 class="item item-divider" style="text-align:right;">
+                {{::c.localize.strings['PredefinedCarts']}}
+            </h3>
             <a class="item item-avatar-right" ng-repeat="cartInfo in c.myCartsInfo | filter:{ 'IsPredefined' : 1 }" ng-click="OpenCartDetails(cartInfo['CartID'])">
                 <img ng-src={{cartInfo['ImageUrl']}}>
                 <h2 style="float:right">{{cartInfo['CartName']}}</h2>
