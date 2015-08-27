@@ -134,60 +134,6 @@ angular.module('ComparePrices.services', ['ngResource'])
             return defer.promise;
         }
 
-        function CreateProductTablesForShops($scope, radius)
-        {
-            var defer = $q.defer();
-            $scope.c.currentlyShopsDownloaded = 0;
-            $scope.c.currentlyShopsDownloadedPercentage = 0;
-
-            // TODO: how this can be done without timeout? the problem is that when we come to rhis function there is no yet loading element
-            setTimeout(function()
-            {
-                // this makes text and circle in two lines
-                document.getElementsByClassName("loading-container")[0].getElementsByClassName("loading")[0].firstChild.style.display='block';
-                // create progress with circle
-                $scope.c.globalProgressLoadingPointer = new CircularProgress({
-                    radius: 30,
-                    lineWidth: 3,
-                    font: "15px Arial",
-                    strokeStyle: 'white'
-                });
-
-                document.getElementsByClassName("loading-container")[0].getElementsByClassName("loading")[0].appendChild($scope.c.globalProgressLoadingPointer.el);
-                $scope.c.globalProgressLoadingPointer.update(1);
-            },500);
-
-            // get all shops in defined radius
-            // read json and create table
-            IssueShopsInRadiusQuery(radius, false).then(function(shopsInfo) {
-                var numOfShops = shopsInfo.rows.length;
-                var promises = [];
-
-                for (var i=0; i < numOfShops; i++) {
-                    // need to pad store id with zeroes to get the right name
-                    var singleShop  = shopsInfo.rows[i];
-                    // skip shops that already downloaded
-                    if (singleShop['ProductListExists']) {
-                        continue;
-                    }
-
-                    var storeID = ("000" + singleShop['StoreID']);
-                    storeID  = storeID.substr(storeID.length - 3);
-
-                    var tableName   = 'tb_' + singleShop['BrandName'] + '_' + singleShop['StoreID'];
-                    var fileName    =  'stores\/' + singleShop['BrandName'] + '\/price-' + singleShop['BrandName'] + '-' + storeID + '.json';
-                    var chainID     = singleShop['ChainID'];
-                    var storeID     = singleShop['StoreID'];
-                    promises.push(CreateProductTableForSingleShop($scope, numOfShops, tableName, fileName, chainID, storeID));
-                }
-                $q.all(promises).then(function() {
-                    defer.resolve();
-                });
-            });
-
-            return defer.promise;
-        }
-
         function logError(errorCallBack) {
             return function (err) {
                 console.log("DB error: " + err.code);
@@ -256,31 +202,6 @@ angular.module('ComparePrices.services', ['ngResource'])
             });
 
             return d.promise;
-        }
-
-        function UpdateStoreRadiusFromLocations(myLat, myLon) {
-            var defer = $q.defer();
-
-            var sqlQuery = "SELECT ChainID, StoreID, Lat, Lon FROM tbStoresLocation;";
-            db.transaction(function (tx) {
-                tx.executeSql(sqlQuery, [], function (tx, rawresults) {
-                    // TODO: do I need the rows thing? if yes wrap this code in some kind of a function
-                    var len = rawresults.rows.length;
-                    for (var i = 0; i < len; i++) {
-                        var singleStore = rawresults.rows.item(i);
-                        var storeLat = singleStore['Lat'];
-                        var storeLon = singleStore['Lon'];
-
-                        var distance = MiscFunctions.CalculateDistance(myLat, myLon, storeLat, storeLon);
-                        var sqlQuery = 'UPDATE tbStoresLocation SET Distance=' + distance + ' WHERE ChainID="' + singleStore['ChainID'] + '" AND StoreID="' +
-                                        singleStore['StoreID'] + '";';
-                        tx.executeSql(sqlQuery);
-                    }
-                })
-            }, errorCB, function(){
-                defer.resolve();
-            });
-            return defer.promise;
         }
 
         return {
@@ -465,22 +386,90 @@ angular.module('ComparePrices.services', ['ngResource'])
                 });
             },
 
-            UpdateStoresInfo : function($scope, myLat, myLon, radius) {
-                var defer = $q.defer();
-
-                // Each time we update user location we have to recalculate distance to
-                // each shop and if needed download/create missing jsons/tables.
-                $q.all([UpdateStoreRadiusFromLocations(myLat, myLon),
-                        CreateProductTablesForShops($scope, radius)]).then(defer.resolve);
-
-                return defer.promise;
-            },
-
             UpdateImageUrl: function(productCode, targetPath) {
                 db.transaction(function (tx) {
                     var sqlQuery = 'UPDATE tbProducts SET ImagePath="' + targetPath + '" WHERE ItemCode="' + productCode +'";';
                     tx.executeSql(sqlQuery, successCB, errorCB);
                 })
+            },
+
+            UpdateStoreRadiusFromLocations: function(myLat, myLon) {
+                var defer = $q.defer();
+
+                var sqlQuery = "SELECT ChainID, StoreID, Lat, Lon FROM tbStoresLocation;";
+                db.transaction(function (tx) {
+                    tx.executeSql(sqlQuery, [], function (tx, rawresults) {
+                        // TODO: do I need the rows thing? if yes wrap this code in some kind of a function
+                        var len = rawresults.rows.length;
+                        for (var i = 0; i < len; i++) {
+                            var singleStore = rawresults.rows.item(i);
+                            var storeLat = singleStore['Lat'];
+                            var storeLon = singleStore['Lon'];
+
+                            var distance = MiscFunctions.CalculateDistance(myLat, myLon, storeLat, storeLon);
+                            var sqlQuery = 'UPDATE tbStoresLocation SET Distance=' + distance + ' WHERE ChainID="' + singleStore['ChainID'] + '" AND StoreID="' +
+                                singleStore['StoreID'] + '";';
+                            tx.executeSql(sqlQuery);
+                        }
+                    })
+                }, errorCB, function(){
+                    defer.resolve();
+                });
+                return defer.promise;
+            },
+
+            CreateProductTablesForShops: function($scope, radius)
+            {
+                var defer = $q.defer();
+                $scope.c.currentlyShopsDownloaded = 0;
+                $scope.c.currentlyShopsDownloadedPercentage = 0;
+
+                // TODO: how this can be done without timeout? the problem is that when we come to rhis function there is no yet loading element
+                setTimeout(function()
+                {
+                    // this makes text and circle in two lines
+                    document.getElementsByClassName("loading-container")[0].getElementsByClassName("loading")[0].firstChild.style.display='block';
+                    // create progress with circle
+                    $scope.c.globalProgressLoadingPointer = new CircularProgress({
+                        radius: 30,
+                        lineWidth: 3,
+                        font: "15px Arial",
+                        strokeStyle: 'white'
+                    });
+
+                    document.getElementsByClassName("loading-container")[0].getElementsByClassName("loading")[0].appendChild($scope.c.globalProgressLoadingPointer.el);
+                    $scope.c.globalProgressLoadingPointer.update(1);
+                },500);
+
+                // get all shops in defined radius
+                // read json and create table
+                IssueShopsInRadiusQuery(radius, false).then(function(shopsInfo) {
+                    var numOfShops = shopsInfo.rows.length;
+                    var promises = [];
+
+                    for (var i=0; i < numOfShops; i++) {
+                        // need to pad store id with zeroes to get the right name
+                        var singleShop  = shopsInfo.rows[i];
+                        // skip shops that already downloaded
+                        if (singleShop['ProductListExists']) {
+                            continue;
+                        }
+
+                        var storeID = ("000" + singleShop['StoreID']);
+                        storeID  = storeID.substr(storeID.length - 3);
+
+                        var tableName   = 'tb_' + singleShop['BrandName'] + '_' + singleShop['StoreID'];
+                        var fileName    =  'stores\/' + singleShop['BrandName'] + '\/price-' + singleShop['BrandName'] + '-' + storeID + '.json';
+                        var chainID     = singleShop['ChainID'];
+                        var storeID     = singleShop['StoreID'];
+                        promises.push(CreateProductTableForSingleShop($scope, numOfShops, tableName, fileName, chainID, storeID));
+                    }
+                    $q.all(promises).then(function() {
+                        defer.resolve();
+                    });
+                });
+
+                return defer.promise;
             }
         }
     }])
@@ -904,14 +893,29 @@ angular.module('ComparePrices.services', ['ngResource'])
                 localStorage.setItem('Lon', lon);
 
                 // Need to recalculate and create missing stores info
-                ComparePricesStorage.UpdateStoresInfo(lat, lon, $scope.c.rangeForShops).then(function () {
+                UpdateStoresInfoPrivate(lat, lon, $scope.c.rangeForShops).then(function () {
                     defer.resolve();
                 });
             });
             return defer.promise;
         }
 
+        function UpdateStoresInfoPrivate($scope, myLat, myLon, radius) {
+            var defer = $q.defer();
+
+            // Each time we update user location we have to recalculate distance to
+            // each shop and if needed download/create missing jsons/tables.
+            $q.all([ComparePricesStorage.UpdateStoreRadiusFromLocations(myLat, myLon),
+                ComparePricesStorage.CreateProductTablesForShops($scope, radius)]).then(defer.resolve);
+
+            return defer.promise;
+        }
+
         return {
+            UpdateStoresInfo : function($scope, myLat, myLon, radius) {
+                return UpdateStoresInfoPrivate($scope, myLat, myLon, radius);
+            },
+
             UpdateStoresInfoIfRequired: function ($scope) {
                 var defer = $q.defer();
 
