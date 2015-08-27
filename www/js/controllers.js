@@ -117,7 +117,7 @@ angular.module('ComparePrices.controllers', [])
                 $timeout.cancel(rangeForShopsChangedPromise);
             }
             rangeForShopsChangedPromise = $timeout(function() {
-                var previousRangeForShops = parseInt(localStorage.getItem('RangeForShops'));
+                var previousRangeForShops = parseInt(localStorage.getItem('RangeForShops') || ComparePricesConstants.DEFAULT_SHOPS_RANGE);
                 localStorage.setItem('RangeForShops', $scope.c.rangeForShops);
 
                 var lat = localStorage.getItem('Lat') || "";
@@ -135,12 +135,17 @@ angular.module('ComparePrices.controllers', [])
                 if (parseInt($scope.c.rangeForShops) < previousRangeForShops) {
                     return;
                 }
-                // Need to recalculate and create missing stores info
-                $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
-                ComparePricesStorage.UpdateStoresInfo($scope, lat, lon, $scope.c.rangeForShops).then(function() {
-                    $scope.c.HideLoading();
-                });
 
+                // get maximum radius value
+                var maxRangeForShops = parseInt(localStorage.getItem('MaxRangeForShops') || ComparePricesConstants.DEFAULT_SHOPS_RANGE);
+                if (parseInt($scope.c.rangeForShops) > maxRangeForShops) {
+                    localStorage.setItem('MaxRangeForShops', $scope.c.rangeForShops);
+                    // Need to recalculate and create missing stores info
+                    $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
+                    UpdateStores.UpdateStoresInfo($scope, lat, lon, $scope.c.rangeForShops).then(function () {
+                        $scope.c.HideLoading();
+                    });
+                }
             },500);
         };
 
