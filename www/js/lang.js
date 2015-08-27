@@ -51,7 +51,8 @@
         'NavigateToSettings': 'אפשר מיקומך',
         'UserDefinedCarts': 'סלים שלי',
         'PredefinedCarts': 'סלים מוגדרים מראש',
-        'DoYouWantToOpenSettings':'האם אתה רוצה לפתוח הגדרות ולאשר את מיקומך?'
+        'DoYouWantToOpenSettings':'האם אתה רוצה לפתוח הגדרות ולאשר את מיקומך?',
+        'NoInternetConnection' : 'אפליקציה זו דורשת חיבור לאינטרנט'
     };
 
     document.selectLanguage = function(lang)

@@ -479,6 +479,7 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             ErrorPopUp: function($scope, popUpText, callback) {
                 var alertPopup = $ionicPopup.alert({
+                                        title: 'שגיאה',
                                         template: '<div style="text-align:right">' + popUpText + '</div>',
                                         cssClass: 'non-transparent-pop-up'
                 });
@@ -981,11 +982,9 @@ angular.module('ComparePrices.services', ['ngResource'])
                             PopUpFactory.ConfirmationPopUp($scope, title, text).then(function(confirmed) {
                                 if(confirmed) {
                                     // add timeout in order to have time to close the confirmation popup
-                                    setTimeout(function() {
-                                        localStorage.setItem('UserClickedSettingsLocation', 1);
-                                        $ionicSideMenuDelegate.toggleRight();
-                                        cordova.plugins.settings.open();
-                                    }, 100);
+                                    localStorage.setItem('UserClickedSettingsLocation', 1);
+                                    $ionicSideMenuDelegate.toggleRight();
+                                    cordova.plugins.settings.open();
                                 } else {
                                     $ionicSideMenuDelegate.toggleRight();
                                     $scope.c.useUsersCurrentLocation = false;
