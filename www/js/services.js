@@ -166,6 +166,11 @@ angular.module('ComparePrices.services', ['ngResource'])
                 for (var i=0; i < numOfShops; i++) {
                     // need to pad store id with zeroes to get the right name
                     var singleShop  = shopsInfo.rows[i];
+                    // skip shops that already downloaded
+                    if (singleShop['ProductListExists']) {
+                        continue;
+                    }
+
                     var storeID = ("000" + singleShop['StoreID']);
                     storeID  = storeID.substr(storeID.length - 3);
 
