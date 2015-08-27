@@ -893,7 +893,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 localStorage.setItem('Lon', lon);
 
                 // Need to recalculate and create missing stores info
-                UpdateStoresInfoPrivate(lat, lon, $scope.c.rangeForShops).then(function () {
+                UpdateStoresInfoPrivate($scope, lat, lon, $scope.c.rangeForShops).then(function () {
                     defer.resolve();
                 });
             });
@@ -903,11 +903,14 @@ angular.module('ComparePrices.services', ['ngResource'])
         function UpdateStoresInfoPrivate($scope, myLat, myLon, radius) {
             var defer = $q.defer();
 
+            localStorage.setItem('UpdateStoreInfoCompleted', 0);
             // Each time we update user location we have to recalculate distance to
             // each shop and if needed download/create missing jsons/tables.
             $q.all([ComparePricesStorage.UpdateStoreRadiusFromLocations(myLat, myLon),
-                ComparePricesStorage.CreateProductTablesForShops($scope, radius)]).then(defer.resolve);
-
+                ComparePricesStorage.CreateProductTablesForShops($scope, radius)]).then(function() {
+                localStorage.setItem('UpdateStoreInfoCompleted', 1);
+                defer.resolve();
+            });
             return defer.promise;
         }
 
@@ -942,9 +945,15 @@ angular.module('ComparePrices.services', ['ngResource'])
                         // We get here in two cases:
                         // 1) address is not set => it's our first visit and we have to create tables
                         // 2) distance between previous and current location is greater than margin and we have to look for new shops
+                        // 3) user entered location manually and now want to use geolocation for a first time
                         // Get an address from google
                         // in this case we have to show confirmation popup
-                        if (addressAlreadySet) {
+
+                        // when user just enabled geolocation, local storage still has the old value and we can know that user just turned on
+                        // the geolocation and no need to show popup
+                        var useUsersCurrentLocation = localStorage.getItem('UseUsersCurrentLocation');
+
+                        if (addressAlreadySet && useUsersCurrentLocation == "1") {
                             var popUpTitle  = $scope.c.localize.strings['LocationUpdatePopupTitle'];
                             var popUpText   = $scope.c.localize.strings['LocationUpdatePopupText'];
                             $scope.c.HideLoading();
