@@ -21,7 +21,7 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
 })
 
     //////////////// Location calculation + auto complete /////////////////
-.directive('googleAutocomplete', ['$rootScope', 'ComparePricesStorage', '$cordovaGoogleAnalytics', function($rootScope, ComparePricesStorage, $cordovaGoogleAnalytics) {
+.directive('googleAutocomplete', ['$rootScope', 'UpdateStores', '$cordovaGoogleAnalytics', function($rootScope, UpdateStores, $cordovaGoogleAnalytics) {
     return {
         restrict: 'E',
         replace: 'false',
@@ -47,7 +47,7 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                 localStorage.setItem('Lat', place.geometry.location.G);
                 localStorage.setItem('Lon', place.geometry.location.K);
 
-                ComparePricesStorage.UpdateStoresInfo(place.geometry.location.G, place.geometry.location.K, $scope.c.rangeForShops).then(function() {
+                UpdateStores.UpdateStoresInfo($scope, place.geometry.location.G, place.geometry.location.K, $scope.c.rangeForShops).then(function() {
                     $scope.c.HideLoading();
                     // Change the useUsersCurrentLocation variable, so we know that now we should use address from google autocompletion
                     $scope.c.useUsersCurrentLocation = false;

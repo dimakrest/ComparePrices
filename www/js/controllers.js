@@ -61,7 +61,6 @@ angular.module('ComparePrices.controllers', [])
 
         $scope.c.lastAddress = localStorage.getItem('lastAddress') || "";
 
-        $scope.c.variableForPercentage = 123;
         $scope.c.rangeForShops = parseInt(localStorage.getItem('RangeForShops')) || ComparePricesConstants.DEFAULT_SHOPS_RANGE;
 
         $scope.c.useUsersCurrentLocation = parseInt(localStorage.getItem('UseUsersCurrentLocation')) || 0;
@@ -118,7 +117,7 @@ angular.module('ComparePrices.controllers', [])
                 $timeout.cancel(rangeForShopsChangedPromise);
             }
             rangeForShopsChangedPromise = $timeout(function() {
-                var previousRangeForShops = parseInt(localStorage.getItem('RangeForShops'));
+                var previousRangeForShops = parseInt(localStorage.getItem('RangeForShops') || ComparePricesConstants.DEFAULT_SHOPS_RANGE);
                 localStorage.setItem('RangeForShops', $scope.c.rangeForShops);
 
                 var lat = localStorage.getItem('Lat') || "";
@@ -136,12 +135,17 @@ angular.module('ComparePrices.controllers', [])
                 if (parseInt($scope.c.rangeForShops) < previousRangeForShops) {
                     return;
                 }
-                // Need to recalculate and create missing stores info
-                $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
-                ComparePricesStorage.UpdateStoresInfo($scope, lat, lon, $scope.c.rangeForShops).then(function() {
-                    $scope.c.HideLoading();
-                });
 
+                // get maximum radius value
+                var maxRangeForShops = parseInt(localStorage.getItem('MaxRangeForShops') || ComparePricesConstants.DEFAULT_SHOPS_RANGE);
+                if (parseInt($scope.c.rangeForShops) > maxRangeForShops) {
+                    localStorage.setItem('MaxRangeForShops', $scope.c.rangeForShops);
+                    // Need to recalculate and create missing stores info
+                    $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
+                    UpdateStores.UpdateStoresInfo($scope, lat, lon, $scope.c.rangeForShops).then(function () {
+                        $scope.c.HideLoading();
+                    });
+                }
             },500);
         };
 
@@ -159,6 +163,8 @@ angular.module('ComparePrices.controllers', [])
                     localStorage.setItem('UseUsersCurrentLocation', $scope.c.useUsersCurrentLocation ? 1 : 0);
                     $scope.c.HideLoading();
                 });
+            } else {
+                localStorage.setItem('UseUsersCurrentLocation', $scope.c.useUsersCurrentLocation ? 1 : 0);
             }
         };
 
@@ -328,16 +334,28 @@ angular.module('ComparePrices.controllers', [])
                     var text  = $scope.c.localize.strings['ChooseCartsFirst'];
                     PopUpFactory.ErrorPopUp($scope, text);
                 }
-                else
-                {
-                    // if user wants to use his current location, need to check if his location changed
-                    if ($scope.c.useUsersCurrentLocation) {
+                else {
+                    // user closed the app before all tables were created
+                    var updateStoreInfoCompleted = localStorage.getItem('UpdateStoreInfoCompleted');
+                    if (updateStoreInfoCompleted == "0") {
                         $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
-                        UpdateStores.UpdateStoresInfoIfRequired($scope).then(function() {
+                        var myLat = localStorage.getItem('Lat');
+                        var myLon = localStorage.getItem('Lon');
+                        UpdateStores.UpdateStoresInfo($scope, myLat, myLon, $scope.c.rangeForShops).then(function () {
+                            $scope.c.HideLoading();
                             $scope.FindBestShopPrivate(cartIDs);
                         });
                     } else {
-                        $scope.FindBestShopPrivate(cartIDs);
+                        // if user wants to use his current location, need to check if his location changed
+                        if ($scope.c.useUsersCurrentLocation) {
+                            $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
+                            UpdateStores.UpdateStoresInfoIfRequired($scope).then(function () {
+                                $scope.FindBestShopPrivate(cartIDs);
+                                $scope.c.HideLoading();
+                            });
+                        } else {
+                            $scope.FindBestShopPrivate(cartIDs);
+                        }
                     }
                 }
             }
@@ -466,13 +484,29 @@ angular.module('ComparePrices.controllers', [])
             }
             else
             {
-                if ($scope.c.useUsersCurrentLocation) {
-                    $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
-                    UpdateStores.UpdateStoresInfoIfRequired($scope).then(function() {
-                        $scope.FindBestShopPrivate();
-                    })
+                // user closed the app before all tables were created
+                var updateStoreInfoCompleted = localStorage.getItem('UpdateStoreInfoCompleted');
+                if (updateStoreInfoCompleted == "0") {
+                    if ($scope.c.useUsersCurrentLocation) {
+                        $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
+                        var myLat = localStorage.getItem('Lat');
+                        var myLon = localStorage.getItem('Lon');
+                        UpdateStores.UpdateStoresInfo($scope, myLat, myLon, $scope.c.rangeForShops).then(function () {
+                            $scope.c.HideLoading();
+                            $scope.FindBestShopPrivate();
+                        });
+                    }
                 } else {
-                    $scope.FindBestShopPrivate();
+                    if ($scope.c.useUsersCurrentLocation) {
+                        $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
+                        UpdateStores.UpdateStoresInfoIfRequired($scope).then(function() {
+                            $scope.c.HideLoading();
+                            $scope.FindBestShopPrivate();
+
+                        });
+                    } else {
+                        $scope.FindBestShopPrivate();
+                    }
                 }
             }
         };
