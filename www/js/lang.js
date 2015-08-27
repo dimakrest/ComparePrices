@@ -44,6 +44,7 @@
         'ShowShopsThatPartiallySuit': 'חנוית להלן כוללים את כל המוצרים חוץ מ: ',
         'LocationUpdatePopupTitle': 'עידכון מיקום',
         'NoResults': 'לא נמצאו מוצרים',
+        'NoProductsInCart': 'בינתיים אין מוצרים בסל',
         'AddProduct': 'הוסף מוצר',
         'RemoveProducts': 'מחק מוצרים',
         'LocationUpdatePopupText': 'האם אתה רוצה לעדכן את מיקומך?',

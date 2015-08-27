@@ -13,31 +13,24 @@
 
         <!-- TODO: ask Karen why if I change it to ng-if it removes the buttons also(even if the buttons are not under ng-if
          and the cart never comes back -->
-        <div class="list" ng-show="data.showSearchResults">
-            <div class="item item-avatar-right" collection-repeat="product in data.allProductsFiltered" divider-collection-repeat>
-                <img ng-src={{product['ImagePath']}}>
-                <h2 style="text-align: right">{{product['ItemName']}}</h2>
 
-                <div class="ionic-input-group">
-                    <span ng-if="product.Amount != 0" class="ionic-input-group-addon-left" ng-click="UpdateProductAmount(product, -1, false); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
-                    <label ng-if="product.Amount != 0" class="ionic-form-control">{{product["Amount"]}}</label>
-                    <span class="ionic-input-group-addon-right" ng-click="UpdateProductAmount(product, +1, false); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
+        <ion-list class="list" show-delete="shouldShowDelete">
+            <div collection-repeat="product in ((data.showSearchResults == true) ? data.allProductsFiltered : myCart)" divider-collection-repeat>
+
+                <div ng-if="data.showSearchResults">
+                    <ion-item class="item item-avatar-right">
+                        <img ng-src={{product['ImagePath']}}>
+                        <h2 style="text-align: right">{{product['ItemName']}}</h2>
+
+                        <div class="ionic-input-group">
+                            <span ng-if="product.Amount != 0" class="ionic-input-group-addon-left" ng-click="UpdateProductAmount(product, -1, false); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
+                            <label ng-if="product.Amount != 0" class="ionic-form-control">{{product["Amount"]}}</label>
+                            <span class="ionic-input-group-addon-right" ng-click="UpdateProductAmount(product, +1, false); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
+                        </div>
+                    </ion-item>
                 </div>
-            </div>
-            <div ng-if="data.allProductsFiltered !== undefined && !data.allProductsFiltered.length" class="no-results">
-                <p>{{::c.localize.strings['NoResults']}}</p>
-            </div>
-        </div>
 
-
-
-        <div ng-if="!data.showSearchResults && !c.keyPressed">
-            <!-- TODO: Is there a way to make swipe right? -->
-            <!-- do I need here class == list -->
-            <ion-list class="list" class="animate-blinds" show-delete="shouldShowDelete"
-                                                          show-reorder="shouldShowReorder"
-                                                          can-swipe="listCanSwipe">
-                <ion-item ng-repeat="product in myCart">
+                <ion-item ng-if="!data.showSearchResults && !c.keyPressed">
                     <div class="item item-avatar-right">
                         <img ng-src={{product['ImagePath']}}>
 
@@ -54,13 +47,22 @@
                                        ng-click="DeleteProduct(product)">
                     </ion-delete-button>
                 </ion-item>
-            </ion-list>
-        </div>
+
+            </div>
+            <div ng-if="data.showSearchResults && data.allProductsFiltered !== undefined && !data.allProductsFiltered.length" class="no-results">
+                <p>{{::c.localize.strings['NoResults']}}</p>
+            </div>
+            <div ng-if="!data.showSearchResults && !c.keyPressed && !myCart.length" class="no-results">
+                <p>{{::c.localize.strings['NoProductsInCart']}}</p>
+            </div>
+
+
+        </ion-list>
 
     </ion-content>
 </ion-view>
 
 <ion-footer-bar>
-    <button ng-click="FindBestShop()" class="button button-positive">Find best shop</button>
-    <button ng-hide="c.isCurrentCartPredefined" ng-click="DeleteCart()" class="button button-positive">Delete cart</button>
+    <button ng-click="FindBestShop()" class="button button-positive find-best-shop-button">Find best shop</button>
+    <button ng-hide="c.isCurrentCartPredefined" ng-click="DeleteCart()" class="button button-positive delete-cart-button">Delete cart</button>
 </ion-footer-bar>

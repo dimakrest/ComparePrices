@@ -416,8 +416,6 @@ angular.module('ComparePrices.controllers', [])
     .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicHistory, ComparePricesStorage, FindBestShops, UpdateStores, PopUpFactory, ComparePricesConstants, ShowModal, ImageCache, ionicMaterialMotion, ionicMaterialInk, $ionicFilterBar) {
         // ionic related variables. Used to create advanced  <ion-list>
         $scope.shouldShowDelete = false;
-        $scope.shouldShowReorder = false;
-        $scope.listCanSwipe = true;
 
         // TODO: try to implement the bar without all structures
         $scope.data = {};

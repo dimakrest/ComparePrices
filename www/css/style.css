@@ -136,13 +136,10 @@ table.bottomBorder td { text-align:center; padding:3px;}
     display: inline-block;
 }
 
-.bar .button.find-best-shop-button {
+.bar .button.find-best-shop-button, .bar .button.delete-cart-button, .bar .button.back-button {
     max-width: none;
-    width: auto; }
-
-.bar .button.back-button {
-    max-width: none;
-    width: auto; }
+    width: auto;
+}
 
 /* HERE STARTS POLYMER CSS */
 
