@@ -166,6 +166,11 @@ angular.module('ComparePrices.services', ['ngResource'])
                 for (var i=0; i < numOfShops; i++) {
                     // need to pad store id with zeroes to get the right name
                     var singleShop  = shopsInfo.rows[i];
+                    // skip shops that already downloaded
+                    if (singleShop['ProductListExists']) {
+                        continue;
+                    }
+
                     var storeID = ("000" + singleShop['StoreID']);
                     storeID  = storeID.substr(storeID.length - 3);
 
@@ -962,9 +967,12 @@ angular.module('ComparePrices.services', ['ngResource'])
                             var text  = $scope.c.localize.strings['DoYouWantToOpenSettings'];
                             PopUpFactory.ConfirmationPopUp($scope, title, text).then(function(confirmed) {
                                 if(confirmed) {
-                                    localStorage.setItem('UserClickedSettingsLocation', 1);
-                                    $ionicSideMenuDelegate.toggleRight();
-                                    cordova.plugins.settings.open();
+                                    // add timeout in order to have time to close the confirmation popup
+                                    setTimeout(function() {
+                                        localStorage.setItem('UserClickedSettingsLocation', 1);
+                                        $ionicSideMenuDelegate.toggleRight();
+                                        cordova.plugins.settings.open();
+                                    }, 100);
                                 } else {
                                     $ionicSideMenuDelegate.toggleRight();
                                     $scope.c.useUsersCurrentLocation = false;
