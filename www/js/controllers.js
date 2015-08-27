@@ -114,12 +114,6 @@ angular.module('ComparePrices.controllers', [])
         var rangeForShopsChangedPromise;
         $scope.c.UpdateRangeForShops = function(){
 
-            // TODO: maybe remove this, used to instantiate loading and then use it to add loading bar
-            $ionicLoading.show({
-                template: "Loading"
-            });
-            $ionicLoading.hide();
-
             if(rangeForShopsChangedPromise){
                 $timeout.cancel(rangeForShopsChangedPromise);
             }

@@ -155,7 +155,7 @@ angular.module('ComparePrices.services', ['ngResource'])
 
                 document.getElementsByClassName("loading-container")[0].getElementsByClassName("loading")[0].appendChild($scope.c.globalProgressLoadingPointer.el);
                 $scope.c.globalProgressLoadingPointer.update(1);
-            },700);
+            },500);
 
             // get all shops in defined radius
             // read json and create table
@@ -512,17 +512,8 @@ angular.module('ComparePrices.services', ['ngResource'])
                         }
                     ]
                 });
-            },
-
-            PopUpWithDuration: function (duration, message)
-            {
-                var template = "<h2><i class='ion-checkmark-circled'></i></h2><br><small>"+message+"</small>";
-                $ionicLoading.show({
-                    template:'<span style="color:white;">'+template+"</span>",
-                    noBackdrop:false,
-                    duration:duration
-                });
             }
+
         }
     }])
 

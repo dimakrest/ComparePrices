@@ -35,8 +35,8 @@
             <!-- TODO: Is there a way to make swipe right? -->
             <!-- do I need here class == list -->
             <ion-list class="list" class="animate-blinds" show-delete="shouldShowDelete"
-                                                         show-reorder="shouldShowReorder"
-                                                         can-swipe="listCanSwipe">
+                                                          show-reorder="shouldShowReorder"
+                                                          can-swipe="listCanSwipe">
                 <ion-item ng-repeat="product in myCart">
                     <div class="item item-avatar-right">
                         <img ng-src={{product['ImagePath']}}>
@@ -55,13 +55,12 @@
                     </ion-delete-button>
                 </ion-item>
             </ion-list>
-
-            <button ng-click="FindBestShop()" class="button button-outline button-positive icon-left ion-ios-compose-outline">Find best shop</button>
-            <button ng-hide="c.isCurrentCartPredefined" ng-click="DeleteCart()" class="button button-outline button-positive icon-left ion-ios-compose-outline">Delete cart</button>
-
         </div>
 
     </ion-content>
-
-
 </ion-view>
+
+<ion-footer-bar>
+    <button ng-click="FindBestShop()" class="button button-positive">Find best shop</button>
+    <button ng-hide="c.isCurrentCartPredefined" ng-click="DeleteCart()" class="button button-positive">Delete cart</button>
+</ion-footer-bar>
