@@ -27,9 +27,8 @@
         'Kilometer': 'ק"מ',
         'BestShopsHeader': 'השוואת מחירים',
         'FindBestShop': 'לבדוק מחירים',
-        'TotalCartsSelected': 'סלים נבחרו',
         'ChooseYourAddressInSettings': 'קודם תבחר מיקומך בהגדרות',
-        'ChooseCartsFirst': 'קודם תבחר סלים',
+        'ChooseCartFirst': 'קודם תבחר סל',
         'MyAddress': 'כתובת שלי',
         'StoreName': 'שם רשת: ',
         'PriceInStore': 'מחיר: ',
@@ -55,7 +54,7 @@
         'UserDefinedCarts': 'סלים שלי',
         'PredefinedCarts': 'סלים מוגדרים מראש',
         'PredefinedProductGroups': 'מוצרים פופולריים לפי מחלקות',
-        'DoYouWantToOpenSettings':'האם אתה רוצה לפתוח הגדרות ולאשר את מיקומך?'
+        'DoYouWantToOpenSettings':'האם אתה רוצה לפתוח הגדרות ולאשר את מיקומך?',
         'NoInternetConnection' : 'אפליקציה זו דורשת חיבור לאינטרנט'
     };
 

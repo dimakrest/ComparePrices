@@ -12,7 +12,7 @@ angular.module('ComparePrices.services', ['ngResource'])
     .factory('ComparePricesStorage', ['ReadJson', 'MiscFunctions', '$q', '$resource',
         function (ReadJson, MiscFunctions, $q, $resource) {
 
-        var createCartsTbQuery      = 'CREATE TABLE IF NOT EXISTS tbCarts (CartID INTEGER PRIMARY KEY, CartName TEXT, ImageUrl TEXT, CheckboxColor TEXT, IsPredefined INTEGER)';
+        var createCartsTbQuery      = 'CREATE TABLE IF NOT EXISTS tbCarts (CartID INTEGER PRIMARY KEY, CartName TEXT, ImageUrl TEXT, IsPredefined INTEGER)';
         var createUserCartsTbQuery  = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID INTEGER, ItemCode TEXT, Amount INTEGER)';
         var createProductGroupsTbQuery              = 'CREATE TABLE IF NOT EXISTS tbProductGroups (ProductGroupID INTEGER PRIMARY KEY, ProductGroupName TEXT, ImageUrl TEXT)';
         var createProductsInProductGroupsTbQuery    = 'CREATE TABLE IF NOT EXISTS tbProductsInProductGroups (ProductGroupID INTEGER, ItemCode TEXT)';
@@ -221,8 +221,8 @@ angular.module('ComparePrices.services', ['ngResource'])
 
                     db.transaction(function (tx) {
                         carts.forEach(function(singleCart) {
-                            tx.executeSql('INSERT INTO tbCarts (CartID, CartName, ImageUrl, CheckboxColor, IsPredefined)' +
-                            'VALUES (' + lastCartID + ', "' + singleCart['CartName'] + '", "' + singleCart['ImageUrl'] + '", "' + singleCart['CheckboxColor'] + '",1)');
+                            tx.executeSql('INSERT INTO tbCarts (CartID, CartName, ImageUrl, IsPredefined)' +
+                            'VALUES (' + lastCartID + ', "' + singleCart['CartName'] + '", "' + singleCart['ImageUrl'] + '",1)');
 
                             products = singleCart['Products'];
 
@@ -326,8 +326,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 return d.promise;
             },
 
-            GetMyCarts: function (cartIDs, success, error) {
-                console.log("GetMyCarts: Init " + cartIDs.join("\",\"") );
+            GetMyCarts: function (cartID, success, error) {
                 var response = {};
                 response.rows = [];
                 db.transaction(function (tx) {
@@ -337,7 +336,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                         'tbUserCarts.Amount AS Amount, ' +
                         'tbUserCarts.CartID AS CartID ' +
                         'FROM tbProducts JOIN tbUserCarts ON tbProducts.ItemCode=tbUserCarts.ItemCode ' +
-                        'WHERE tbUserCarts.CartID IN (' + cartIDs.join() + ')', [], function (tx, rawresults) {
+                        'WHERE tbUserCarts.CartID = ' + cartID, [], function (tx, rawresults) {
                         // TODO: do I need the rows thing? if yes wrap this code in some kind of a function
                         var len = rawresults.rows.length;
                         for (var i = 0; i < len; i++) {
@@ -403,7 +402,6 @@ angular.module('ComparePrices.services', ['ngResource'])
                     newCart['CartID'] + ', "' +
                     newCart['CartName'] + '", "' +
                     newCart['ImageUrl'] + '", "' +
-                    newCart['CheckboxColor'] + '",' +
                     '0)';
 
                 db.transaction(function (tx) {
@@ -566,7 +564,7 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
     }])
 
-    .factory('FindBestShops', ['ComparePricesStorage', '$q', function(ComparePricesStorage, $q) {
+    .factory('FindBestShops', ['ComparePricesStorage', 'UpdateStores', 'ShowModal', '$q', function(ComparePricesStorage, UpdateStores, ShowModal, $q) {
 
         function CalculatePriceForShop(productCart, productPriceInStore) {
             var totalPrice = 0.0;
@@ -726,7 +724,7 @@ angular.module('ComparePrices.services', ['ngResource'])
             }
         }
 
-        return function($scope, cart, radius) {
+        function FindBestShopInRadius ($scope, cart, radius) {
             var d = $q.defer();
 
             // At first get from myCart only ItemCodes
@@ -749,7 +747,7 @@ angular.module('ComparePrices.services', ['ngResource'])
 
                 var findShopsResponse = FindMaxShopsWithMaxCommonProducts(cart, result);
                 var suitableShops = findShopsResponse['suitableShops'];
-                $scope.missingProducts = findShopsResponse['missingProducts'];
+                $scope.c.missingProducts = findShopsResponse['missingProducts'];
 
                 // sort shops by price
                 suitableShops.sort(dynamicSortMultiple("CartPrice", "Distance"));
@@ -777,14 +775,14 @@ angular.module('ComparePrices.services', ['ngResource'])
                         {
                             shopsOfSpecificBrand[brandName] = 1;
                             //singleShopInfo.shopInfo['IsChecked'] = (singleShopInfo.shopInfo['CartPrice'] == minimumPrice);
-                            $scope.shopsNearThatHaveNeededProducts.push(suitableShops[i]);
+                            $scope.c.shopsNearThatHaveNeededProducts.push(suitableShops[i]);
                             totalShops++;
                         }
                         else {
                             if (shopsOfSpecificBrand[brandName] < $scope.c.maxShopsOfTheSameBrand) {
                                 shopsOfSpecificBrand[brandName]++;
                                 //singleShopInfo.shopInfo['IsChecked'] = (singleShopInfo.shopInfo['CartPrice'] == minimumPrice);
-                                $scope.shopsNearThatHaveNeededProducts.push(suitableShops[i]);
+                                $scope.c.shopsNearThatHaveNeededProducts.push(suitableShops[i]);
                                 totalShops++;
                             }
                         }
@@ -799,6 +797,60 @@ angular.module('ComparePrices.services', ['ngResource'])
                 d.resolve(ComparePricesStorage.GetProductsInfo(productCodesInMyCart));
             });
             return d.promise;
+        }
+
+        function FindBestShopPrivate ($scope, cartID) {
+            $scope.c.missingProducts = [];
+            $scope.c.ShowLoading($scope.c.localize.strings['LookingForBestShop']);
+            // closes opened accordions in best_shops.html
+            $scope.c.ClearShowPriceDetailsForShop();
+            ComparePricesStorage.GetMyCarts(cartID, function (myCart) {
+
+                $scope.c.comparedProducts = [];
+                myCart.rows.forEach(function(singleProduct)
+                {
+                    $scope.c.comparedProducts[singleProduct.ItemCode] = [];
+                    $scope.c.comparedProducts[singleProduct.ItemCode]['Amount'] = singleProduct.Amount;
+                });
+
+                FindBestShopInRadius($scope, myCart.rows, $scope.c.rangeForShops).then(function (productsInfo) {
+
+                    for (var i=0; i < productsInfo.rows.length; i++) {
+                        $scope.c.comparedProducts[productsInfo.rows[i].ItemCode]['Image'] = productsInfo.rows[i].ImagePath;
+                        $scope.c.comparedProducts[productsInfo.rows[i].ItemCode]['Name'] = productsInfo.rows[i].ItemName;
+                    }
+
+                    $scope.c.HideLoading();
+                    ShowModal($scope, 'templates/best_shops.html');
+                })
+            });
+        }
+
+        return function($scope, cartID) {
+            $scope.c.shopsNearThatHaveNeededProducts = [];
+            // user closed the app before all tables were created
+            var updateStoreInfoCompleted = localStorage.getItem('UpdateStoreInfoCompleted');
+            if (updateStoreInfoCompleted == "0") {
+                $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
+                var myLat = localStorage.getItem('Lat');
+                var myLon = localStorage.getItem('Lon');
+                UpdateStores.UpdateStoresInfo($scope, myLat, myLon, $scope.c.rangeForShops).then(function () {
+                    $scope.c.HideLoading();
+                    FindBestShopPrivate($scope, cartID);
+                });
+            } else {
+                // if user wants to use his current location, need to check if his location changed
+                if ($scope.c.useUsersCurrentLocation) {
+                    $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
+                    UpdateStores.UpdateStoresInfoIfRequired($scope).then(function() {
+                        $scope.c.HideLoading();
+                        FindBestShopPrivate($scope, cartID);
+
+                    });
+                } else {
+                    FindBestShopPrivate($scope, cartID);
+                }
+            }
         }
     }])
 

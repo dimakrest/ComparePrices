@@ -8,17 +8,17 @@
     <ion-content class="content-bg">
 
         <ion-list>
-            <div style="text-align:right" ng-show="missingProducts.length > 0">
+            <div style="text-align:right" ng-show="c.missingProducts.length > 0">
                 {{::c.localize.strings['DontHaveAllProducts']}}
                 <br>
                 {{::c.localize.strings['ShowShopsThatPartiallySuit']}}
-                <ion-item ng-repeat="productCode in missingProducts" >
+                <ion-item ng-repeat="productCode in c.missingProducts" >
                     <h2 style="text-align:right">{{c.comparedProducts[productCode].Name}}</h2>
                 </ion-item>
             </div>
 
 
-            <div ng-repeat="shop in shopsNearThatHaveNeededProducts track by $index" ng-init="parentIndex = $index">
+            <div ng-repeat="shop in c.shopsNearThatHaveNeededProducts track by $index" ng-init="parentIndex = $index">
                 <ion-item class="item-avatar-right item-stable"
                           ng-click="toggleDetails($index)"
                           ng-class="{active: isDetailsShown($index)}">
