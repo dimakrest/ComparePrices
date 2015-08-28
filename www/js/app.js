@@ -59,7 +59,7 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
 }])
 
     // Need to add myCart -> this is a default page
-.config(function($stateProvider, $urlRouterProvider, $ionicFilterBarConfigProvider) {
+.config(function($stateProvider, $urlRouterProvider, $ionicFilterBarConfigProvider, $ionicConfigProvider) {
     $stateProvider
 
         .state('tabs', {
@@ -132,4 +132,10 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
 
     // placeholder for a search bar
     $ionicFilterBarConfigProvider.placeholder(document.localize.strings['SearchQueryCartDetailsPlaceholder']);
-});
+
+    // Change android default params => make the app ios style(prettier)
+    // for android make the tabs to be at the bottom
+    $ionicConfigProvider.tabs.position('bottom');
+    $ionicConfigProvider.navBar.alignTitle('center');
+
+    });
