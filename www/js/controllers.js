@@ -45,6 +45,7 @@ angular.module('ComparePrices.controllers', [])
         $scope.c = {};
 
         $scope.c.currentCartName = "";
+        $scope.c.currentProductGroupName = "";
         $scope.c.isCurrentCartPredefined = 0;
         $scope.c.showSearchBar = 0;
         $scope.c.keyPressed = 0;
@@ -248,6 +249,87 @@ angular.module('ComparePrices.controllers', [])
         };
     })
 
+    .controller('ProductGroupsCtrl', function($scope, $resource, ComparePricesStorage, FindBestShops, ionicMaterialInk, ionicMaterialMotion) {
+
+        ComparePricesStorage.GetAllProductGroups(function(result) {
+            $scope.$apply(function() {
+                $scope.c.productGroupsInfo = result.rows;
+            })
+        });
+
+        $scope.OpenProductGroupDetails = function(productGroupID) {
+            setTimeout(function()
+            {
+                $scope.c.productGroupsInfo.forEach(function(singleProductGroup) {
+                    if (singleProductGroup['ProductGroupID'] == productGroupID)
+                    {
+                        $scope.c.currentProductGroupName = singleProductGroup['ProductGroupName'];
+                    }
+                });
+
+                location.href="#/tab/productGroups/products/" + productGroupID
+            },100)
+        };
+
+        // TODO: need to find an event when the list is ready
+        // ionicMaterialMotion - to have the carts animation
+        // ionicMaterialInk - material effect on buttons inside the ion-item
+        setTimeout(function(){
+//            ionicMaterialMotion.fadeSlideInRight();
+//            ionicMaterialMotion.fadeSlideIn();
+
+            //ionicMaterialInk.displayEffect();
+            ionicMaterialMotion.blinds();
+
+//            ionicMaterialMotion.ripple();
+        }, 1500);
+
+    })
+
+    .controller('ProductsCtrl', function($scope, $stateParams, $ionicHistory, ComparePricesStorage, FindBestShops, PopUpFactory, ComparePricesConstants, ImageCache, ionicMaterialMotion, ionicMaterialInk, $ionicFilterBar) {
+
+        $scope.myProductGroup = [];
+        $scope.productGroupID = $stateParams.productGroupID;
+
+        ComparePricesStorage.GetProductGroup($scope.productGroupID, function(result) {
+            $scope.$apply(function() {
+                $scope.myProductGroup = result.rows;
+                console.log($scope.myProductGroup);
+            });
+        });
+
+        $scope.FindBestShop = function(productID) {
+            if ($scope.c.lastAddress == '')
+            {
+                $scope.c.HandleAddressIsNotSet();
+            }
+            else
+            {
+                var structForFindBestShop = [];
+                for (var i=0; i < $scope.myProductGroup.length; i++) {
+                    if ($scope.myProductGroup[i]['ItemCode'] == productID) {
+                        structForFindBestShop['ItemCode'] = $scope.myProductGroup[i]['ItemCode'];
+                        structForFindBestShop['ItemName'] = $scope.myProductGroup[i]['ItemName'];
+                        structForFindBestShop['ImagePath'] = $scope.myProductGroup[i]['ImagePath'];
+                        structForFindBestShop['Amount'] = 1;
+                        break;
+                    }
+                }
+                FindBestShops($scope, [structForFindBestShop]);
+            }
+        };
+
+        // TODO: need to find an event when the list is ready
+        setTimeout(function(){
+//            ionicMaterialMotion.fadeSlideInRight();
+//            ionicMaterialMotion.fadeSlideIn();
+//            ionicMaterialInk.displayEffect();
+            ionicMaterialMotion.blinds();
+
+//            ionicMaterialMotion.ripple();
+        }, 1500);
+    })
+
     .controller('MyCartsCtrl', function($scope, $resource, $ionicPopup, PopUpFactory, ComparePricesStorage, ComparePricesConstants, FindBestShops, ionicMaterialInk, ionicMaterialMotion) {
 
         $scope.newCartName = "";
@@ -318,7 +400,9 @@ angular.module('ComparePrices.controllers', [])
                 }
                 else {
                     // check if location changed, if yes download new stores. After it find best shop
-                    FindBestShops($scope, cartID);
+                    ComparePricesStorage.GetMyCart(cartID, function (productsToCalculatePrice) {
+                        FindBestShops($scope, productsToCalculatePrice.rows);
+                    });
                 }
             }
         };
@@ -405,10 +489,16 @@ angular.module('ComparePrices.controllers', [])
         $scope.myCart      = [];
         $scope.cartID = $stateParams.cartID;
 
-        ComparePricesStorage.GetMyCarts($scope.cartID, function(result) {
+        ComparePricesStorage.GetMyCart($scope.cartID, function(result) {
             $scope.$apply(function() {
                 $scope.myCart = result.rows;
             });
+        });
+
+        // TODO: don't want to initalize this every time, need to do this only when we want to update
+        // the cart
+        ComparePricesStorage.GetAllProducts(function(result) {
+            $scope.data.allProducts = result.rows;
         });
 
         $scope.FindBestShop = function() {
@@ -419,7 +509,7 @@ angular.module('ComparePrices.controllers', [])
             else
             {
                 // check if location changed, if yes download new stores. After it find best shop
-                FindBestShops($scope, $scope.cartID);
+                FindBestShops($scope, $scope.myCart);
             }
         };
 
@@ -557,12 +647,6 @@ angular.module('ComparePrices.controllers', [])
                 }
             }
         };
-
-        // TODO: don't want to initalize this every time, need to do this only when we want to update
-        // the cart
-        ComparePricesStorage.GetAllProducts(function(result) {
-            $scope.data.allProducts = result.rows;
-        });
 
         // based on https://github.com/djett41/ionic-filter-bar
         $scope.ShowFilterBar = function () {

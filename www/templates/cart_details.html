@@ -11,9 +11,6 @@
 
     <ion-content class="content-bg" ng-class="{'has-subheader': !c.isCurrentCartPredefined && !c.showSearchBar}">
 
-        <!-- TODO: ask Karen why if I change it to ng-if it removes the buttons also(even if the buttons are not under ng-if
-         and the cart never comes back -->
-
         <ion-list class="list" show-delete="shouldShowDelete">
             <div collection-repeat="product in ((data.showSearchResults == true) ? data.allProductsFiltered : myCart)" divider-collection-repeat>
 

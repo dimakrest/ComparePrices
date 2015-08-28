@@ -259,9 +259,9 @@ angular.module('ComparePrices.services', ['ngResource'])
 
                             products = singleProductGroup['Products'];
 
-                            products.forEach(function(singleProduct) {
+                            products.forEach(function(singleProductID) {
                                 tx.executeSql('INSERT INTO tbProductsInProductGroups (ProductGroupID, ItemCode)' +
-                                'VALUES (' + lastProductGroupID + ', "' + singleProduct + '")');
+                                'VALUES (' + lastProductGroupID + ', "' + singleProductID + '")');
                             });
                             lastProductGroupID++;
                         });
@@ -326,7 +326,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 return d.promise;
             },
 
-            GetMyCarts: function (cartID, success, error) {
+            GetMyCart: function (cartID, success, error) {
                 var response = {};
                 response.rows = [];
                 db.transaction(function (tx) {
@@ -337,7 +337,29 @@ angular.module('ComparePrices.services', ['ngResource'])
                         'tbUserCarts.CartID AS CartID ' +
                         'FROM tbProducts JOIN tbUserCarts ON tbProducts.ItemCode=tbUserCarts.ItemCode ' +
                         'WHERE tbUserCarts.CartID = ' + cartID, [], function (tx, rawresults) {
-                        // TODO: do I need the rows thing? if yes wrap this code in some kind of a function
+                        var len = rawresults.rows.length;
+                        for (var i = 0; i < len; i++) {
+                            // Amount is changed in the cart, so I have to make a copy,
+                            // otherwise it doesn't work in Safari. The properties are immutable.
+                            response.rows.push(angular.copy(rawresults.rows.item(i)));
+                        }
+                        if (success) {
+                            success(response);
+                        }
+                    });
+                }, errorCB, successCB);
+                return response;
+            },
+
+            GetProductGroup: function (productGroupID, success, error) {
+                var response = {};
+                response.rows = [];
+                db.transaction(function (tx) {
+                    tx.executeSql('SELECT tbProducts.ItemCode AS ItemCode, ' +
+                                  'tbProducts.ItemName AS ItemName,' +
+                                  'tbProducts.ImagePath AS ImagePath ' +
+                                  'FROM tbProducts JOIN tbProductsInProductGroups ON tbProducts.ItemCode=tbProductsInProductGroups.ItemCode ' +
+                                  'WHERE tbProductsInProductGroups.ProductGroupID = ' + productGroupID, [], function (tx, rawresults) {
                         var len = rawresults.rows.length;
                         for (var i = 0; i < len; i++) {
                             // Amount is changed in the cart, so I have to make a copy,
@@ -381,13 +403,31 @@ angular.module('ComparePrices.services', ['ngResource'])
                 response.rows = [];
                 db.transaction(function (tx) {
                     tx.executeSql(sqlQuery, [], function (tx, rawresults) {
-                        // TODO: do I need the rows thing? if yes wrap this code in some kind of a function
                         var len = rawresults.rows.length;
                         console.log("GetAllCarts: " + len + " rows found.");
                         for (var i = 0; i < len; i++) {
                             singleItem = rawresults.rows.item(i);
+                            // Add IsChecked field
                             singleItem['IsChecked'] = false;
                             response.rows.push(singleItem)
+                        }
+                        if (success) {
+                            success(response)
+                        }
+                    });
+                });
+                return response
+            },
+
+            GetAllProductGroups: function (success) {
+                var sqlQuery = 'SELECT * FROM tbProductGroups;';
+                var response = {};
+                response.rows = [];
+                db.transaction(function (tx) {
+                    tx.executeSql(sqlQuery, [], function (tx, rawresults) {
+                        var len = rawresults.rows.length;
+                        for (var i = 0; i < len; i++) {
+                            response.rows.push(rawresults.rows.item(i))
                         }
                         if (success) {
                             success(response)
@@ -433,7 +473,6 @@ angular.module('ComparePrices.services', ['ngResource'])
                 var sqlQuery = "SELECT ChainID, StoreID, Lat, Lon FROM tbStoresLocation;";
                 db.transaction(function (tx) {
                     tx.executeSql(sqlQuery, [], function (tx, rawresults) {
-                        // TODO: do I need the rows thing? if yes wrap this code in some kind of a function
                         var len = rawresults.rows.length;
                         for (var i = 0; i < len; i++) {
                             var singleStore = rawresults.rows.item(i);
@@ -799,34 +838,32 @@ angular.module('ComparePrices.services', ['ngResource'])
             return d.promise;
         }
 
-        function FindBestShopPrivate ($scope, cartID) {
+        function FindBestShopPrivate ($scope, productsToCalculatePrice) {
             $scope.c.missingProducts = [];
             $scope.c.ShowLoading($scope.c.localize.strings['LookingForBestShop']);
             // closes opened accordions in best_shops.html
             $scope.c.ClearShowPriceDetailsForShop();
-            ComparePricesStorage.GetMyCarts(cartID, function (myCart) {
+            $scope.c.comparedProducts = [];
 
-                $scope.c.comparedProducts = [];
-                myCart.rows.forEach(function(singleProduct)
-                {
-                    $scope.c.comparedProducts[singleProduct.ItemCode] = [];
-                    $scope.c.comparedProducts[singleProduct.ItemCode]['Amount'] = singleProduct.Amount;
-                });
+            productsToCalculatePrice.forEach(function(singleProduct)
+            {
+                $scope.c.comparedProducts[singleProduct.ItemCode] = [];
+                $scope.c.comparedProducts[singleProduct.ItemCode]['Amount'] = singleProduct.Amount;
+            });
 
-                FindBestShopInRadius($scope, myCart.rows, $scope.c.rangeForShops).then(function (productsInfo) {
+            FindBestShopInRadius($scope, productsToCalculatePrice, $scope.c.rangeForShops).then(function (productsInfo) {
 
-                    for (var i=0; i < productsInfo.rows.length; i++) {
-                        $scope.c.comparedProducts[productsInfo.rows[i].ItemCode]['Image'] = productsInfo.rows[i].ImagePath;
-                        $scope.c.comparedProducts[productsInfo.rows[i].ItemCode]['Name'] = productsInfo.rows[i].ItemName;
-                    }
+                for (var i=0; i < productsInfo.rows.length; i++) {
+                    $scope.c.comparedProducts[productsInfo.rows[i].ItemCode]['Image'] = productsInfo.rows[i].ImagePath;
+                    $scope.c.comparedProducts[productsInfo.rows[i].ItemCode]['Name'] = productsInfo.rows[i].ItemName;
+                }
 
-                    $scope.c.HideLoading();
-                    ShowModal($scope, 'templates/best_shops.html');
-                })
+                $scope.c.HideLoading();
+                ShowModal($scope, 'templates/best_shops.html');
             });
         }
 
-        return function($scope, cartID) {
+        return function($scope, productsToCalculatePrice) {console.log(productsToCalculatePrice);
             $scope.c.shopsNearThatHaveNeededProducts = [];
             // user closed the app before all tables were created
             var updateStoreInfoCompleted = localStorage.getItem('UpdateStoreInfoCompleted');
@@ -836,7 +873,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 var myLon = localStorage.getItem('Lon');
                 UpdateStores.UpdateStoresInfo($scope, myLat, myLon, $scope.c.rangeForShops).then(function () {
                     $scope.c.HideLoading();
-                    FindBestShopPrivate($scope, cartID);
+                    FindBestShopPrivate($scope, productsToCalculatePrice);
                 });
             } else {
                 // if user wants to use his current location, need to check if his location changed
@@ -844,11 +881,11 @@ angular.module('ComparePrices.services', ['ngResource'])
                     $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
                     UpdateStores.UpdateStoresInfoIfRequired($scope).then(function() {
                         $scope.c.HideLoading();
-                        FindBestShopPrivate($scope, cartID);
+                        FindBestShopPrivate($scope, productsToCalculatePrice);
 
                     });
                 } else {
-                    FindBestShopPrivate($scope, cartID);
+                    FindBestShopPrivate($scope, productsToCalculatePrice);
                 }
             }
         }

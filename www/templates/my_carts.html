@@ -14,7 +14,7 @@
                 <h2 style="float:right">{{cartInfo['CartName']}}</h2>
                 <!-- want the color to be white and not dark blue -->
                 <label class="checkbox checkbox-stable">
-                    <input type="checkbox" ng-checked="cartInfo.IsChecked" ng-model="cartInfo.IsChecked" ng-click="ChangeCheckbox(); $event.stopPropagation()">
+                    <input type="checkbox" ng-checked="cartInfo.IsChecked" ng-model="cartInfo.IsChecked" ng-click="ChangeCheckbox(cartInfo['CartID']); $event.stopPropagation()">
                 </label>
             </a>
             <h3 class="item item-divider" style="text-align:right;">
