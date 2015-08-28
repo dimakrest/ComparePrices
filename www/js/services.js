@@ -12,8 +12,10 @@ angular.module('ComparePrices.services', ['ngResource'])
     .factory('ComparePricesStorage', ['ReadJson', 'MiscFunctions', '$q', '$resource',
         function (ReadJson, MiscFunctions, $q, $resource) {
 
-        var createUserCartsTbQuery  = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID INTEGER, ItemCode TEXT, Amount INTEGER)';
         var createCartsTbQuery      = 'CREATE TABLE IF NOT EXISTS tbCarts (CartID INTEGER PRIMARY KEY, CartName TEXT, ImageUrl TEXT, CheckboxColor TEXT, IsPredefined INTEGER)';
+        var createUserCartsTbQuery  = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID INTEGER, ItemCode TEXT, Amount INTEGER)';
+        var createProductGroupsTbQuery              = 'CREATE TABLE IF NOT EXISTS tbProductGroups (ProductGroupID INTEGER PRIMARY KEY, ProductGroupName TEXT, ImageUrl TEXT)';
+        var createProductsInProductGroupsTbQuery    = 'CREATE TABLE IF NOT EXISTS tbProductsInProductGroups (ProductGroupID INTEGER, ItemCode TEXT)';
 
         // TODO: database size + don't want to call init every time
         var db = openDatabase("ComparePricesDB", "1.0", "Global storage", 4 * 1024 * 1024); // TODO: check what happens when we exceed this limit
@@ -146,6 +148,8 @@ angular.module('ComparePrices.services', ['ngResource'])
         function initDB(tx) {
             tx.executeSql(createUserCartsTbQuery);
             tx.executeSql(createCartsTbQuery);
+            tx.executeSql(createProductGroupsTbQuery);
+            tx.executeSql(createProductsInProductGroupsTbQuery);
         }
 
         // TODO: add flag to mask all prints
@@ -211,8 +215,8 @@ angular.module('ComparePrices.services', ['ngResource'])
                 var lastCartID = 1;
                 var defer = $q.defer();
 
-                ReadJson.query({jsonName:'user_defined_carts'}, function (userCarts) {
-                    var carts = userCarts;
+                ReadJson.query({jsonName:'predefined_carts'}, function (predefinedCarts) {
+                    var carts = predefinedCarts;
                     var products;
 
                     db.transaction(function (tx) {
@@ -236,6 +240,38 @@ angular.module('ComparePrices.services', ['ngResource'])
                 });
 
                 localStorage.setItem('initPredefinedCarts', 0);
+                return defer.promise;
+            },
+
+            CreatePredefinedProducts: function ()
+            {
+                var lastProductGroupID = 1;
+                var defer = $q.defer();
+
+                ReadJson.query({jsonName:'predefined_products'}, function (predefinedProducts) {
+                    var productGroups = predefinedProducts;
+                    var products;
+
+                    db.transaction(function (tx) {
+                        productGroups.forEach(function(singleProductGroup) {
+                            tx.executeSql('INSERT INTO tbProductGroups (ProductGroupID, ProductGroupName, ImageUrl)' +
+                            'VALUES (' + lastProductGroupID + ', "' + singleProductGroup['ProductGroupName'] + '", "' + singleProductGroup['ImageUrl'] + '")');
+
+                            products = singleProductGroup['Products'];
+
+                            products.forEach(function(singleProduct) {
+                                tx.executeSql('INSERT INTO tbProductsInProductGroups (ProductGroupID, ItemCode)' +
+                                'VALUES (' + lastProductGroupID + ', "' + singleProduct + '")');
+                            });
+                            lastProductGroupID++;
+                        });
+
+                    }, errorCB, function(){
+                        defer.resolve();
+                    });
+                });
+
+                localStorage.setItem('initPredefinedProducts', 0);
                 return defer.promise;
             },
 
@@ -529,7 +565,7 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
     }])
 
-    .factory('FindBestShops', ['ComparePricesStorage', 'ComparePricesConstants', '$q', function(ComparePricesStorage, ComparePricesConstants, $q) {
+    .factory('FindBestShops', ['ComparePricesStorage', '$q', function(ComparePricesStorage, $q) {
 
         function CalculatePriceForShop(productCart, productPriceInStore) {
             var totalPrice = 0.0;
@@ -541,7 +577,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                         amount += productCart[i]['Amount'];
                     }
                 }
-                totalPrice += parseFloat(product['ItemPrice']) * amount
+                totalPrice += parseFloat(product['ItemPrice']) * amount;
             });
             return Math.round(totalPrice);
         }
@@ -723,7 +759,7 @@ angular.module('ComparePrices.services', ['ngResource'])
 
                 for (var i=0; i < suitableShops.length; i++)
                 {
-                    if (totalShops < ComparePricesConstants.MAX_SHOPS_TO_SHOW)
+                    if (totalShops < $scope.c.maxShopsToShow)
                     {
                         if (suitableShops[i]['CartPrice'] > minimalPrice)
                         {
@@ -744,7 +780,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                             totalShops++;
                         }
                         else {
-                            if (shopsOfSpecificBrand[brandName] < ComparePricesConstants.MAX_SHOPS_OF_THE_SAME_BRAND) {
+                            if (shopsOfSpecificBrand[brandName] < $scope.c.maxShopsOfTheSameBrand) {
                                 shopsOfSpecificBrand[brandName]++;
                                 //singleShopInfo.shopInfo['IsChecked'] = (singleShopInfo.shopInfo['CartPrice'] == minimumPrice);
                                 $scope.shopsNearThatHaveNeededProducts.push(suitableShops[i]);

@@ -1,0 +1,68 @@
+<ion-header-bar style="justify-content: space-between;" ng-if="!c.isCurrentCartPredefined && !c.showSearchBar && !c.keyPressed" class="bar bar-subheader item-input-inset">
+    <div>
+        <span style="color: cornflowerblue; margin-left:10px;  padding:10px;"  ng-hide="myCart.length == 0" ng-click="ToggleDeleteValue()">{{::c.localize.strings['RemoveProducts']}}</span>
+    </div>
+    <div>
+        <span style="color: cornflowerblue; margin-right:10px; padding:10px;" ng-click="ShowFilterBar()">{{::c.localize.strings['AddProduct']}}</span>
+    </div>
+</ion-header-bar>
+
+<ion-view view-title={{::c.currentCartName}}>
+
+    <ion-content class="content-bg" ng-class="{'has-subheader': !c.isCurrentCartPredefined && !c.showSearchBar}">
+
+        <!-- TODO: ask Karen why if I change it to ng-if it removes the buttons also(even if the buttons are not under ng-if
+         and the cart never comes back -->
+
+        <ion-list class="list" show-delete="shouldShowDelete">
+            <div collection-repeat="product in ((data.showSearchResults == true) ? data.allProductsFiltered : myCart)" divider-collection-repeat>
+
+                <div ng-if="data.showSearchResults">
+                    <ion-item class="item item-avatar-right">
+                        <img ng-src={{product['ImagePath']}}>
+                        <h2 style="text-align: right">{{product['ItemName']}}</h2>
+
+                        <div class="ionic-input-group">
+                            <span ng-if="product.Amount != 0" class="ionic-input-group-addon-left" ng-click="UpdateProductAmount(product, -1, false); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
+                            <label ng-if="product.Amount != 0" class="ionic-form-control">{{product["Amount"]}}</label>
+                            <span class="ionic-input-group-addon-right" ng-click="UpdateProductAmount(product, +1, false); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
+                        </div>
+                    </ion-item>
+                </div>
+
+                <ion-item ng-if="!data.showSearchResults && !c.keyPressed">
+                    <div class="item item-avatar-right">
+                        <img ng-src={{product['ImagePath']}}>
+
+                        <h2 style="text-align: right">{{product.ItemName}}</h2>
+
+                        <div class="ionic-input-group">
+                            <span class="ionic-input-group-addon-left" ng-click="UpdateProductAmount(product, -1, true); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
+                            <label class="ionic-form-control">{{ product["Amount"] }}</label>
+                            <span class="ionic-input-group-addon-right" ng-click="UpdateProductAmount(product, +1, true); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
+                        </div>
+                    </div>
+
+                    <ion-delete-button class="ion-minus-circled"
+                                       ng-click="DeleteProduct(product)">
+                    </ion-delete-button>
+                </ion-item>
+
+            </div>
+            <div ng-if="data.showSearchResults && data.allProductsFiltered !== undefined && !data.allProductsFiltered.length" class="no-results">
+                <p>{{::c.localize.strings['NoResults']}}</p>
+            </div>
+            <div ng-if="!data.showSearchResults && !c.keyPressed && !myCart.length" class="no-results">
+                <p>{{::c.localize.strings['NoProductsInCart']}}</p>
+            </div>
+
+
+        </ion-list>
+
+    </ion-content>
+</ion-view>
+
+<ion-footer-bar>
+    <button ng-click="FindBestShop()" class="button button-positive find-best-shop-button">Find best shop</button>
+    <button ng-hide="c.isCurrentCartPredefined" ng-click="DeleteCart()" class="button button-positive delete-cart-button">Delete cart</button>
+</ion-footer-bar>

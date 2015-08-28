@@ -75,7 +75,7 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                 templateUrl: "templates/my_carts.html",
                 controller: 'MyCartsCtrl',
                     resolve: {
-                        "ComparePrices": function (ComparePricesStorage)
+                        "CreatePredefinedCarts": function (ComparePricesStorage)
                         {
                             var initPredefinedCarts = localStorage.getItem('initPredefinedCarts') || 1;
                             if (initPredefinedCarts == 1) {
@@ -87,7 +87,6 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
             }
         })
 
-        // TODO: Do I need here a new view? How I can do this if I use here another nav view, nothing works
         .state('tabs.cartDetails', {
             url: "/myCarts/cartDetails/:cartID",
             views: {
@@ -96,7 +95,37 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                     controller: 'CartDetailsCtrl'
                 }
             }
-        });
+        })
+
+        .state('tabs.productGroups', {
+            url: "/productGroups",
+            views: {
+                'tabProducts': {
+                    templateUrl: "templates/product_groups.html",
+                    controller: 'ProductGroupsCtrl',
+                    resolve: {
+                        "CreatePredefinedProducts": function (ComparePricesStorage)
+                        {
+                            var initPredefinedProducts = localStorage.getItem('initPredefinedProducts') || 1;
+                            if (initPredefinedProducts == 1) {
+                                // initPredefinedProducts is changed to 0 inside CreatePredefinedProducts()
+                                return ComparePricesStorage.CreatePredefinedProducts();
+                            }
+                        }}
+                }
+            }
+        })
+
+        .state('tabs.products', {
+            url: "/productGroups/products/:productGroupID",
+            views: {
+                'tabProducts': {
+                    templateUrl: "templates/products.html",
+                    controller: 'ProductsCtrl'
+                }
+            }
+        })
+    ;
 
     // if none of the above states are matched, use this as the fallback
     $urlRouterProvider.otherwise('/tab/myCarts');

@@ -11,7 +11,8 @@
         'AddressPlaceHolder': 'הכנס כתובת',
         'FindLocationButton': 'חפש',
         'SearchQueryCartDetailsPlaceholder': 'הקלד שם מוצר',
-        'MyCartsTitle': 'סלים שלי',
+        'CompareCartsTitle': 'השוואת סלים',
+        'CompareProductsTitle': 'השוואת מוצרים',
         'CancelButton': 'בטל',
         'SaveButton': 'שמור',
         'EnterCartName': 'הכנס שם של סל',
@@ -36,6 +37,8 @@
         'StoreAddress': 'כתובת: ',
         'UpdatingListOfStores': '... מעדכן את רשימת החנויות',
         'LookingForBestShop': 'מחפש את החנות הזולה',
+        'MaxShopsToShow': 'כמה חנויות הזולות להציג בהשוואה',
+        'MaxShopsOfTheSameBrand': 'כמה חנויות הזולות מכל רשת להציג בהשוואה',
         'ToggleMyLocation': 'השתמש במיקום הנוכחי',
         'DistanceToShop': 'מרחק',
         'CancelSearch': 'ביטול',
@@ -51,6 +54,7 @@
         'NavigateToSettings': 'אפשר מיקומך',
         'UserDefinedCarts': 'סלים שלי',
         'PredefinedCarts': 'סלים מוגדרים מראש',
+        'PredefinedProductGroups': 'מוצרים פופולריים לפי מחלקות',
         'DoYouWantToOpenSettings':'האם אתה רוצה לפתוח הגדרות ולאשר את מיקומך?'
     };
 

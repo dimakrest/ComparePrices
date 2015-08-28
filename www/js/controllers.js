@@ -54,6 +54,9 @@ angular.module('ComparePrices.controllers', [])
         $scope.c.currentlyShopsDownloaded = 0;
         $scope.c.currentlyShopsDownloadedPercentage = 0;
         $scope.c.globalProgressLoadingPointer = "";
+        $scope.c.maxShopsToShow = ComparePricesConstants.DEFAULT_MAX_SHOPS_TO_SHOW;
+        $scope.c.maxShopsOfTheSameBrand = ComparePricesConstants.DEFAULT_MAX_SHOPS_OF_THE_SAME_BRAND;
+
 
         // init localization array
         $scope.c.localize = document.localize;

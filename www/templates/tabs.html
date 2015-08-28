@@ -1,7 +1,11 @@
 <ion-tabs class="tabs-icon-top tabs-dark">
 
-    <ion-tab title={{::c.localize.strings['MyCartsTitle']}} icon-off="ion-ios-paper-outline" icon-on="ion-ios-paper" href="#/tab/myCarts">
+    <ion-tab title={{::c.localize.strings['CompareCartsTitle']}} icon-off="ion-ios-cart-outline" icon-on="ion-ios-cart" href="#/tab/myCarts">
         <ion-nav-view name="tabMyCarts" ></ion-nav-view>
+    </ion-tab>
+
+    <ion-tab title={{::c.localize.strings['CompareProductsTitle']}} icon-off="ion-ios-nutrition-outline" icon-on="ion-ios-nutrition" href="#/tab/productGroups">
+        <ion-nav-view name="tabProducts" ></ion-nav-view>
     </ion-tab>
 
 </ion-tabs>
