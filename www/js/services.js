@@ -493,7 +493,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                         storeID  = storeID.substr(storeID.length - 3);
 
                         var tableName   = 'tb_' + singleShop['BrandName'] + '_' + singleShop['StoreID'];
-                        var fileName    =  'stores\/' + singleShop['BrandName'] + '\/price-' + singleShop['BrandName'] + '-' + storeID + '.json';
+                        var fileName    =  'stores\/' + singleShop['BrandName'] + '\/price-' + singleShop['BrandName'] + '-' + storeID + '.json.gz';
                         var chainID     = singleShop['ChainID'];
                         var storeID     = singleShop['StoreID'];
                         promises.push(CreateProductTableForSingleShop($scope, numOfShops, tableName, fileName, chainID, storeID));
