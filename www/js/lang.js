@@ -56,6 +56,7 @@
         'PredefinedCarts': 'סלים מוגדרים מראש',
         'PredefinedProductGroups': 'מוצרים פופולריים לפי מחלקות',
         'DoYouWantToOpenSettings':'האם אתה רוצה לפתוח הגדרות ולאשר את מיקומך?'
+        'NoInternetConnection' : 'אפליקציה זו דורשת חיבור לאינטרנט'
     };
 
     document.selectLanguage = function(lang)

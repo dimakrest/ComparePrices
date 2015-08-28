@@ -79,8 +79,19 @@ angular.module('ComparePrices.controllers', [])
                 s4() + '-' + s4() + s4() + s4();
         }
 
+        function CheckConnection() {
+            var networkState = navigator.connection.type;
+
+            if (networkState == Connection.NONE) {
+                var popUpText = $scope.c.localize.strings['NoInternetConnection'];
+                PopUpFactory.ErrorPopUp($scope, popUpText);
+            }
+        }
+
         // to distinguish real devices from development environment , we set a variable in local storage
         document.addEventListener("deviceready", function () {
+            // Check for internet connection
+            CheckConnection($scope);
             localStorage.setItem('IsRunningOnDevice', 1);
         }, false);
 
@@ -97,6 +108,9 @@ angular.module('ComparePrices.controllers', [])
         }, false);
 
         document.addEventListener("resume", function () {
+            // Check for internet connection
+            CheckConnection($scope);
+
             // app comes from background after user clicked settings button
             var userClickedSettingsLocation = localStorage.getItem('UserClickedSettingsLocation') || "0";
             userClickedSettingsLocation = (userClickedSettingsLocation == "1");
