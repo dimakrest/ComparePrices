@@ -1,4 +1,4 @@
-<ion-header-bar style="justify-content: space-between;" ng-if="!c.isCurrentCartPredefined && !c.showSearchBar && !c.keyPressed" class="bar bar-subheader item-input-inset">
+<ion-header-bar style="justify-content: space-between; -webkit-justify-content: space-between;" ng-if="!c.isCurrentCartPredefined && !c.showSearchBar && !c.keyPressed" class="bar bar-subheader item-input-inset">
     <div>
         <span style="color: cornflowerblue; margin-left:10px;  padding:10px;"  ng-hide="myCart.length == 0" ng-click="ToggleDeleteValue()">{{::c.localize.strings['RemoveProducts']}}</span>
     </div>
