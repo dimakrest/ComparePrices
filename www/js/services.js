@@ -447,8 +447,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     var sqlQuery = 'INSERT INTO tbCarts VALUES (' +
                         newCart['CartID'] + ', "' +
                         newCart['CartName'] + '", "' +
-                        newCart['ImageUrl'] + '", "' +
-                        '0)';
+                        newCart['ImageUrl'] + '", 0)';
 
                     db.transaction(function (tx) {
                         tx.executeSql(sqlQuery)
