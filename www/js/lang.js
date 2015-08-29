@@ -28,7 +28,6 @@
         'BestShopsHeader': 'השוואת מחירים',
         'FindBestShop': 'לבדוק מחירים',
         'ChooseYourAddressInSettings': 'קודם תבחר מיקומך בהגדרות',
-        'ChooseCartFirst': 'קודם תבחר סל',
         'MyAddress': 'כתובת שלי',
         'StoreName': 'שם רשת: ',
         'PriceInStore': 'מחיר: ',

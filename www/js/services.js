@@ -829,14 +829,12 @@ angular.module('ComparePrices.services', ['ngResource'])
                         if (typeof (shopsOfSpecificBrand[brandName]) == "undefined")
                         {
                             shopsOfSpecificBrand[brandName] = 1;
-                            //singleShopInfo.shopInfo['IsChecked'] = (singleShopInfo.shopInfo['CartPrice'] == minimumPrice);
                             $scope.c.shopsNearThatHaveNeededProducts.push(suitableShops[i]);
                             totalShops++;
                         }
                         else {
                             if (shopsOfSpecificBrand[brandName] < $scope.c.maxShopsOfTheSameBrand) {
                                 shopsOfSpecificBrand[brandName]++;
-                                //singleShopInfo.shopInfo['IsChecked'] = (singleShopInfo.shopInfo['CartPrice'] == minimumPrice);
                                 $scope.c.shopsNearThatHaveNeededProducts.push(suitableShops[i]);
                                 totalShops++;
                             }

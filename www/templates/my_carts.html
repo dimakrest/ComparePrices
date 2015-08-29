@@ -12,10 +12,6 @@
             <a class="item item-avatar-right" ng-repeat="cartInfo in c.myCartsInfo | filter:{ 'IsPredefined' : 0 } | orderBy:'-CartID'" ng-click="OpenCartDetails(cartInfo['CartID'])">
                 <img ng-src={{cartInfo['ImageUrl']}}>
                 <h2 style="float:right">{{cartInfo['CartName']}}</h2>
-                <!-- want the color to be white and not dark blue -->
-                <label class="checkbox checkbox-stable">
-                    <input type="checkbox" ng-checked="cartInfo.IsChecked" ng-model="cartInfo.IsChecked" ng-click="ChangeCheckbox(cartInfo['CartID']); $event.stopPropagation()">
-                </label>
             </a>
             <h3 class="item item-divider" style="text-align:right;">
                 {{::c.localize.strings['PredefinedCarts']}}
@@ -23,16 +19,8 @@
             <a class="item item-avatar-right" ng-repeat="cartInfo in c.myCartsInfo | filter:{ 'IsPredefined' : 1 }" ng-click="OpenCartDetails(cartInfo['CartID'])">
                 <img ng-src={{cartInfo['ImageUrl']}}>
                 <h2 style="float:right">{{cartInfo['CartName']}}</h2>
-                <!-- want the color to be white and not dark blue -->
-                <label class="checkbox checkbox-stable">
-                    <input type="checkbox" ng-checked="cartInfo.IsChecked" ng-model="cartInfo.IsChecked" ng-click="ChangeCheckbox(cartInfo['CartID']); $event.stopPropagation()">
-                </label>
             </a>
         </div>
 
     </ion-content>
 </ion-view>
-
-<ion-footer-bar>
-    <button ng-click="FindBestShop();" class="button button-fab button-flat button-positive find-best-shop-button" data-ink-color="#ff0000" data-ink-opacity=".8" >{{::c.localize.strings['FindBestShop']}}</button>
-</ion-footer-bar>

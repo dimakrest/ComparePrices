@@ -366,47 +366,6 @@ angular.module('ComparePrices.controllers', [])
             },100)
         };
 
-        $scope.ChangeCheckbox = function(CartID) {
-            $scope.c.myCartsInfo.forEach(function(singleCart) {
-                if (singleCart['CartID'] == CartID)
-                {
-                    singleCart['IsChecked'] = true;
-                }
-                else
-                {
-                    singleCart['IsChecked'] = false;
-                }
-            });
-        };
-
-        $scope.FindBestShop = function() {
-            if ($scope.c.lastAddress == '')
-            {
-                $scope.c.HandleAddressIsNotSet();
-            }
-            else
-            {
-                var cartID = 0;
-                $scope.c.myCartsInfo.forEach(function(singleCart) {
-                    if (singleCart['IsChecked']) {
-                        cartID = singleCart['CartID'];
-                    }
-                });
-
-                if (cartID == 0)
-                {
-                    var text  = $scope.c.localize.strings['ChooseCartFirst'];
-                    PopUpFactory.ErrorPopUp($scope, text);
-                }
-                else {
-                    // check if location changed, if yes download new stores. After it find best shop
-                    ComparePricesStorage.GetMyCart(cartID, function (productsToCalculatePrice) {
-                        FindBestShops($scope, productsToCalculatePrice.rows);
-                    });
-                }
-            }
-        };
-
         // TODO: return my popup and handle the response in calling function. same way as in confirm delete product
         // TODO: make pop-ups as service?
         $scope.CreateNewCart = function() {
@@ -529,7 +488,7 @@ angular.module('ComparePrices.controllers', [])
                             cartIndex = i;
                         }
                     }
-                    if (numOfUserCarts == 1) {  // user had last cart
+                    if ((numOfUserCarts == 1) && ($scope.c.myCartsInfo[cartIndex]['IsPredefined'] == 0)) {  // user had last cart and deletes it
                         $scope.c.hasUserCarts = 0;
                     }
                     if (cartIndex != -1) {

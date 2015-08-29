@@ -1,4 +1,4 @@
-<ion-header-bar style="justify-content: space-between; -webkit-justify-content: space-between;" ng-if="!c.isCurrentCartPredefined && !c.showSearchBar && !c.keyPressed" class="bar bar-subheader item-input-inset">
+<ion-header-bar style="justify-content: space-between; -webkit-justify-content: space-between;" ng-if="!c.showSearchBar && !c.keyPressed" class="bar bar-subheader item-input-inset">
     <div>
         <span style="color: cornflowerblue; margin-left:10px;  padding:10px;"  ng-hide="myCart.length == 0" ng-click="ToggleDeleteValue()">{{::c.localize.strings['RemoveProducts']}}</span>
     </div>
@@ -9,7 +9,7 @@
 
 <ion-view view-title={{::c.currentCartName}}>
 
-    <ion-content class="content-bg" ng-class="{'has-subheader': !c.isCurrentCartPredefined && !c.showSearchBar}">
+    <ion-content class="content-bg" ng-class="{'has-subheader': !c.showSearchBar}">
 
         <ion-list class="list" show-delete="shouldShowDelete">
             <div collection-repeat="product in ((data.showSearchResults == true) ? data.allProductsFiltered : myCart)" divider-collection-repeat>
@@ -60,6 +60,6 @@
 </ion-view>
 
 <ion-footer-bar>
-    <button ng-click="FindBestShop()" class="button button-positive find-best-shop-button">Find best shop</button>
-    <button ng-hide="c.isCurrentCartPredefined" ng-click="DeleteCart()" class="button button-positive delete-cart-button">Delete cart</button>
+    <button ng-click="FindBestShop()" class="button button-positive find-best-shop-button">{{::c.localize.strings['FindBestShop']}}</button>
+    <button ng-click="DeleteCart()" class="button button-positive delete-cart-button">{{::c.localize.strings['AreYouSureWantToDeleteCartTitle']}}</button>
 </ion-footer-bar>
