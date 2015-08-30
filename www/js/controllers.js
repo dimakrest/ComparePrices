@@ -188,6 +188,12 @@ angular.module('ComparePrices.controllers', [])
             }
         };
 
+        $scope.c.OpenWaze = function(lat, lng) {
+            if (((localStorage.getItem('IsRunningOnDevice') || "0") != "0")) {
+                WazeLink.open('waze://?ll=' + lat + ',' + lng);
+            }
+        };
+
         // TODO: need to restructure this, need to print the list in a pretty way
         $scope.c.ShareCartAndShopDetails = function() {
             var subject = 'Products List and shops info';
@@ -249,7 +255,7 @@ angular.module('ComparePrices.controllers', [])
         };
     })
 
-    .controller('ProductGroupsCtrl', function($scope, $resource, ComparePricesStorage, FindBestShops, ionicMaterialInk, ionicMaterialMotion) {
+    .controller('ProductGroupsCtrl', function($scope, ComparePricesStorage, ionicMaterialInk, ionicMaterialMotion) {
 
         ComparePricesStorage.GetAllProductGroups(function(result) {
             $scope.$apply(function() {
@@ -330,7 +336,7 @@ angular.module('ComparePrices.controllers', [])
         }, 1500);
     })
 
-    .controller('MyCartsCtrl', function($scope, $resource, $ionicPopup, PopUpFactory, ComparePricesStorage, ComparePricesConstants, FindBestShops, ionicMaterialInk, ionicMaterialMotion) {
+    .controller('MyCartsCtrl', function($scope, $resource, $ionicPopup, PopUpFactory, ComparePricesStorage, ComparePricesConstants, ionicMaterialInk, ionicMaterialMotion) {
 
         $scope.newCartName = "";
 
