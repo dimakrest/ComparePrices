@@ -37,6 +37,9 @@
                         <h4>{{::c.localize.strings['DistanceToStore']}} {{shop["Distance"]}} {{::c.localize.strings['Kilometer']}}</h4>
                     </div>
                     <i class="icon" ng-class="isDetailsShown($index) ? 'ion-android-arrow-dropup-circle' : 'ion-android-arrow-dropdown-circle'"></i>
+
+                    <button ng-click="c.OpenWaze(shop['Lat'], shop['Lon']); $event.stopPropagation()" class="waze-button"></button>
+
                 </ion-item>
 
                 <ion-item class="item-accordion" ng-repeat="product in shop.Products" ng-show="isDetailsShown(parentIndex)">
