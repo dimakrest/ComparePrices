@@ -138,4 +138,7 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
     $ionicConfigProvider.tabs.position('bottom');
     $ionicConfigProvider.navBar.alignTitle('center');
 
+    // disable cache it causes some errorns in the repoeat-collection directive and cached views
+    $ionicConfigProvider.views.maxCache(0);
+
     });
