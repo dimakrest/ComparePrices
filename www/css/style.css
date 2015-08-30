@@ -138,7 +138,7 @@ table.bottomBorder td { text-align:center; padding:3px;}
 
 .bar .button.find-best-shop-button, .bar .button.delete-cart-button, .bar .button.back-button {
     max-width: none;
-    width: auto;
+    width: 100px;
 }
 
 /* HERE STARTS POLYMER CSS */
@@ -1713,7 +1713,19 @@ a {
     background-position: 50% 50%;
     /* put the height and width of your image here */
     height: 35px;
-    width: 86px;
+    width: 94px;
+    border: none;
+    padding: 0px;
+    border-radius: 10px;
+}
+
+.maps-button {
+    background-image: url('../img/maps_button.png');
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    /* put the height and width of your image here */
+    height: 35px;
+    width: 94px;
     border: none;
     padding: 0px;
     border-radius: 10px;
