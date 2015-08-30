@@ -73,5 +73,13 @@
         },
         "is_top_level": true,
         "variables": {}
+    },
+    "uk.co.workingedge.phonegap.plugin.LaunchNavigator": {
+        "source": {
+            "type": "registry",
+            "id": "uk.co.workingedge.phonegap.plugin.launchnavigator"
+        },
+        "is_top_level": true,
+        "variables": {}
     }
 }

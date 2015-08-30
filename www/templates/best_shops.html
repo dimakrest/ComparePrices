@@ -39,6 +39,7 @@
                     <i class="icon" ng-class="isDetailsShown($index) ? 'ion-android-arrow-dropup-circle' : 'ion-android-arrow-dropdown-circle'"></i>
 
                     <button ng-click="c.OpenWaze(shop['Lat'], shop['Lon']); $event.stopPropagation()" class="waze-button"></button>
+                    <button ng-click="c.OpenGoogleMaps(shop['Lat'], shop['Lon']); $event.stopPropagation()" class="button button-positive find-best-shop-button">Open Google Maps</button>
 
                 </ion-item>
 
