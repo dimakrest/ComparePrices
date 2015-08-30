@@ -14,18 +14,16 @@
         <ion-list class="list" show-delete="shouldShowDelete">
             <div collection-repeat="product in ((data.showSearchResults == true) ? data.allProductsFiltered : myCart)" divider-collection-repeat>
 
-                <div ng-if="data.showSearchResults">
-                    <ion-item class="item item-avatar-right">
-                        <img ng-src={{product['ImagePath']}}>
-                        <h2 style="text-align: right">{{product['ItemName']}}</h2>
+                <ion-item ng-if="data.showSearchResults" class="item item-avatar-right">
+                    <img ng-src={{product['ImagePath']}}>
+                    <h2 style="text-align: right">{{product['ItemName']}}</h2>
 
-                        <div class="ionic-input-group">
-                            <span ng-if="product.Amount != 0" class="ionic-input-group-addon-left" ng-click="UpdateProductAmount(product, -1, false); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
-                            <label ng-if="product.Amount != 0" class="ionic-form-control">{{product["Amount"]}}</label>
-                            <span class="ionic-input-group-addon-right" ng-click="UpdateProductAmount(product, +1, false); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
-                        </div>
-                    </ion-item>
-                </div>
+                    <div class="ionic-input-group">
+                        <span ng-if="product.Amount != 0" class="ionic-input-group-addon-left" ng-click="UpdateProductAmount(product, -1, false); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
+                        <label ng-if="product.Amount != 0" class="ionic-form-control">{{product["Amount"]}}</label>
+                        <span class="ionic-input-group-addon-right" ng-click="UpdateProductAmount(product, +1, false); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
+                    </div>
+                </ion-item>
 
                 <ion-item ng-if="!data.showSearchResults && !c.keyPressed">
                     <div class="item item-avatar-right">

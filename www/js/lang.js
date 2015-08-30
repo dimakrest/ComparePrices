@@ -7,12 +7,11 @@
 
     var heb = {
         'Amount':'כמות:',
-        'AddedProduct': 'מוצר נוסף',
         'AddressPlaceHolder': 'הכנס כתובת',
         'FindLocationButton': 'חפש',
         'SearchQueryCartDetailsPlaceholder': 'הקלד שם מוצר',
-        'CompareCartsTitle': 'השוואת סלים',
-        'CompareProductsTitle': 'השוואת מוצרים',
+        'CompareCartsTitle': 'מחיר לסל',
+        'CompareProductsTitle': 'מחיר למוצר',
         'CancelButton': 'בטל',
         'SaveButton': 'שמור',
         'EnterCartName': 'הכנס שם של סל',
@@ -47,6 +46,7 @@
         'NoResults': 'לא נמצאו מוצרים',
         'NoProductsInCart': 'בינתיים אין מוצרים בסל',
         'AddProduct': 'הוסף מוצר',
+        'FindProduct': 'חפש מוצר',
         'RemoveProducts': 'מחק מוצרים',
         'LocationUpdatePopupText': 'האם אתה רוצה לעדכן את מיקומך?',
         'NavigateToSettings': 'אפשר מיקומך',

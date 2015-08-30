@@ -249,7 +249,19 @@ angular.module('ComparePrices.controllers', [])
         };
     })
 
-    .controller('ProductGroupsCtrl', function($scope, $resource, ComparePricesStorage, FindBestShops, ionicMaterialInk, ionicMaterialMotion) {
+    .controller('ProductGroupsCtrl', function($scope, $resource, ComparePricesStorage, FindBestShops, $ionicFilterBar, ionicMaterialInk, ionicMaterialMotion) {
+
+        // TODO: try to implement the bar without all structures
+        $scope.data = {};
+        $scope.data.allProducts         = [];
+        $scope.data.allProductsFiltered = [];
+        $scope.data.showSearchResults   = false;
+
+        // TODO: don't want to initalize this every time, need to do this only when we want to update
+        // the cart
+        ComparePricesStorage.GetAllProducts(function(result) {
+            $scope.data.allProducts = result.rows;
+        });
 
         ComparePricesStorage.GetAllProductGroups(function(result) {
             $scope.$apply(function() {
@@ -269,6 +281,56 @@ angular.module('ComparePrices.controllers', [])
 
                 location.href="#/tab/productGroups/products/" + productGroupID
             },100)
+        };
+
+        $scope.FindBestShop = function(productID, productName, productImage) {
+            if ($scope.c.lastAddress == '')
+            {
+                $scope.c.HandleAddressIsNotSet();
+            }
+            else
+            {
+                var structForFindBestShop = [];
+                structForFindBestShop['ItemCode'] = productID;
+                structForFindBestShop['ItemName'] = productName;
+                structForFindBestShop['ImagePath'] = productImage;
+                structForFindBestShop['Amount'] = 1;
+
+                FindBestShops($scope, [structForFindBestShop]);
+            }
+        };
+
+        // based on https://github.com/djett41/ionic-filter-bar
+        $scope.ShowFilterBar = function () {
+            $ionicFilterBar.show({
+                // items gets the array to filter
+                items: $scope.data.allProducts,
+                // this function is called when filtering is done
+                // we take filtered items and place items that already in cart in the top of the list
+                update: function (filteredItems) {
+                    $scope.c.showSearchBar = 1;
+                    $scope.data.showSearchResults   = true;
+                    $scope.data.allProductsFiltered = angular.copy(filteredItems);
+                },
+                // Called after the filterBar is removed. This can happen when the cancel button is pressed, the backdrop is tapped
+                // or swiped, or the back button is pressed.
+                cancel: function() {
+                    $scope.data.allProductsFiltered = [];
+                    $scope.data.showSearchResults = false;
+                    $scope.c.showSearchBar = 0;
+                    $scope.c.keyPressed = 0;
+                },
+                debounce: true,
+                cancelText: $scope.c.localize.strings['CancelSearch'],
+                delay: 500,
+                keyPressed: function () {
+                    // this function is needed to hide what is after backdrop, as backdrop dissappears immediately, and results come only after 500ms
+                    $scope.$apply(function() {
+                        $scope.c.keyPressed = 1;
+                    });
+                },
+                filterProperties: 'ItemName'
+            });
         };
 
         // TODO: need to find an event when the list is ready
@@ -622,6 +684,7 @@ angular.module('ComparePrices.controllers', [])
                     var numOfProductsInCart     = $scope.myCart.length;
                     var numOfFilteredProducts   = filteredItems.length;
 
+                    // Add products that appear in my cart
                     for (var i=0; i < numOfProductsInCart; i++) {
                         for (var j=0; j < numOfFilteredProducts; j++) {
                             if ($scope.myCart[i]['ItemCode'] == filteredItems[j]['ItemCode']) {
@@ -630,7 +693,7 @@ angular.module('ComparePrices.controllers', [])
                             }
                         }
                     }
-                    // Now add products that doesn't exist in the cart
+                    // Now add products that don't exist in the cart
                     for (var i=0; i < numOfFilteredProducts; i++) {
                         var singleProduct   = filteredItems[i];
                         var productFound    = false;
