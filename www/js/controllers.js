@@ -170,9 +170,11 @@ angular.module('ComparePrices.controllers', [])
         };
 
         $scope.c.ClearShowPriceDetailsForShop = function(){
-            for (var i=0; i<$scope.c.rangeForShops; i++) {
+            for (var i=0; i<$scope.c.maxShopsToShow; i++) {
                 $scope.c.showPriceDetailsForShop[i] = 0;
             }
+            // used for missing products
+            $scope.c.showPriceDetailsForShop[1000] = 0;
         };
 
         // toggle button allow my current location
