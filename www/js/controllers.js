@@ -46,7 +46,7 @@ angular.module('ComparePrices.controllers', [])
 
         $scope.c.currentCartName = "";
         $scope.c.currentProductGroupName = "";
-        $scope.c.isCurrentCartPredefined = 0;
+        $scope.c.isCurrentCartPredefined    = 0;
         $scope.c.showSearchBar = 0;
         $scope.c.keyPressed = 0;
         $scope.c.hasUserCarts = 0;
@@ -331,7 +331,7 @@ angular.module('ComparePrices.controllers', [])
                 update: function (filteredItems) {
                     $scope.c.showSearchBar = 1;
                     $scope.data.showSearchResults   = true;
-                    $scope.data.allProductsFiltered = angular.copy(filteredItems);
+                    $scope.data.allProductsFiltered = filteredItems;
                 },
                 // Called after the filterBar is removed. This can happen when the cancel button is pressed, the backdrop is tapped
                 // or swiped, or the back button is pressed.
