@@ -196,6 +196,21 @@ angular.module('ComparePrices.controllers', [])
             }
         };
 
+        $scope.c.OpenGoogleMaps = function(storeLat, storeLon) {
+                var myLat = localStorage.getItem('Lat');
+                var myLon = localStorage.getItem('Lon');
+
+                launchnavigator.navigate(
+                [storeLat, storeLon],
+                [myLat, myLon],
+                function () {
+                    alert("Plugin success");
+                },
+                function (error) {
+                    alert("Plugin error: " + error);
+                }, {preferGoogleMaps: true});
+        };
+
         // TODO: need to restructure this, need to print the list in a pretty way
         $scope.c.ShareCartAndShopDetails = function() {
             var subject = 'Products List and shops info';
