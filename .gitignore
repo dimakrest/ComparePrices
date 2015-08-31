@@ -5,7 +5,6 @@ node_modules/
 platforms/
 plugins/*
 !plugins/fetch.json
-*.json
 npm-debug.log
 workspace.xml
 www/img/no_item_pict.png
