@@ -57,24 +57,6 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
         }
     }
 }])
-
-.directive( 'elemReady', ['ionicMaterialMotion', function( ionicMaterialMotion ) {
-    return {
-        restrict: 'A',
-        link: function( $scope, elem, attrs ) {
-            elem.ready(function(){
-                setTimeout(function() {
-                    // Possible effects
-//            ionicMaterialMotion.fadeSlideInRight();
-//            ionicMaterialMotion.fadeSlideIn();
-//            ionicMaterialMotion.ripple();
-                    ionicMaterialMotion.blinds();
-                }, 400); // TODO: take into account num of elements
-            });
-        }
-    }
-}])
-
     // Need to add myCart -> this is a default page
 .config(function($stateProvider, $urlRouterProvider, $ionicFilterBarConfigProvider, $ionicConfigProvider) {
     $stateProvider

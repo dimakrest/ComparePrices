@@ -5,8 +5,8 @@
 
     <ion-content class="content-bg">
 
-        <div class="list animate-blinds" elem-ready>
-            <h1 ng-show=c.hasUserCarts class="item item-divider" style="text-align:right;">
+        <div class="list animate-blinds">
+            <h1 ng-if=c.hasUserCarts class="item item-divider" style="text-align:right;">
                 {{::c.localize.strings['UserDefinedCarts']}}
             </h1>
             <a class="item item-avatar-right" ng-repeat="cartInfo in c.myCartsInfo | filter:{ 'IsPredefined' : 0 } | orderBy:'-CartID'" ng-click="OpenCartDetails(cartInfo['CartID'])">

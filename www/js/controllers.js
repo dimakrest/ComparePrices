@@ -49,7 +49,6 @@ angular.module('ComparePrices.controllers', [])
         $scope.c.isCurrentCartPredefined    = 0;
         $scope.c.showSearchBar = 0;
         $scope.c.keyPressed = 0;
-        $scope.c.hasUserCarts = 0;
         $scope.c.comparedProducts = [];
         $scope.c.allProducts = [];
         $scope.c.showPriceDetailsForShop = [];
@@ -273,7 +272,7 @@ angular.module('ComparePrices.controllers', [])
         };
     })
 
-    .controller('ProductGroupsCtrl', function($scope, ComparePricesStorage, PrepareInfoForControllers, FindBestShops, $ionicFilterBar, ionicMaterialInk) {
+    .controller('ProductGroupsCtrl', function($scope, ComparePricesStorage, PrepareInfoForControllers, FindBestShops, $ionicFilterBar, ionicMaterialMotion, ionicMaterialInk) {
 
         // TODO: try to implement the bar without all structures
         $scope.data = {};
@@ -356,6 +355,12 @@ angular.module('ComparePrices.controllers', [])
                 filterProperties: 'ItemName'
             });
         };
+
+        $scope.$on('$ionicView.afterEnter', function(){
+            setTimeout(function() {
+                ionicMaterialMotion.blinds();
+            }, 50);
+        });
     })
 
     .controller('ProductsCtrl', function($scope, $stateParams, $ionicHistory, ComparePricesStorage, FindBestShops, PopUpFactory, ComparePricesConstants, ImageCache, ionicMaterialInk, $ionicFilterBar) {
@@ -394,10 +399,16 @@ angular.module('ComparePrices.controllers', [])
 
     .controller('MyCartsCtrl', function($scope, $resource, $ionicPopup, PopUpFactory, ComparePricesStorage, ComparePricesConstants, PrepareInfoForControllers, ionicMaterialInk, ionicMaterialMotion) {
 
+        ionicMaterialInk.displayEffect();
+
         $scope.newCartName = "";
 
-        $scope.c.myCartsInfo    = PrepareInfoForControllers.GetUserCarts();
-        $scope.c.hasUserCarts   = PrepareInfoForControllers.GetHasUserCarts();
+        if (typeof ($scope.c.myCartsInfo) == "undefined") {
+            $scope.c.myCartsInfo = PrepareInfoForControllers.GetUserCarts();
+        }
+        if (typeof ($scope.c.hasUserCarts) == "undefined") {
+            $scope.c.hasUserCarts = PrepareInfoForControllers.GetHasUserCarts();
+        }
 
         $scope.lastCartID = localStorage.getItem('lastCartID') || "100";
         $scope.lastCartID = parseInt($scope.lastCartID);
@@ -470,6 +481,12 @@ angular.module('ComparePrices.controllers', [])
                 }, 0);
             });
         };
+
+        $scope.$on('$ionicView.afterEnter', function(){
+            setTimeout(function() {
+                ionicMaterialMotion.blinds();
+            }, 50);
+        });
     })
 
     .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicHistory, PrepareInfoForControllers, ComparePricesStorage, FindBestShops, PopUpFactory, ComparePricesConstants, ImageCache, ionicMaterialInk, $ionicFilterBar) {
