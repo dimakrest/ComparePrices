@@ -3,12 +3,10 @@
     <ion-content class="content-bg">
 
         <div class="list">
-                <a ng-repeat="product in myProductGroup" ng-click="FindBestShop(product['ItemCode'])">
-                    <div class="item item-avatar-right">
-                        <img ng-src={{product['ImagePath']}}>
-                        <h2 style="text-align: right">{{product.ItemName}}</h2>
-                    </div>
-                </a>
+            <a class="item item-avatar-right" ng-repeat="product in myProductGroup" ng-click="FindBestShop(product['ItemCode'])">
+                <img ng-src={{product['ImagePath']}}>
+                <h2 style="text-align: right">{{product.ItemName}}</h2>
+            </a>
         </div>
 
     </ion-content>

@@ -563,7 +563,7 @@ angular.module('ComparePrices.services', ['ngResource'])
             }
         }])
 
-    .factory('PopUpFactory', ['$ionicLoading', '$ionicPopup', function($ionicLoading, $ionicPopup) {
+    .factory('PopUpFactory', ['$ionicLoading', '$timeout', '$ionicPopup', 'ionicMaterialInk', function($ionicLoading, $timeout, $ionicPopup, ionicMaterialInk) {
         return {
 
             ErrorPopUp: function($scope, popUpText, callback) {
@@ -572,12 +572,21 @@ angular.module('ComparePrices.services', ['ngResource'])
                     template: '<div style="text-align:right">' + popUpText + '</div>',
                     cssClass: 'non-transparent-pop-up'
                 });
+
+                $timeout(function() {
+                    ionicMaterialInk.displayEffect();
+                }, 0);
+
                 if (callback) {
                     alertPopup.then(callback);
                 }
             },
 
             ConfirmationPopUp: function($scope, popUpTitle, popUpText) {
+                $timeout(function() {
+                    ionicMaterialInk.displayEffect();
+                }, 0);
+
                 return $ionicPopup.confirm({
                     title: popUpTitle,
                     template: '<div style="text-align:right">' + popUpText + '</div>',

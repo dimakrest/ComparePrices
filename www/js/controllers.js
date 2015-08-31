@@ -41,7 +41,7 @@ angular.module('ComparePrices.controllers', [])
       };
     })
 
-    .controller('RootCtrl', function($scope, $ionicPopover, $ionicLoading, $timeout, $ionicSideMenuDelegate, PopUpFactory, ComparePricesStorage, ComparePricesConstants, UpdateStores, $cordovaGoogleAnalytics) {
+    .controller('RootCtrl', function($scope, $ionicLoading, $timeout, $ionicSideMenuDelegate, PopUpFactory, ComparePricesStorage, ComparePricesConstants, UpdateStores, $cordovaGoogleAnalytics) {
         $scope.c = {};
 
         $scope.c.currentCartName = "";
@@ -104,7 +104,6 @@ angular.module('ComparePrices.controllers', [])
             if (UUID == "")
             {
                 UUID = generateGuid();
-                console.log("UUID: " + UUID)
                 localStorage.setItem('UUID', UUID);
             }
             $cordovaGoogleAnalytics.setUserId(UUID);
@@ -359,11 +358,12 @@ angular.module('ComparePrices.controllers', [])
         $scope.$on('$ionicView.afterEnter', function(){
             setTimeout(function() {
                 ionicMaterialMotion.blinds();
+                ionicMaterialInk.displayEffect();
             }, 50);
         });
     })
 
-    .controller('ProductsCtrl', function($scope, $stateParams, $ionicHistory, ComparePricesStorage, FindBestShops, PopUpFactory, ComparePricesConstants, ImageCache, ionicMaterialInk, $ionicFilterBar) {
+    .controller('ProductsCtrl', function($scope, $stateParams, $ionicHistory, ComparePricesStorage, FindBestShops, PopUpFactory, ComparePricesConstants, ImageCache, ionicMaterialInk) {
 
         $scope.myProductGroup = [];
         $scope.productGroupID = $stateParams.productGroupID;
@@ -395,11 +395,15 @@ angular.module('ComparePrices.controllers', [])
                 FindBestShops($scope, [structForFindBestShop]);
             }
         };
+
+        $scope.$on('$ionicView.afterEnter', function(){
+            setTimeout(function() {
+                ionicMaterialInk.displayEffect();
+            }, 50);
+        });
     })
 
-    .controller('MyCartsCtrl', function($scope, $resource, $ionicPopup, PopUpFactory, ComparePricesStorage, ComparePricesConstants, PrepareInfoForControllers, ionicMaterialInk, ionicMaterialMotion) {
-
-        ionicMaterialInk.displayEffect();
+    .controller('MyCartsCtrl', function($scope, $timeout, $ionicPopup, PopUpFactory, ComparePricesStorage, ComparePricesConstants, PrepareInfoForControllers, ionicMaterialInk, ionicMaterialMotion) {
 
         $scope.newCartName = "";
 
@@ -437,6 +441,7 @@ angular.module('ComparePrices.controllers', [])
             var placeHolder = ($scope.lastCartID == 100) ? $scope.c.localize.strings['Cart'] : $scope.c.localize.strings['Cart'] + ' ' + ($scope.lastCartID - 99);
             var myPopup = $ionicPopup.show({
                 template: '<input style="text-align:right" type="text" ng-model="popupData.newCartName", placeholder="' + placeHolder + '">',
+                cssClass: 'non-transparent-pop-up',
                 title: $scope.c.localize.strings['EnterCartName'],
                 scope: $scope,
                 buttons: [
@@ -458,6 +463,9 @@ angular.module('ComparePrices.controllers', [])
                     }
                 ]
             });
+            $timeout(function() {
+                ionicMaterialInk.displayEffect();
+            }, 0);
             myPopup.then(function(res) {
                 if (res == 'CancelButtonPressed') {
                     return;
@@ -485,6 +493,7 @@ angular.module('ComparePrices.controllers', [])
         $scope.$on('$ionicView.afterEnter', function(){
             setTimeout(function() {
                 ionicMaterialMotion.blinds();
+                ionicMaterialInk.displayEffect();
             }, 50);
         });
     })
@@ -702,4 +711,10 @@ angular.module('ComparePrices.controllers', [])
                 filterProperties: 'ItemName'
             });
         };
+
+        $scope.$on('$ionicView.afterEnter', function(){
+            setTimeout(function() {
+                ionicMaterialInk.displayEffect();
+            }, 50);
+        });
 });
