@@ -65,37 +65,50 @@
       <ion-side-menu side="right">
 
           <div>
-              <h2 style="text-align:center; font-family: simpleHebrewFont;">{{::c.localize.strings['MyAddress']}}</h2>
+              <h2 style="text-align:center; font-family: simpleHebrewFont; margin-top:30px;">{{::c.localize.strings['Properties']}}</h2>
           </div>
 
-          <div class="item" style="color:#a3a3a3" ng-if="c.lastAddress != ''">
+          <!--Address section-->
+          <div style="text-align:right; margin-right: 20px">
+            {{::c.localize.strings['CurrentAddress']}}
+          </div>
+          <div style="color:#a3a3a3; text-align:right; margin-right: 30px; margin-top: 5px" ng-if="c.lastAddress != ''">
               {{c.lastAddress}}
           </div>
 
-          <!--<ion-toggle ng-model="airplaneMode" toggle-class="left-toggle-positive">{{::c.localize.strings['ToggleMyLocation']}}</ion-toggle>-->
-          <div class="item item-toggle">
-              <label class="toggle toggle-positive">
-                  <input type="checkbox" ng-checked="c.useUsersCurrentLocation" ng-model="c.useUsersCurrentLocation" ng-click="c.LocationToggleChanged()">
-                  <div class="track">
-                      <div class="handle"></div>
-                  </div>
-              </label>
-              <span>{{::c.localize.strings['ToggleMyLocation']}}</span>
-          </div>
+          <table style="width:95%; margin-top: 10px; margin-left: 10px">
+              <tr>
+                  <td style="width:80%;">
+                      <label class="toggle toggle-positive">
+                          <input type="checkbox" ng-checked="c.useUsersCurrentLocation" ng-model="c.useUsersCurrentLocation" ng-click="c.LocationToggleChanged()">
+                          <div class="track">
+                              <div class="handle"></div>
+                          </div>
+                      </label>
+                      <span style="float:right; padding-right:8px; padding-top:8px;">{{::c.localize.strings['ToggleMyLocation']}}</span>
+                  </td>
+                  <td rowspan="2" style="vertical-align: middle;">
+                    <div style="text-align:center;">
+                      {{::c.localize.strings['Or']}}
+                    </div>
+                  </td>
+              </tr>
+              <tr>
+                  <td>
+                      <div class="bar bar-header item-input-inset">
+                          <google-autocomplete></google-autocomplete>
+                      </div>
+                  </td>
+              </tr>
+          </table>
 
-          <div class="bar bar-header item-input-inset">
-              <google-autocomplete></google-autocomplete>
-              <button class="button button-clear">
-                  {{::c.localize.strings['FindLocationButton']}}
-              </button>
-          </div>
 
-          <div style="text-align: right; margin-right: 20px">
+          <!--Range inputs-->
+          <div style="text-align: right; margin-right: 20px; margin-top: 20px">
             <span> {{c.localize.strings['DistanceToShop']}}</span>
             <span> {{c.rangeForShops}} </span>
             <span> {{c.localize.strings['Kilometer']}}</span>
           </div>
-
           <div class="item range range-positive" style="border: none; ">
               <input type="range" min="5" max="20" value="c.rangeForShops" ng-model="c.rangeForShops" ng-change="c.UpdateRangeForShops()">
           </div>
