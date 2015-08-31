@@ -14,29 +14,67 @@
         <ion-list class="list" show-delete="shouldShowDelete">
             <div collection-repeat="product in ((data.showSearchResults == true) ? data.allProductsFiltered : myCart)" divider-collection-repeat>
 
-                <ion-item ng-if="data.showSearchResults" class="item item-avatar-right">
-                    <img ng-src={{product['ImagePath']}}>
-                    <h2 style="text-align: right">{{product['ItemName']}}</h2>
+                <ion-item ng-if="data.showSearchResults">
 
-                    <div class="ionic-input-group">
-                        <span ng-show="product.Amount != 0" class="ionic-input-group-addon-left" ng-click="UpdateProductAmount(product, -1, false); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
-                        <label ng-show="product.Amount != 0" class="ionic-form-control">{{product["Amount"]}}</label>
-                        <span ng-class="{'ionic-input-group-addon-right': product.Amount != 0, 'ionic-input-group-addon-center': product.Amount == 0}" ng-click="UpdateProductAmount(product, +1, false); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
-                    </div>
+                    <table style="table-layout: fixed; width:95%; margin-left: 10px">
+                        <tr style="height:72px;">
+                            <td style="vertical-align: middle; width:140px;">
+                                <div class="ionic-input-group">
+                                    <span ng-show="product.Amount != 0" class="ionic-input-group-addon-left" ng-click="UpdateProductAmount(product, -1, false); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
+                                    <label ng-show="product.Amount != 0" class="ionic-form-control">{{product["Amount"]}}</label>
+                                    <span ng-class="{'ionic-input-group-addon-right': product.Amount != 0, 'ionic-input-group-addon-center': product.Amount == 0}" ng-click="UpdateProductAmount(product, +1, false); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
+                                </div>
+                            </td>
+                            <td style="vertical-align: middle; word-wrap: break-word; text-align: right">
+                                <h2 style="text-align: right">{{product['ItemName']}}</h2>
+                            </td>
+                            <td align="center" style="vertical-align: middle; width: 70px">
+                                <img style="width: 40px; height: 40px;" ng-src={{product['ImagePath']}}>
+                            </td>
+
+                        </tr>
+                    </table>
+
+
+
+
+                    <!--<h2 style="text-align: right">{{product['ItemName']}}</h2>-->
+
+                    <!--<div class="ionic-input-group">-->
+                        <!--<span ng-show="product.Amount != 0" class="ionic-input-group-addon-left" ng-click="UpdateProductAmount(product, -1, false); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>-->
+                        <!--<label ng-show="product.Amount != 0" class="ionic-form-control">{{product["Amount"]}}</label>-->
+                        <!--<span ng-class="{'ionic-input-group-addon-right': product.Amount != 0, 'ionic-input-group-addon-center': product.Amount == 0}" ng-click="UpdateProductAmount(product, +1, false); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>-->
+                    <!--</div>-->
                 </ion-item>
 
                 <ion-item ng-if="!data.showSearchResults && !c.keyPressed">
-                    <div class="item item-avatar-right">
-                        <img ng-src={{product['ImagePath']}}>
+                        <table style="table-layout: fixed; width:95%; margin-left: 10px">
+                            <tr style="height:72px;">
+                                <td style="vertical-align: middle; width:140px;">
+                                    <div class="ionic-input-group">
+                                        <span class="ionic-input-group-addon-left" ng-click="UpdateProductAmount(product, -1, true); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
+                                        <label class="ionic-form-control">{{ product["Amount"] }}</label>
+                                        <span class="ionic-input-group-addon-right" ng-click="UpdateProductAmount(product, +1, true); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
+                                    </div>
+                                </td>
+                                <td style="vertical-align: middle; word-wrap: break-word; text-align: right">
+                                    {{product.ItemName}}
+                                </td>
+                                <td align="center" style="vertical-align: middle; width: 70px">
+                                    <img style="width: 40px; height: 40px;" ng-src={{product['ImagePath']}}>
+                                </td>
 
-                        <h2 style="text-align: right">{{product.ItemName}}</h2>
+                            </tr>
+                        </table>
 
-                        <div class="ionic-input-group">
-                            <span class="ionic-input-group-addon-left" ng-click="UpdateProductAmount(product, -1, true); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
-                            <label class="ionic-form-control">{{ product["Amount"] }}</label>
-                            <span class="ionic-input-group-addon-right" ng-click="UpdateProductAmount(product, +1, true); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
-                        </div>
-                    </div>
+
+                        <!--<h2 style="text-align: right">{{product.ItemName}}</h2>-->
+
+                        <!--<div class="ionic-input-group">-->
+                            <!--<span class="ionic-input-group-addon-left" ng-click="UpdateProductAmount(product, -1, true); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>-->
+                            <!--<label class="ionic-form-control">{{ product["Amount"] }}</label>-->
+                            <!--<span class="ionic-input-group-addon-right" ng-click="UpdateProductAmount(product, +1, true); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>-->
+                        <!--</div>-->
 
                     <ion-delete-button class="ion-minus-circled"
                                        ng-click="DeleteProduct(product)">
@@ -57,11 +95,11 @@
     </ion-content>
 </ion-view>
 
-<ion-footer-bar style="justify-content: space-between; -webkit-justify-content: space-between;" class="effectFooter" >
-    <div ng-click="FindBestShop()" class="box effect1">
+<ion-footer-bar ng-if="!c.showSearchBar && !c.keyPressed" style="justify-content: space-between; -webkit-justify-content: space-between;" class="effectFooter" >
+    <div ng-click="FindBestShop()" class="box effect1 button-fab">
         {{::c.localize.strings['FindBestShop']}}
     </div>
-    <div ng-click="DeleteCart()" class="box effect1" style="background-color: #cd3a3d; border: 1px solid #d42a07;">
+    <div ng-click="DeleteCart()" class="box effect1 button-fab" style="background-color: #cd3a3d; border: 1px solid #d42a07;">
         {{::c.localize.strings['AreYouSureWantToDeleteCartTitle']}}
     </div>
 </ion-footer-bar>
