@@ -49,7 +49,6 @@ angular.module('ComparePrices.controllers', [])
         $scope.c.isCurrentCartPredefined    = 0;
         $scope.c.showSearchBar = 0;
         $scope.c.keyPressed = 0;
-        $scope.c.hasUserCarts = 0;
         $scope.c.comparedProducts = [];
         $scope.c.allProducts = [];
         $scope.c.showPriceDetailsForShop = [];
@@ -399,6 +398,8 @@ angular.module('ComparePrices.controllers', [])
     })
 
     .controller('MyCartsCtrl', function($scope, $resource, $ionicPopup, PopUpFactory, ComparePricesStorage, ComparePricesConstants, PrepareInfoForControllers, ionicMaterialInk, ionicMaterialMotion) {
+
+        ionicMaterialInk.displayEffect();
 
         $scope.newCartName = "";
 
