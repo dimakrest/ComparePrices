@@ -1018,6 +1018,94 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
     }])
 
+    .factory('PrepareInfoForControllers', ['$q', 'ComparePricesStorage', function($q, ComparePricesStorage) {
+        var _hasUserCarts       = 0;
+        var _myCartsInfo        = [];
+        var _myCart             = [];
+        var _productGroupsInfo  = [];
+
+        return {
+            'InitUserCarts': function(initPredefinedCarts) {
+                var defer = $q.defer();
+                if (initPredefinedCarts == 1) {
+                    ComparePricesStorage.CreatePredefinedCarts().then(function() {
+                        ComparePricesStorage.GetAllCarts(function (result) {
+                            _myCartsInfo = result.rows;
+                            // check if user has own carts
+                            var numOfCarts = _myCartsInfo.length;
+                            for (var i = 0; i < numOfCarts; i++) {
+                                if (_myCartsInfo[i]['IsPredefined'] == 0) {
+                                    _hasUserCarts = 1;
+                                    break;
+                                }
+                            }
+                            defer.resolve();
+                        });
+                    });
+                } else {
+                    ComparePricesStorage.GetAllCarts(function (result) {
+                        _myCartsInfo = result.rows;
+                        // check if user has own carts
+                        var numOfCarts = _myCartsInfo.length;
+                        for (var i = 0; i < numOfCarts; i++) {
+                            if (_myCartsInfo[i]['IsPredefined'] == 0) {
+                                _hasUserCarts = 1;
+                                break;
+                            }
+                        }
+                        defer.resolve();
+                    });
+                }
+                return defer.promise;
+            },
+
+            InitMyCart : function(cartID) {
+                var defer = $q.defer();
+
+                ComparePricesStorage.GetMyCart(cartID, function(result) {
+                    _myCart = result.rows;
+                    defer.resolve();
+                });
+                return defer.promise;
+            },
+
+            InitProductGroups : function(initPredefinedProducts) {
+                var defer = $q.defer();
+
+                if (initPredefinedProducts == 1) {
+                    ComparePricesStorage.CreatePredefinedProducts().then(function() {
+                        ComparePricesStorage.GetAllProductGroups(function (result) {
+                            _productGroupsInfo = result.rows;
+                            defer.resolve();
+                        });
+                    });
+                } else {
+                    ComparePricesStorage.GetAllProductGroups(function (result) {
+                        _productGroupsInfo = result.rows;
+                        defer.resolve();
+                    });
+                }
+                return defer.promise;
+            },
+
+            'GetUserCarts' : function() {
+                return _myCartsInfo;
+            },
+
+            GetHasUserCarts : function() {
+                return _hasUserCarts;
+            },
+
+            GetMyCart : function() {
+                return _myCart;
+            },
+
+            GetProductGroups : function() {
+                return _productGroupsInfo;
+            }
+        }
+    }])
+
     .factory('UpdateStores', ['$q', '$ionicSideMenuDelegate', 'GoogleReverseGeocoding', 'MiscFunctions', 'ComparePricesConstants', 'ComparePricesStorage', 'PopUpFactory', '$cordovaGoogleAnalytics', function($q, $ionicSideMenuDelegate, GoogleReverseGeocoding, MiscFunctions, ComparePricesConstants, ComparePricesStorage, PopUpFactory, $cordovaGoogleAnalytics) {
 
         function ReverseGeocodingAndUpdateStore($scope, lat, lon) {
