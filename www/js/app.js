@@ -69,7 +69,7 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
 //            ionicMaterialMotion.fadeSlideIn();
 //            ionicMaterialMotion.ripple();
                     ionicMaterialMotion.blinds();
-                }, 400); // TODO: take into account num of elements
+                }, 850); // TODO: take into account num of elements
             });
         }
     }
