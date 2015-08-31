@@ -1,4 +1,4 @@
-<ion-header-bar style="justify-content: space-between; -webkit-justify-content: space-between;" ng-if="!c.showSearchBar && !c.keyPressed" class="bar bar-subheader item-input-inset">
+<ion-header-bar style="justify-content: space-between; -webkit-justify-content: space-between;" ng-if="!c.showSearchBar && !c.keyPressed" class="bar bar-subheader item-input-inset effectSubHeader">
     <div>
         <span style="color: cornflowerblue; margin-left:10px;  padding:10px;"  ng-hide="myCart.length == 0" ng-click="ToggleDeleteValue()">{{::c.localize.strings['RemoveProducts']}}</span>
     </div>
@@ -19,9 +19,9 @@
                     <h2 style="text-align: right">{{product['ItemName']}}</h2>
 
                     <div class="ionic-input-group">
-                        <span ng-if="product.Amount != 0" class="ionic-input-group-addon-left" ng-click="UpdateProductAmount(product, -1, false); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
-                        <label ng-if="product.Amount != 0" class="ionic-form-control">{{product["Amount"]}}</label>
-                        <span class="ionic-input-group-addon-right" ng-click="UpdateProductAmount(product, +1, false); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
+                        <span ng-show="product.Amount != 0" class="ionic-input-group-addon-left" ng-click="UpdateProductAmount(product, -1, false); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
+                        <label ng-show="product.Amount != 0" class="ionic-form-control">{{product["Amount"]}}</label>
+                        <span ng-class="{'ionic-input-group-addon-right': product.Amount != 0, 'ionic-input-group-addon-center': product.Amount == 0}" ng-click="UpdateProductAmount(product, +1, false); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
                     </div>
                 </ion-item>
 
@@ -57,7 +57,11 @@
     </ion-content>
 </ion-view>
 
-<ion-footer-bar style="justify-content: space-around; -webkit-justify-content: space-around;">
-    <button ng-click="FindBestShop()" class="button button-positive find-best-shop-button">{{::c.localize.strings['FindBestShop']}}</button>
-    <button ng-click="DeleteCart()" class="button button-positive delete-cart-button">{{::c.localize.strings['AreYouSureWantToDeleteCartTitle']}}</button>
+<ion-footer-bar style="justify-content: space-between; -webkit-justify-content: space-between;" class="effectFooter" >
+    <div ng-click="FindBestShop()" class="box effect1">
+        {{::c.localize.strings['FindBestShop']}}
+    </div>
+    <div ng-click="DeleteCart()" class="box effect1">
+        {{::c.localize.strings['AreYouSureWantToDeleteCartTitle']}}
+    </div>
 </ion-footer-bar>

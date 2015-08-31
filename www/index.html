@@ -50,7 +50,7 @@
   <ion-side-menus enable-menu-with-back-views="true">
       <!-- Center content -->
       <ion-side-menu-content>
-          <ion-nav-bar class="bar-positive" back-button-type="button-icon" back-button-icon="ion-arrow-left-c">
+          <ion-nav-bar class="bar-positive effectHeader" back-button-type="button-icon" back-button-icon="ion-arrow-left-c">
               <ion-nav-back-button>
               </ion-nav-back-button>
               <ion-nav-buttons side="right">
@@ -67,20 +67,11 @@
       <ion-side-menu side="right">
 
           <div>
-              <h2 style="text-align:center">{{::c.localize.strings['MyAddress']}}</h2>
+              <h2 style="text-align:center; font-family: simpleHebrewFont;">{{::c.localize.strings['MyAddress']}}</h2>
           </div>
 
           <div class="item" style="color:#a3a3a3" ng-if="c.lastAddress != ''">
               {{c.lastAddress}}
-          </div>
-
-          <div>
-            <span> {{c.localize.strings['DistanceToShop']}}</span>
-            <span> {{c.rangeForShops}} </span>
-          </div>
-
-          <div class="item range range-positive" style="border: none">
-              <input type="range" min="5" max="20" value="c.rangeForShops" ng-model="c.rangeForShops" ng-change="c.UpdateRangeForShops()">
           </div>
 
           <!--<ion-toggle ng-model="airplaneMode" toggle-class="left-toggle-positive">{{::c.localize.strings['ToggleMyLocation']}}</ion-toggle>-->
@@ -101,7 +92,17 @@
               </button>
           </div>
 
-          <div>
+          <div style="text-align: right; margin-right: 20px">
+            <span> {{c.localize.strings['DistanceToShop']}}</span>
+            <span> {{c.rangeForShops}} </span>
+            <span> {{c.localize.strings['Kilometer']}}</span>
+          </div>
+
+          <div class="item range range-positive" style="border: none; ">
+              <input type="range" min="5" max="20" value="c.rangeForShops" ng-model="c.rangeForShops" ng-change="c.UpdateRangeForShops()">
+          </div>
+
+          <div style="text-align: right; margin-right: 20px">
               <span> {{c.localize.strings['MaxShopsToShow']}}</span>
               <span> {{c.maxShopsToShow}} </span>
           </div>
@@ -109,7 +110,7 @@
               <input type="range" min="5" max="20" value="c.maxShopsToShow" ng-model="c.maxShopsToShow">
           </div>
 
-          <div>
+          <div style="text-align: right; margin-right: 20px">
               <span> {{c.localize.strings['MaxShopsOfTheSameBrand']}}</span>
               <span> {{c.maxShopsOfTheSameBrand}} </span>
           </div>
