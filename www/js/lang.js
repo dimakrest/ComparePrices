@@ -44,6 +44,7 @@
         'LocationUpdatePopupTitle': 'עידכון מיקום',
         'NoResults': 'לא נמצאו מוצרים',
         'NoProductsInCart': 'בינתיים אין מוצרים בסל',
+        'NoShopWithSuchItemInTheArea': 'באיזור שלך לא נמצא חנות הכולל את המוצר',
         'AddProduct': 'הוסף מוצר',
         'FindProduct': 'חפש מוצר',
         'RemoveProducts': 'מחק מוצר',

@@ -619,7 +619,7 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
     }])
 
-    .factory('FindBestShops', ['ComparePricesStorage', 'UpdateStores', 'ShowModal', '$q', function(ComparePricesStorage, UpdateStores, ShowModal, $q) {
+    .factory('FindBestShops', ['ComparePricesStorage', 'UpdateStores', 'ShowModal', 'PopUpFactory', '$q', function(ComparePricesStorage, UpdateStores, ShowModal, PopUpFactory, $q) {
 
         function CalculatePriceForShop(productCart, productPriceInStore) {
             var totalPrice = 0.0;
@@ -867,13 +867,22 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             FindBestShopInRadius($scope, productsToCalculatePrice, $scope.c.rangeForShops).then(function (productsInfo) {
 
-                for (var i=0; i < productsInfo.rows.length; i++) {
+                for (var i = 0; i < productsInfo.rows.length; i++) {
                     $scope.c.comparedProducts[productsInfo.rows[i].ItemCode]['Image'] = productsInfo.rows[i].ImagePath;
                     $scope.c.comparedProducts[productsInfo.rows[i].ItemCode]['Name'] = productsInfo.rows[i].ItemName;
                 }
 
                 $scope.c.HideLoading();
-                ShowModal($scope, 'templates/best_shops.html');
+                // no items found
+                if ($scope.c.missingProducts.length == productsInfo.rows.length)
+                {
+                        var text  = $scope.c.localize.strings['NoShopWithSuchItemInTheArea'];
+                        PopUpFactory.ErrorPopUp($scope, text, function() {});
+                }
+                else
+                {
+                    ShowModal($scope, 'templates/best_shops.html');
+                }
             });
         }
 
