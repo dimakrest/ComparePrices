@@ -58,6 +58,23 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
     }
 }])
 
+.directive( 'elemReady', ['ionicMaterialMotion', function( ionicMaterialMotion ) {
+    return {
+        restrict: 'A',
+        link: function( $scope, elem, attrs ) {
+            elem.ready(function(){
+                setTimeout(function() {
+                    // Possible effects
+//            ionicMaterialMotion.fadeSlideInRight();
+//            ionicMaterialMotion.fadeSlideIn();
+//            ionicMaterialMotion.ripple();
+                    ionicMaterialMotion.blinds();
+                }, 400); // TODO: take into account num of elements
+            });
+        }
+    }
+}])
+
     // Need to add myCart -> this is a default page
 .config(function($stateProvider, $urlRouterProvider, $ionicFilterBarConfigProvider, $ionicConfigProvider) {
     $stateProvider
@@ -75,13 +92,10 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                 templateUrl: "templates/my_carts.html",
                 controller: 'MyCartsCtrl',
                     resolve: {
-                        "CreatePredefinedCarts": function (ComparePricesStorage)
+                        "CreatePredefinedCarts": function (ComparePricesStorage, PrepareInfoForControllers)
                         {
                             var initPredefinedCarts = localStorage.getItem('initPredefinedCarts') || 1;
-                            if (initPredefinedCarts == 1) {
-                                // initPredefinedCarts is changed to 0 inside CreatePredefinedCarts()
-                                return ComparePricesStorage.CreatePredefinedCarts();
-                            }
+                            return PrepareInfoForControllers.InitUserCarts(initPredefinedCarts);
                         }}
                 }
             }
@@ -92,7 +106,12 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
             views: {
                 'tabMyCarts': {
                     templateUrl: "templates/cart_details.html",
-                    controller: 'CartDetailsCtrl'
+                    controller: 'CartDetailsCtrl',
+                    resolve: {
+                        "InitMyCart" : function(PrepareInfoForControllers, $stateParams) {
+                            return PrepareInfoForControllers.InitMyCart($stateParams.cartID);
+                        }
+                    }
                 }
             }
         })
@@ -104,13 +123,10 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                     templateUrl: "templates/product_groups.html",
                     controller: 'ProductGroupsCtrl',
                     resolve: {
-                        "CreatePredefinedProducts": function (ComparePricesStorage)
+                        "InitPredefinedProducts": function (PrepareInfoForControllers)
                         {
                             var initPredefinedProducts = localStorage.getItem('initPredefinedProducts') || 1;
-                            if (initPredefinedProducts == 1) {
-                                // initPredefinedProducts is changed to 0 inside CreatePredefinedProducts()
-                                return ComparePricesStorage.CreatePredefinedProducts();
-                            }
+                            return PrepareInfoForControllers.InitProductGroups(initPredefinedProducts);
                         }}
                 }
             }
