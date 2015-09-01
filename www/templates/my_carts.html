@@ -5,22 +5,30 @@
 
     <ion-content class="content-bg">
 
-        <div class="list animate-blinds">
-            <h1 ng-if=c.hasUserCarts class="item item-divider" style="text-align:right;">
-                {{::c.localize.strings['UserDefinedCarts']}}
-            </h1>
-            <a class="item item-avatar-right" ng-repeat="cartInfo in c.myCartsInfo | filter:{ 'IsPredefined' : 0 } | orderBy:'-CartID'" ng-click="OpenCartDetails(cartInfo['CartID'])">
-                <img ng-src={{cartInfo['ImageUrl']}}>
-                <h2 style="float:right">{{cartInfo['CartName']}}</h2>
-            </a>
-            <h1 class="item item-divider" style="text-align:right;">
-                {{::c.localize.strings['PredefinedCarts']}}
-            </h1>
-            <a class="item item-avatar-right" ng-repeat="cartInfo in c.myCartsInfo | filter:{ 'IsPredefined' : 1 }" ng-click="OpenCartDetails(cartInfo['CartID'])">
-                <img ng-src={{cartInfo['ImageUrl']}}>
-                <h2 style="float:right">{{cartInfo['CartName']}}</h2>
-            </a>
-        </div>
+
+            <div ng-if=c.hasUserCarts class="animate-blinds card">
+
+                <h1 class="item item-divider" style="text-align:right; background-color: rgb(215, 225, 255);">
+                    {{::c.localize.strings['UserDefinedCarts']}}
+                </h1>
+
+                <a class="item item-avatar-right" ng-repeat="cartInfo in c.myCartsInfo | filter:{ 'IsPredefined' : 0 } | orderBy:'-CartID'" ng-click="OpenCartDetails(cartInfo['CartID'])">
+                    <img ng-src={{cartInfo['ImageUrl']}}>
+                    <h2 style="text-align:right;">{{cartInfo['CartName']}}</h2>
+                </a>
+            </div>
+
+            <div class="animate-blinds card">
+                <h1 class="item item-divider" style="text-align:right; background-color: rgb(215, 225, 255);">
+                    {{::c.localize.strings['PredefinedCarts']}}
+                </h1>
+
+                <a class="item item-avatar-right" ng-repeat="cartInfo in c.myCartsInfo | filter:{ 'IsPredefined' : 1 }" ng-click="OpenCartDetails(cartInfo['CartID'])">
+                    <img ng-src={{cartInfo['ImageUrl']}}>
+                    <h2 style="text-align:right;">{{cartInfo['CartName']}}</h2>
+                </a>
+            </div>
+
 
     </ion-content>
 </ion-view>

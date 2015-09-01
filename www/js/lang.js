@@ -51,7 +51,7 @@
         'LocationUpdatePopupText': 'האם אתה רוצה לעדכן את מיקומך?',
         'NavigateToSettings': 'אפשר מיקומך',
         'UserDefinedCarts': 'סלים שלי',
-        'PredefinedCarts': 'סלים מוגדרים מראש',
+        'PredefinedCarts': 'סלים לדוגמא',
         'PredefinedProductGroups': 'מוצרים פופולריים לפי מחלקות',
         'DoYouWantToOpenSettings':'האם אתה רוצה לפתוח הגדרות ולאשר את מיקומך?',
         'NoInternetConnection' : 'אפליקציה זו דורשת חיבור לאינטרנט'

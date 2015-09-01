@@ -41,7 +41,7 @@
                     </div>
                     <div style="text-align:right; align-content: center; -webkit-align-items: center">
                         <h5>{{shop["BrandNameHeb"]}}</h5>
-                        <h5 style="color:green">{{shop["PercentsToShowNearPrice"]}}{{::c.localize.strings['CurrencySign']}}{{::c.localize.strings['PriceInStore']}} {{shop["CartPrice"]}}</h5>
+                        <h5 style="color: {{shop['PriceColor']}}">{{shop["PercentsToShowNearPrice"]}}{{::c.localize.strings['CurrencySign']}}{{::c.localize.strings['PriceInStore']}} {{shop["CartPrice"]}}</h5>
                         <h6>{{::c.localize.strings['StoreAddress']}} {{shop["City"]}}, {{shop["Address"]}}</h6>
                     </div>
                     <div style="flex-wrap: wrap; top: 16px; right: 16px; width: 70px;">

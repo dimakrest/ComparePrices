@@ -828,10 +828,12 @@ angular.module('ComparePrices.services', ['ngResource'])
                         {
                             var percentsToShowNearPrice = Math.round((suitableShops[i]['CartPrice'] / minimalPrice - 1) * 100);
                             suitableShops[i]['PercentsToShowNearPrice'] = (percentsToShowNearPrice == 0) ? "" : ' (+' + percentsToShowNearPrice + '%) ';
+                            suitableShops[i]['PriceColor'] = (percentsToShowNearPrice < 30) ? "orange" : "red";
                         }
                         else
                         {
                             suitableShops[i]['PercentsToShowNearPrice'] = "";
+                            suitableShops[i]['PriceColor'] = "green";
                         }
 
                         var brandName = suitableShops[i]['BrandName'];
