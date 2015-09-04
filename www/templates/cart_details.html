@@ -22,7 +22,7 @@
                             <span ng-hide="product.Amount == 0"><label class="ionic-form-control">{{product["Amount"]}}</label></span>
                             <span ng-class="{'ionic-input-group-addon-right': product.Amount != 0, 'ionic-input-group-addon-center': product.Amount == 0}" ng-click="UpdateProductAmount(product, +1, false); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
                         </div>
-                        <h2 style="text-align: right; padding-top:7px; white-space: pre-line;">{{product.ItemName}}</h2>
+                        <h2 ng-style="{ 'padding-top': product.ItemName.length < 15 ? '7px' : '0px' }" style="text-align: right; white-space: pre-line;">{{product.ItemName}}</h2>
 
                         <ion-delete-button class="ion-minus-circled"
                                            ng-click="DeleteProduct(product)">
@@ -39,7 +39,7 @@
                             <label class="ionic-form-control">{{product["Amount"]}}</label>
                             <span class="ionic-input-group-addon-right" ng-click="UpdateProductAmount(product, +1, true); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
                         </div>
-                        <h2 style="text-align: right; padding-top:7px; white-space: pre-line;">{{product.ItemName}}</h2>
+                        <h2 ng-style="{ 'padding-top': product.ItemName.length < 15 ? '7px' : '0px' }" style="text-align: right; white-space: pre-line;">{{product.ItemName}}</h2>
 
                         <ion-delete-button class="ion-minus-circled"
                                            ng-click="DeleteProduct(product)">
