@@ -39,6 +39,7 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                 }
 
                 $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
+                console.log(place);
                 $scope.c.lastAddress = place.formatted_address.replace(", ישראל", "");;
                 if ((localStorage.getItem('IsRunningOnDevice') || "0") != "0") {
                     $cordovaGoogleAnalytics.trackEvent('Settings', 'Change address', $scope.c.lastAddress, $scope.c.rangeForShops);

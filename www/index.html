@@ -76,7 +76,7 @@
           <div style="text-align:right; margin-right: 20px">
             {{::c.localize.strings['CurrentAddress']}}
           </div>
-          <div style="color:#a3a3a3; text-align:right; margin-right: 30px; margin-top: 5px" ng-if="c.lastAddress != ''">
+          <div style="color:#A2A8AD; text-align:right; margin-right: 30px; margin-top: 5px" ng-if="c.lastAddress != ''">
               {{c.lastAddress}}
           </div>
 
@@ -85,7 +85,7 @@
           <table style="width:95%; margin-top: 10px; margin-left: 10px">
               <tr>
                   <td style="width:80%;">
-                      <label class="toggle toggle-dark">
+                      <label class="toggle toggle-positive">
                           <input type="checkbox" ng-checked="c.useUsersCurrentLocation" ng-model="c.useUsersCurrentLocation" ng-click="c.LocationToggleChanged()">
                           <div class="track">
                               <div class="handle"></div>
@@ -101,7 +101,7 @@
               </tr>
               <tr>
                   <td>
-                      <div class="item-input-inset">
+                      <div class="item-input-inset input-settings-address">
                           <google-autocomplete></google-autocomplete>
                       </div>
                   </td>
