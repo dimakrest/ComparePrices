@@ -50,9 +50,11 @@ table.bottomBorder td { text-align:center; padding:3px;}
     line-height: 27px;
     padding-top: 0;
     padding-bottom: 0;
-    transition: 0.2s all linear;
-    -webkit-transition: 0.2s all linear;
-    height:54px;
+    transition: 0.3s all linear;
+    -webkit-transition: 0.3s all linear;
+    height:50px;
+    border-width: 0px;
+    border-bottom-width: 1px;
 }
 .list .item.item-accordion.ng-hide {
     height: 2px;

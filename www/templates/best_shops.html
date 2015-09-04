@@ -1,7 +1,12 @@
 <ion-modal-view >
     <ion-header-bar class="positive-bg text-center">
         <button class="button button-icon icon ion-ios-close-empty light" ng-click="modal.close()"></button>
-        <div class="h1 title light">{{::c.localize.strings['BestShopsHeader']}}</div>
+        <div style="text-align:right; white-space: normal;" class="h1 title light">
+            {{::c.localize.strings['BestShopsHeader']}}
+            <span ng-show="(c.shopsNearThatHaveNeededProducts[0].Products.length == 1)">{{c.comparedProducts[c.shopsNearThatHaveNeededProducts[0].Products[0].ItemCode].Name}}</span>
+            <span ng-show="(c.shopsNearThatHaveNeededProducts[0].Products.length > 1)">{{::c.currentCartName}}</span>
+
+        </div>
 
         <!--<button class="button button-icon icon ion-ios-upload-outline light" ng-click="c.ShareCartAndShopDetails()"></button>-->
     </ion-header-bar>
@@ -11,7 +16,7 @@
         <ion-list>
             <ion-item class="item-stable" style="text-align:right"
                  ng-show="c.missingProducts.length > 0"
-                 ng-click="toggleDetails(1000)"
+                 ng-click="toggleDetails(1000,2)"
                  ng-class="{active: isDetailsShown(1000)}">
                 {{::c.localize.strings['DontHaveAllProducts']}}
                 <br>
@@ -25,40 +30,49 @@
 
 
             <div ng-repeat="shop in c.shopsNearThatHaveNeededProducts track by $index" ng-init="parentIndex = $index">
-
-
-                <div class="item-stable"
-                          ng-click="toggleDetails($index)"
+                <ion-item class="item item-avatar-right"
+                          ng-click="toggleDetails($index, shop.Products.length)"
                           ng-class="{active: isDetailsShown($index)}"
-                          style="display: flex; flex-wrap: wrap; justify-content: space-between; -webkit-justify-content: space-between;">
+                          style="display: flex; justify-content: space-between; -webkit-justify-content: space-between;">
+                    <img ng-src={{::shop['BrandImage']}}>
+                    <i ng-show="shop.Products.length > 1" class="icon" style="position: absolute; right: 30px; top: 80px;" ng-class="isDetailsShown($index) ? 'ion-android-arrow-dropup-circle' : 'ion-android-arrow-dropdown-circle'"></i>
+                    <div style="display:flex; justify-content: flex-start; -webkit-justify-content: flex-start;">
+                        <div style="margin-left: -10px;">
+                            <button ng-click="c.OpenWaze(shop['Lat'], shop['Lon']); $event.stopPropagation()" class="waze-button" style="top: 16px;"></button>
+                            <br>
+                            <button ng-click="c.OpenGoogleMaps(shop['Lat'], shop['Lon']); $event.stopPropagation()" class="maps-button"></button>
+                        </div>
 
-                    <div style="width: 50px; align-items: center; -webkit-align-items: center">
-                        <h4>{{shop["Distance"]}} {{::c.localize.strings['Kilometer']}}</h4>
+                        <div style="display:flex; align-items:center; -webkit-align-items:center;">
+                            <h3 style="text-align:right;">{{shop["Distance"]}}{{::c.localize.strings['Kilometer']}}</h3>
+                        </div>
                     </div>
-                    <div style="flex-wrap: wrap; width: 100px;">
-                        <button ng-click="c.OpenWaze(shop['Lat'], shop['Lon']); $event.stopPropagation()" class="waze-button" style="top: 16px;"></button>
-                        <button ng-click="c.OpenGoogleMaps(shop['Lat'], shop['Lon']); $event.stopPropagation()" class="maps-button"></button>
+
+                    <div style="text-align:right; display:flex; align-items:center; -webkit-align-items:center;">
+                        <div>
+                            <h3>{{shop["BrandNameHeb"]}}</h3>
+                            <h2 style="white-space: pre-line; color: {{shop['PriceColor']}}">{{::c.localize.strings['CurrencySign']}}{{::c.localize.strings['PriceInStore']}} {{shop["CartPrice"]}}</h2>
+                            <h2 ng-if="shop['PercentsToShowNearPrice'] != ''" style="text-align: center; white-space: pre-line; color: {{shop['PriceColor']}}">{{shop["PercentsToShowNearPrice"]}}</h2>
+                            <h4 style="white-space: pre-line;">{{::c.localize.strings['StoreAddress']}} {{shop["City"]}}, {{shop["Address"]}}</h4>
+                        </div>
                     </div>
-                    <div style="text-align:right; align-content: center; -webkit-align-items: center">
-                        <h5>{{shop["BrandNameHeb"]}}</h5>
-                        <h5 style="color: {{shop['PriceColor']}}">{{shop["PercentsToShowNearPrice"]}}{{::c.localize.strings['CurrencySign']}}{{::c.localize.strings['PriceInStore']}} {{shop["CartPrice"]}}</h5>
-                        <h6>{{::c.localize.strings['StoreAddress']}} {{shop["City"]}}, {{shop["Address"]}}</h6>
-                    </div>
-                    <div style="flex-wrap: wrap; top: 16px; right: 16px; width: 70px;">
-                        <img ng-src={{::shop['BrandImage']}} style="top: 16px; right: 16px; width: 40px; height: 40px;">
-                        <i class="icon" ng-class="isDetailsShown($index) ? 'ion-android-arrow-dropup-circle' : 'ion-android-arrow-dropdown-circle'"></i>
-                    </div>
+
+
+
                     <!--<label class="checkbox">-->
                         <!--<input type="checkbox" ng-checked="shop.IsChecked" ng-model="shop.IsChecked">-->
                     <!--</label>                -->
 
-                </div>
+                </ion-item>
 
-                <ion-item class="item-accordion" ng-repeat="product in shop.Products" ng-show="isDetailsShown(parentIndex)">
+                <ion-item class="item-accordion" ng-repeat="product in shop.Products" ng-show="(shop.Products.length > 1) && isDetailsShown(parentIndex)">
                     <h2 style="text-align:right">{{c.comparedProducts[product.ItemCode].Name}}</h2>
-                    <h2 style="text-align:left; color:green">{{::c.localize.strings['CurrencySign']}}{{c.comparedProducts[product.ItemCode].Amount * product.ItemPrice  | number : 2}} = {{c.comparedProducts[product.ItemCode].Amount}} * {{::c.localize.strings['CurrencySign']}}{{product.ItemPrice * 1 | number : 2}}</h2>
+                    <h2 style="text-align:left; color:green; padding-top: 6px;">{{::c.localize.strings['CurrencySign']}}{{c.comparedProducts[product.ItemCode].Amount * product.ItemPrice | number : 2}}
+                        <span ng-hide="c.comparedProducts[product.ItemCode].Amount == 1"> = {{c.comparedProducts[product.ItemCode].Amount}} * {{::c.localize.strings['CurrencySign']}}{{product.ItemPrice * 1 | number : 2}}</span></h2>
                 </ion-item>
             </div>
+
+
         </ion-list>
 
 
