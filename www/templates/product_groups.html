@@ -8,28 +8,26 @@
     <ion-content class="content-bg" ng-class="{'has-subheader': !c.showSearchBar}">
 
         <ion-list class="list animate-blinds">
-            <h3 class="item item-divider" style="text-align:right;" ng-show="!data.showSearchResults && !c.keyPressed">
+            <h3 class="item" style="text-align:right; border-bottom-width: 0; border-top-width: 0; padding-bottom: 0px;" ng-show="!data.showSearchResults && !c.keyPressed">
                 {{::c.localize.strings['PredefinedProductGroups']}}
             </h3>
 
-            <div collection-repeat="productOrProductGroupInfo in ((data.showSearchResults == true) ? data.allProductsFiltered : c.productGroupsInfo)" item-height="72px" divider-collection-repeat>
+            <div ng-class="{'card': !data.showSearchResults}" collection-repeat="productOrProductGroupInfo in ((data.showSearchResults == true) ? data.allProductsFiltered : c.productGroupsInfo)" item-height="72px" divider-collection-repeat>
+                <a ng-show="data.showSearchResults" class="item item-avatar-right" ng-click="FindBestShop(productOrProductGroupInfo['ItemCode'], productOrProductGroupInfo['ItemName'], productOrProductGroupInfo['ImagePath'])">
+                        <img style="width: auto;" ng-src={{productOrProductGroupInfo['ImagePath']}}>
+                        <i class="icon ion-chevron-left" style="float:left; padding-top: 10px;"></i>
+                        <h2 style="text-align: right; padding-top:10px;">{{productOrProductGroupInfo['ItemName']}}</h2>
+                </a>
 
-                <div ng-show="data.showSearchResults">
-                    <a class="item item-avatar-right" ng-click="FindBestShop(productOrProductGroupInfo['ItemCode'], productOrProductGroupInfo['ItemName'], productOrProductGroupInfo['ImagePath'])">
-                        <img ng-src={{productOrProductGroupInfo['ImagePath']}}>
-                        <h2 style="text-align: right">{{productOrProductGroupInfo['ItemName']}}</h2>
-                    </a>
-                </div>
-
-                <div ng-show="!data.showSearchResults && !c.keyPressed">
-                    <a class="item item-avatar-right" ng-click="OpenProductGroupDetails(productOrProductGroupInfo['ProductGroupID'])">
+                <a ng-show="!data.showSearchResults && !c.keyPressed" class="item item-avatar-right" ng-click="OpenProductGroupDetails(productOrProductGroupInfo['ProductGroupID'])" style="height:72px">
                         <img ng-src={{productOrProductGroupInfo['ImageUrl']}}>
-                        <h2 style="float:right">{{productOrProductGroupInfo['ProductGroupName']}}</h2>
-                    </a>
-                </div>
-
+                        <i class="icon ion-chevron-left" style="float:left; padding-top: 10px;"></i>
+                        <h2 style="text-align: right; padding-top:10px; white-space: pre-line;">{{productOrProductGroupInfo['ProductGroupName']}}</h2>
+                </a>
             </div>
+
         </ion-list>
+
 
         <div ng-if="data.showSearchResults && data.allProductsFiltered !== undefined && !data.allProductsFiltered.length" class="no-results">
             <p>{{::c.localize.strings['NoResults']}}</p>

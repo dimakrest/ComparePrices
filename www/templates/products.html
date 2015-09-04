@@ -2,10 +2,12 @@
 
     <ion-content class="content-bg">
 
-        <div class="list">
-            <a class="item item-avatar-right" ng-repeat="product in myProductGroup" ng-click="FindBestShop(product['ItemCode'])">
-                <img ng-src={{product['ImagePath']}}>
-                <h2 style="text-align: right">{{product.ItemName}}</h2>
+        <div class="card">
+        <!--<div class="animate-blinds card">-->
+            <a class="item item-avatar-right"  style="height:72px" ng-repeat="product in myProductGroup" ng-click="FindBestShop(product['ItemCode'])">
+                <img style="width: auto;" ng-src={{product['ImagePath']}}>
+                <i class="icon ion-chevron-left" style="float:left; padding-top: 10px;"></i>
+                <h2 style="text-align: right; padding-top:10px;  white-space: pre-line;">{{product.ItemName}}</h2>
             </a>
         </div>
 
