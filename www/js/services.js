@@ -40,10 +40,20 @@ angular.module('ComparePrices.services', ['ngResource'])
                         // TODO: how better mask ' and "
                         for (var i = 0; i < numOfProducts; i++) {
                             var singleProduct = products[i];
+                            // build the image path: 1 is jpg, 2 for png all others are no_product_img.jpg
+                            var imagePath = '';
+                            if (singleProduct['IT'] == '1') {
+                                imagePath = 'https://s3.eu-central-1.amazonaws.com/compare.prices.frankfurt/product_images/product_' + singleProduct['IC'] + '.jpg';
+                            } else if (singleProduct['IT'] == '2') {
+                                imagePath = 'https://s3.eu-central-1.amazonaws.com/compare.prices.frankfurt/product_images/product_' + singleProduct['IC'] + '.png';
+                            } else {
+                                imagePath = 'img/no_product_img.jpg';
+                            }
+
                             var sqlQuery = 'INSERT INTO tbProducts VALUES ("' +
                                 singleProduct['IC'] + '", "' +
                                 singleProduct['IN'].replace(/\"/g, "\'\'") + '", "' +
-                                singleProduct['ImagePath'] + '")';
+                                imagePath + '")';
                             tx.executeSql(sqlQuery)
                         }
                     }, errorCB, successCB)
