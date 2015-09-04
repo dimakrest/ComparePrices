@@ -652,7 +652,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 }
                 totalPrice += parseFloat(product['ItemPrice']) * amount;
             });
-            return Math.round(totalPrice);
+            return (productPriceInStore.length == 1 ) ? totalPrice.toFixed(2) : Math.round(totalPrice);
         }
 
         function TwoArraysAreIdentical(Array1, Array2) {

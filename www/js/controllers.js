@@ -240,12 +240,16 @@ angular.module('ComparePrices.controllers', [])
             $ionicLoading.hide();
         };
 
-        // 2 function for toggling accordion in best_shops.html
-        $scope.toggleDetails = function(shopId) {
-            if ($scope.isDetailsShown(shopId)) {
-                $scope.c.showPriceDetailsForShop[shopId] = 0;
-            } else {
-                $scope.c.showPriceDetailsForShop[shopId] = 1;
+        // 2 functions for toggling accordion in best_shops.html
+        $scope.toggleDetails = function(shopId, numOfItems) {
+            // in case we have only 1 item we don't have accordion, and don't want to toggle the color of the item-stable
+            if (numOfItems > 1)
+            {
+                if ($scope.isDetailsShown(shopId)) {
+                    $scope.c.showPriceDetailsForShop[shopId] = 0;
+                } else {
+                    $scope.c.showPriceDetailsForShop[shopId] = 1;
+                }
             }
         };
         $scope.isDetailsShown = function(shopId) {
@@ -440,7 +444,7 @@ angular.module('ComparePrices.controllers', [])
             $scope.popupData.newCartName = "";
             var placeHolder = ($scope.lastCartID == 100) ? $scope.c.localize.strings['Cart'] : $scope.c.localize.strings['Cart'] + ' ' + ($scope.lastCartID - 99);
             var myPopup = $ionicPopup.show({
-                template: '<input style="text-align:right" type="text" ng-model="popupData.newCartName", placeholder="' + placeHolder + '">',
+                template: '<label class="item item-input"><input style="text-align:right; padding-right: 10px;" type="text" ng-model="popupData.newCartName", placeholder="' + placeHolder + '"></label>',
                 cssClass: 'non-transparent-pop-up',
                 title: $scope.c.localize.strings['EnterCartName'],
                 scope: $scope,
