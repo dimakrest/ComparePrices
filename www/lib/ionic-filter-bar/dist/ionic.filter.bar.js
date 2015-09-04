@@ -61,7 +61,9 @@ angular.module('jett.ionic.filter.bar', ['ionic']);
             cancelEl.bind('click', cancelFilterBar);
 
             // If backdrop is enabled, create and append it to filter, then add click/swipe listeners to cancel filter
-            if ($scope.config.backdrop) {
+            // on android by default backdrop is disabled. Din't find param in ionicConfigProvider, so doing this in a very
+            // ugly way
+            if ($scope.config.backdrop || 1) {
               backdrop = angular.element('<div class="filter-bar-backdrop"></div>');
               $element.append(backdrop);
 

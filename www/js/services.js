@@ -1041,7 +1041,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 var dLat = (myLat - storeLat) * Math.PI / 180;  // deg2rad below
                 var dLon = (myLon - storeLon) * Math.PI / 180;
                 var a = 0.5 - Math.cos(dLat) / 2 + Math.cos(storeLat * Math.PI / 180) * Math.cos(myLat * Math.PI / 180) * (1 - Math.cos(dLon)) / 2;
-                var distance = Math.round(R * 2 * Math.asin(Math.sqrt(a)));
+                var distance = Math.max(Math.round(R * 2 * Math.asin(Math.sqrt(a))), 1);
 
                 return distance;
             }

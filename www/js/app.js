@@ -136,8 +136,8 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
 
     // Change android default params => make the app ios style(prettier)
     // for android make the tabs to be at the bottom
-    $ionicConfigProvider.tabs.position('bottom');
-    $ionicConfigProvider.navBar.alignTitle('center');
+    $ionicConfigProvider.tabs.style('standard').position('bottom');
+    $ionicConfigProvider.navBar.alignTitle('center').positionPrimaryButtons('left');
 
     // disable cache it causes some errorns in the repoeat-collection directive and cached views
 //    $ionicConfigProvider.views.maxCache(0);
