@@ -1019,12 +1019,8 @@ angular.module('ComparePrices.services', ['ngResource'])
                         fullAddress['locality'] = addressComponents[i]['long_name'];
                         numOfFieldsInFullAddress++
                     }
-                    if ((typesOfComponents.indexOf('country') > -1) && (typesOfComponents.indexOf('political') > -1)) {
-                        fullAddress['country'] = addressComponents[i]['long_name'];
-                        numOfFieldsInFullAddress++
-                    }
-                    if (numOfFieldsInFullAddress == 4) {
-                        var fullAddress = fullAddress['route'] + ' ' + fullAddress['streetNumber'] + ',' + fullAddress['locality'] + ',' + fullAddress['country'];
+                    if (numOfFieldsInFullAddress == 3) {
+                        var fullAddress = fullAddress['route'] + ' ' + fullAddress['streetNumber'] + ',' + fullAddress['locality'];
                         defer.resolve(fullAddress);
                         break;
                     }

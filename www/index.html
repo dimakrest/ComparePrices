@@ -64,11 +64,13 @@
       </ion-side-menu-content>
 
       <!-- Right menu -->
-      <ion-side-menu side="right">
+      <ion-side-menu side="right" style="color: #E6E8E9; background-color: #384554;">
 
           <div>
-              <h2 style="text-align:center; font-family: simpleHebrewFont; margin-top:30px;">{{::c.localize.strings['Properties']}}</h2>
+              <h2 style="text-align:center; font-family: simpleHebrewFont; margin-top:30px; color: #E6E8E9; ">{{::c.localize.strings['Properties']}}</h2>
           </div>
+
+          <div class="settings-border-divider"></div>
 
           <!--Address section-->
           <div style="text-align:right; margin-right: 20px">
@@ -78,16 +80,18 @@
               {{c.lastAddress}}
           </div>
 
+          <div class="settings-border-divider"></div>
+
           <table style="width:95%; margin-top: 10px; margin-left: 10px">
               <tr>
                   <td style="width:80%;">
-                      <label class="toggle toggle-positive">
+                      <label class="toggle toggle-dark">
                           <input type="checkbox" ng-checked="c.useUsersCurrentLocation" ng-model="c.useUsersCurrentLocation" ng-click="c.LocationToggleChanged()">
                           <div class="track">
                               <div class="handle"></div>
                           </div>
                       </label>
-                      <span style="float:right; padding-right:8px; padding-top:8px;">{{::c.localize.strings['ToggleMyLocation']}}</span>
+                      <span style="float:right; padding-right:8px; padding-top:5px;">{{::c.localize.strings['ToggleMyLocation']}}</span>
                   </td>
                   <td rowspan="2" style="vertical-align: middle;">
                     <div style="text-align:center;">
@@ -97,13 +101,14 @@
               </tr>
               <tr>
                   <td>
-                      <div class="bar bar-header item-input-inset">
+                      <div class="item-input-inset">
                           <google-autocomplete></google-autocomplete>
                       </div>
                   </td>
               </tr>
           </table>
 
+          <div class="settings-border-divider"></div>
 
           <!--Range inputs-->
           <div style="text-align: right; margin-right: 20px; margin-top: 20px">
@@ -130,6 +135,8 @@
           <div class="item range range-positive" style="border: none">
               <input type="range" min="1" max="7" value="c.maxShopsOfTheSameBrand" ng-model="c.maxShopsOfTheSameBrand">
           </div>
+
+          <div class="settings-border-divider"></div>
 
       </ion-side-menu>
   </ion-side-menus>

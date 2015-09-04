@@ -45,6 +45,22 @@ table.bottomBorder td { text-align:center; padding:3px;}
             box-shadow: 0 -3px 6px -2px #777;
 }
 
+.settings-border-divider {
+    border-top: 1px solid #43505C;
+    width: 90%;
+    margin-top: 5px;
+    margin-left: 5%;
+}
+
+.toggle.toggle-compare-prices input:checked + .track {
+    border-color: #387ef5;
+    background-color: #387ef5;
+}
+
+.range.range-positive input::-webkit-slider-thumb:before {
+    background: #387ef5; }
+.range.range-positive input::-ms-fill-lower {
+    background: #387ef5; }
 
 .list .item.item-accordion {
     line-height: 27px;
