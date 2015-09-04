@@ -75,10 +75,10 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                 templateUrl: "templates/my_carts.html",
                 controller: 'MyCartsCtrl',
                     resolve: {
-                        "CreatePredefinedCarts": function (ComparePricesStorage, PrepareInfoForControllers)
+                        "CreateMyCarts": function (ComparePricesStorage, PrepareInfoForControllers)
                         {
-                            var initPredefinedCarts = localStorage.getItem('initPredefinedCarts') || 1;
-                            return PrepareInfoForControllers.InitUserCarts(initPredefinedCarts);
+                            var firstTimeLoad = localStorage.getItem('firstTimeLoad') || 1;
+                            return PrepareInfoForControllers.MyCartsInit(firstTimeLoad);
                         }}
                 }
             }

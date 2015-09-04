@@ -21,87 +21,6 @@ angular.module('ComparePrices.services', ['ngResource'])
             var db = openDatabase("ComparePricesDB", "1.0", "Global storage", 4 * 1024 * 1024); // TODO: check what happens when we exceed this limit
             db.transaction(initDB, errorCB, successCB); // creates tables for the first time if required
 
-            var initProductList = localStorage.getItem('initProductList') || 1;
-            if (initProductList == 1) {
-                CreateTbProducts();
-                CreateStoresLocationTable();
-
-                // For now do this only once
-                localStorage.setItem('initProductList', 0);
-            }
-
-            function CreateTbProducts()
-            {
-                ReadJson.query({jsonName:'all_products'}, function (products) {
-                    db.transaction(function (tx) {
-                        tx.executeSql('DROP TABLE IF EXISTS tbProducts');
-                        tx.executeSql('CREATE TABLE IF NOT EXISTS tbProducts (ItemCode TEXT PRIMARY KEY, ItemName TEXT, ImagePath TEXT)');
-                        var numOfProducts = products.length;
-                        // TODO: how better mask ' and "
-                        for (var i = 0; i < numOfProducts; i++) {
-                            var singleProduct = products[i];
-                            // build the image path: 1 is jpg, 2 for png all others are no_product_img.jpg
-                            var imagePath = '';
-                            if (singleProduct['IT'] == '1') {
-                                imagePath = 'https://s3.eu-central-1.amazonaws.com/compare.prices.frankfurt/product_images/product_' + singleProduct['IC'] + '.jpg';
-                            } else if (singleProduct['IT'] == '2') {
-                                imagePath = 'https://s3.eu-central-1.amazonaws.com/compare.prices.frankfurt/product_images/product_' + singleProduct['IC'] + '.png';
-                            } else {
-                                imagePath = 'img/no_product_img.jpg';
-                            }
-
-                            var sqlQuery = 'INSERT INTO tbProducts VALUES ("' +
-                                singleProduct['IC'] + '", "' +
-                                singleProduct['IN'].replace(/\"/g, "\'\'") + '", "' +
-                                imagePath + '")';
-                            tx.executeSql(sqlQuery)
-                        }
-                    }, errorCB, successCB)
-                });
-            }
-
-            function CreateStoresLocationTable()
-            {
-                ReadJson.query({jsonName:'stores'}, function (storesInfo) {
-                    db.transaction(function (tx) {
-                        tx.executeSql('DROP TABLE IF EXISTS tbStoresLocation');
-                        tx.executeSql('CREATE TABLE IF NOT EXISTS tbStoresLocation (ChainID TEXT, BrandName TEXT, BrandNameHeb TEXT, StoreID TEXT, Lat REAL, Lon REAL, ' +
-                            'City TEXT, Address TEXT, Distance INTEGER, ProductListExists INTEGER, PRIMARY KEY (ChainID, StoreID))');
-                        var numOfBrands = storesInfo.length;
-                        for (var brandIndex=0; brandIndex < numOfBrands; brandIndex++) {
-                            var brandInfo = storesInfo[brandIndex];
-                            var brandName       = brandInfo['brand'];
-                            var brandNameHeb    = brandInfo['heb'];
-                            var chainID         = brandInfo['ChainId'];
-
-                            if (typeof (chainID) == "undefined" || chainID == "undefined") {
-                                continue;
-                            }
-                            var numOfBranches = brandInfo['branches'].length;
-                            // TODO: how better mask ' and "
-                            for (var branchIndex = 0; branchIndex < numOfBranches; branchIndex++) {
-                                var singleBranch = brandInfo['branches'][branchIndex];
-                                // TODO: Kirill has to remove undefined
-                                if ((typeof (singleBranch['Lat']) == "undefined") || (typeof (singleBranch['Lng']) == "undefined") ||
-                                    (singleBranch['Lat'] == "unknown") || (singleBranch['Lng'] == "unknown")) {
-                                    continue;
-                                }
-                                var sqlQuery = 'INSERT INTO tbStoresLocation VALUES ("' +
-                                    chainID + '", "' +
-                                    brandName + '", "' +
-                                    brandNameHeb + '", "' +
-                                    singleBranch['StoreId'] + '", ' +
-                                    singleBranch['Lat'] + ', ' +
-                                    singleBranch['Lng'] + ', "' +
-                                    singleBranch['City'].replace(/\"/g, "\'\'") + '", "' +
-                                    singleBranch['Address'].replace(/\"/g, "\'\'") + '", 0, 0)';
-                                tx.executeSql(sqlQuery)
-                            }
-                        }
-                    }, errorCB, successCB);
-                });
-            }
-
             // Function to mark that for this store products json exists
             function SuccessTableCreation(chainID, storeID, defer) {
                 db.transaction(function (tx) {
@@ -226,6 +145,90 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             return {
 
+                CreateTbProducts : function() {
+                    var defer = $q.defer();
+
+                    ReadJson.query({jsonName:'all_products'}, function (products) {
+                        db.transaction(function (tx) {
+                            tx.executeSql('DROP TABLE IF EXISTS tbProducts');
+                            tx.executeSql('CREATE TABLE IF NOT EXISTS tbProducts (ItemCode TEXT PRIMARY KEY, ItemName TEXT, ImagePath TEXT)');
+                            var numOfProducts = products.length;
+                            // TODO: how better mask ' and "
+                            for (var i = 0; i < numOfProducts; i++) {
+                                var singleProduct = products[i];
+                                // build the image path: 1 is jpg, 2 for png all others are no_product_img.jpg
+                                var imagePath = '';
+                                if (singleProduct['IT'] == '1') {
+                                    imagePath = 'https://s3.eu-central-1.amazonaws.com/compare.prices.frankfurt/product_images/product_' + singleProduct['IC'] + '.jpg';
+                                } else if (singleProduct['IT'] == '2') {
+                                    imagePath = 'https://s3.eu-central-1.amazonaws.com/compare.prices.frankfurt/product_images/product_' + singleProduct['IC'] + '.png';
+                                } else {
+                                    imagePath = 'img/no_product_img.jpg';
+                                }
+
+                                var sqlQuery = 'INSERT INTO tbProducts VALUES ("' +
+                                    singleProduct['IC'] + '", "' +
+                                    singleProduct['IN'].replace(/\"/g, "\'\'") + '", "' +
+                                    imagePath + '")';
+                                tx.executeSql(sqlQuery)
+                            }
+                        }, function() {
+                            defer.resolve();
+                        }, function() {
+                            defer.resolve();
+                        })
+                    });
+                    return defer.promise;
+                },
+
+                CreateStoresLocationTable : function() {
+                    var defer = $q.defer();
+
+                    ReadJson.query({jsonName:'stores'}, function (storesInfo) {
+                        db.transaction(function (tx) {
+                            tx.executeSql('DROP TABLE IF EXISTS tbStoresLocation');
+                            tx.executeSql('CREATE TABLE IF NOT EXISTS tbStoresLocation (ChainID TEXT, BrandName TEXT, BrandNameHeb TEXT, StoreID TEXT, Lat REAL, Lon REAL, ' +
+                                'City TEXT, Address TEXT, Distance INTEGER, ProductListExists INTEGER, PRIMARY KEY (ChainID, StoreID))');
+                            var numOfBrands = storesInfo.length;
+                            for (var brandIndex=0; brandIndex < numOfBrands; brandIndex++) {
+                                var brandInfo = storesInfo[brandIndex];
+                                var brandName       = brandInfo['brand'];
+                                var brandNameHeb    = brandInfo['heb'];
+                                var chainID         = brandInfo['ChainId'];
+
+                                if (typeof (chainID) == "undefined" || chainID == "undefined") {
+                                    continue;
+                                }
+                                var numOfBranches = brandInfo['branches'].length;
+                                // TODO: how better mask ' and "
+                                for (var branchIndex = 0; branchIndex < numOfBranches; branchIndex++) {
+                                    var singleBranch = brandInfo['branches'][branchIndex];
+                                    // TODO: Kirill has to remove undefined
+                                    if ((typeof (singleBranch['Lat']) == "undefined") || (typeof (singleBranch['Lng']) == "undefined") ||
+                                        (singleBranch['Lat'] == "unknown") || (singleBranch['Lng'] == "unknown")) {
+                                        continue;
+                                    }
+                                    var sqlQuery = 'INSERT INTO tbStoresLocation VALUES ("' +
+                                        chainID + '", "' +
+                                        brandName + '", "' +
+                                        brandNameHeb + '", "' +
+                                        singleBranch['StoreId'] + '", ' +
+                                        singleBranch['Lat'] + ', ' +
+                                        singleBranch['Lng'] + ', "' +
+                                        singleBranch['City'].replace(/\"/g, "\'\'") + '", "' +
+                                        singleBranch['Address'].replace(/\"/g, "\'\'") + '", 0, 0)';
+                                    tx.executeSql(sqlQuery)
+                                }
+                            }
+                        }, function() {
+                            defer.resolve();
+                        }, function() {
+                            defer.resolve();
+                        });
+                    });
+                    return defer.promise;
+                },
+
                 CreatePredefinedCarts: function ()
                 {
                     var lastCartID = 1;
@@ -254,8 +257,6 @@ angular.module('ComparePrices.services', ['ngResource'])
                             defer.resolve();
                         });
                     });
-
-                    localStorage.setItem('initPredefinedCarts', 0);
                     return defer.promise;
                 },
 
@@ -1044,30 +1045,39 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
     }])
 
-    .factory('PrepareInfoForControllers', ['$q', 'ComparePricesStorage', function($q, ComparePricesStorage) {
+    .factory('PrepareInfoForControllers', ['$q', '$ionicLoading', 'ComparePricesStorage', function($q, $ionicLoading, ComparePricesStorage) {
         var _hasUserCarts       = 0;
         var _myCartsInfo        = [];
         var _myCart             = [];
         var _productGroupsInfo  = [];
 
         return {
-            'InitUserCarts': function(initPredefinedCarts) {
+            'MyCartsInit': function(firstTimeLoad) {
                 var defer = $q.defer();
-                if (initPredefinedCarts == 1) {
-                    ComparePricesStorage.CreatePredefinedCarts().then(function() {
-                        ComparePricesStorage.GetAllCarts(function (result) {
-                            _myCartsInfo = result.rows;
-                            // check if user has own carts
-                            var numOfCarts = _myCartsInfo.length;
-                            for (var i = 0; i < numOfCarts; i++) {
-                                if (_myCartsInfo[i]['IsPredefined'] == 0) {
-                                    _hasUserCarts = 1;
-                                    break;
-                                }
-                            }
-                            defer.resolve();
-                        });
+                if (firstTimeLoad == 1) {
+
+                    $ionicLoading.show({
+                        template: '<div class="loader"><svg class="circular"><circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10"/></svg></div>'
                     });
+
+                    $q.all([ComparePricesStorage.CreateTbProducts(),
+                            ComparePricesStorage.CreateStoresLocationTable(),
+                            ComparePricesStorage.CreatePredefinedCarts()]).then(function() {
+                                ComparePricesStorage.GetAllCarts(function (result) {
+                                    _myCartsInfo = result.rows;
+                                    // check if user has own carts
+                                    var numOfCarts = _myCartsInfo.length;
+                                    for (var i = 0; i < numOfCarts; i++) {
+                                        if (_myCartsInfo[i]['IsPredefined'] == 0) {
+                                            _hasUserCarts = 1;
+                                            break;
+                                        }
+                                    }
+                                    defer.resolve();
+                                    localStorage.setItem('firstTimeLoad', 0);
+                                    $ionicLoading.hide();
+                                });
+                            });
                 } else {
                     ComparePricesStorage.GetAllCarts(function (result) {
                         _myCartsInfo = result.rows;
