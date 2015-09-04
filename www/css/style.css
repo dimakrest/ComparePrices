@@ -1824,3 +1824,8 @@ a {
     padding: 0px;
     border-radius: 10px;
 }
+
+.pac-icon {
+    width: 0;
+    background-image: none;
+}
