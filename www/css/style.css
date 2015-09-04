@@ -52,15 +52,27 @@ table.bottomBorder td { text-align:center; padding:3px;}
     margin-left: 5%;
 }
 
-.toggle.toggle-compare-prices input:checked + .track {
-    border-color: #387ef5;
-    background-color: #387ef5;
+.input-settings-address .item-input-wrapper {
+    border-color: #4C5865;
+    background-color: #4C5865;
+    color: #A2A8AD;
 }
 
-.range.range-positive input::-webkit-slider-thumb:before {
-    background: #387ef5; }
-.range.range-positive input::-ms-fill-lower {
-    background: #387ef5; }
+.input-settings-address .item-input-wrapper #searchBar::-webkit-input-placeholder {
+    color: #A2A8AD;
+}
+.input-settings-address .item-input-wrapper #searchBar:-ms-input-placeholder {
+    color: #A2A8AD;
+}
+.input-settings-address .item-input-wrapper #searchBar::-moz-placeholder {
+    color: #A2A8AD;
+    opacity:  1;
+}
+.input-settings-address .item-input-wrapper #searchBar:-moz-placeholder {
+    color: #A2A8AD;
+    opacity:  1;
+}
+
 
 .list .item.item-accordion {
     line-height: 27px;
