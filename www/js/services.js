@@ -37,14 +37,26 @@ angular.module('ComparePrices.services', ['ngResource'])
                 storeJson.get(function(response) {
                     db.transaction(function (tx) {
                         tx.executeSql('DROP TABLE IF EXISTS ' + tableName);
-                        tx.executeSql('CREATE TABLE IF NOT EXISTS ' + tableName + ' (ItemCode TEXT PRIMARY KEY, ItemPrice TEXT)'); // TODO: change item price to be double
+                        tx.executeSql('CREATE TABLE IF NOT EXISTS ' + tableName + ' (ItemCode TEXT PRIMARY KEY, ItemPrice TEXT, DiscountAmount TEXT KEY, DiscountPrice TEXT)'); // TODO: change item price to be double
                         var products = response['items'];
                         var numOfProducts = products.length;
                         for (var i = 0; i < numOfProducts; i++) {
                             var singleProduct = products[i];
-                            var sqlQuery = 'INSERT INTO ' + tableName + ' VALUES ("' +
-                                singleProduct['IC'] + '", "' +
-                                singleProduct['IP'] + '")';
+                            // we don't have discounts for all the items
+                            var sqlQuery = "";
+                            if (typeof(singleProduct['DA']) == "undefined" || typeof(singleProduct['DP']) == "undefined")
+                            {
+                                sqlQuery = 'INSERT INTO ' + tableName + ' VALUES ("' +
+                                    singleProduct['IC'] + '", "' +
+                                    singleProduct['IP'] + '","","")';
+                            }
+                            else
+                                sqlQuery = 'INSERT INTO ' + tableName + ' VALUES ("' +
+                                    singleProduct['IC'] + '", "' +
+                                    singleProduct['IP'] + '", "' +
+                                    singleProduct['DA'] + '", "' +
+                                    singleProduct['DP'] + '")';
+
                             tx.executeSql(sqlQuery)
                         }
                 }, function() {
@@ -1061,8 +1073,13 @@ angular.module('ComparePrices.services', ['ngResource'])
             },
 
             IsConnectedToInternet : function() {
-                var networkState = navigator.connection.type;
-                return (networkState != Connection.NONE);
+                var isRunningOnDevice = localStorage.getItem('IsRunningOnDevice') || 0;
+                if(isRunningOnDevice == 1) {
+                    var networkState = navigator.connection.type;
+                    return (networkState != Connection.NONE);
+                } else {
+                    return true;
+                }
             }
         }
     }])
