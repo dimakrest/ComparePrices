@@ -16,7 +16,7 @@
                 <a ng-show="data.showSearchResults" class="item item-avatar-right" ng-click="FindBestShop(productOrProductGroupInfo['ItemCode'], productOrProductGroupInfo['ItemName'], productOrProductGroupInfo['ImagePath'])">
                         <img style="width: auto;" ng-src={{productOrProductGroupInfo['ImagePath']}}>
                         <i class="icon ion-chevron-left" style="float:left; padding-top: 10px;"></i>
-                        <h2 ng-style="{ 'padding-top': productOrProductGroupInfo.ItemName.length < 15 ? '10px' : '0px' }" style="text-align: right; padding-top:10px;">{{productOrProductGroupInfo['ItemName']}}</h2>
+                        <h2 ng-style="{ 'padding-top': productOrProductGroupInfo.ItemName.length < 35 ? '10px' : '0px' }" style="text-align: right; padding-top:10px;">{{productOrProductGroupInfo['ItemName']}}</h2>
                 </a>
 
                 <a ng-show="!data.showSearchResults && !c.keyPressed" class="item item-avatar-right" ng-click="OpenProductGroupDetails(productOrProductGroupInfo['ProductGroupID'])" style="height:72px">

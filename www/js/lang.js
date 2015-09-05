@@ -22,7 +22,7 @@
         'YesButton': 'כן',
         'NoButton': 'לא',
         'CurrencySign': '₪',
-        'Kilometer': ' ק"מ',
+        'Kilometer': "ק''מ",
         'BestShopsHeader': 'מחיר ל: ',
         'FindBestShop': 'לבדוק מחירים',
         'ChooseYourAddressInSettings': 'קודם תבחר מיקומך בהגדרות',

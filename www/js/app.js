@@ -39,8 +39,18 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                 }
 
                 $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
-                console.log(place);
-                $scope.c.lastAddress = place.formatted_address.replace(", ישראל", "");;
+                var full_address = place.formatted_address.replace(", ישראל", "");
+                // we check how many commas there are in the string. If no commas it means we don't have street there
+                // as we always have format "Israel, city". It means we have bad address and user inserted some place, so we will take also name
+                if ((full_address.match(/,/g) || []).length == 0)
+                {
+                    $scope.c.lastAddress = full_address + ', ' + place.name;
+                }
+                else
+                {
+                    $scope.c.lastAddress = full_address;
+                }
+
                 if ((localStorage.getItem('IsRunningOnDevice') || "0") != "0") {
                     $cordovaGoogleAnalytics.trackEvent('Settings', 'Change address', $scope.c.lastAddress, $scope.c.rangeForShops);
                 }

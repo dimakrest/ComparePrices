@@ -168,7 +168,7 @@ angular.module('ComparePrices.services', ['ngResource'])
 
                                 var sqlQuery = 'INSERT INTO tbProducts VALUES ("' +
                                     singleProduct['IC'] + '", "' +
-                                    singleProduct['IN'].replace(/\"/g, "\'\'") + '", "' +
+                                    singleProduct['IN'].replace(/\"/g, "\'\'").replace(/^\s+/, '').replace(/\s+$/, '') + '", "' +
                                     imagePath + '")';
                                 tx.executeSql(sqlQuery)
                             }
