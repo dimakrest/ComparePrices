@@ -90,14 +90,7 @@ angular.module('ComparePrices.controllers', [])
             }
         }
 
-        // to distinguish real devices from development environment , we set a variable in local storage
-        document.addEventListener("deviceready", function () {
-            // Check for internet connection
-            CheckConnection($scope);
-            localStorage.setItem('IsRunningOnDevice', 1);
-        }, false);
-
-        document.addEventListener("deviceready", function () {
+        function StartGoogleAnalytics() {
             $cordovaGoogleAnalytics.startTrackerWithId('UA-61254051-2');
             var UUID = localStorage.getItem('UUID') || "";
             if (UUID == "")
@@ -106,6 +99,17 @@ angular.module('ComparePrices.controllers', [])
                 localStorage.setItem('UUID', UUID);
             }
             $cordovaGoogleAnalytics.setUserId(UUID);
+        }
+
+        document.addEventListener("deviceready", function () {
+            // Check for internet connection
+            CheckConnection($scope);
+
+            // to distinguish real devices from development environment , we set a variable in local storage
+            localStorage.setItem('IsRunningOnDevice', 1);
+
+            // init and start google analytics
+            StartGoogleAnalytics();
         }, false);
 
         document.addEventListener("resume", function () {
@@ -255,10 +259,8 @@ angular.module('ComparePrices.controllers', [])
                 [storeLat, storeLon],
                 [myLat, myLon],
                 function () {
-                    alert("Plugin success");
                 },
                 function (error) {
-                    alert("Plugin error: " + error);
                 }, {preferGoogleMaps: true});
         };
 
@@ -295,8 +297,7 @@ angular.module('ComparePrices.controllers', [])
         // 2 functions for toggling accordion in best_shops.html
         $scope.toggleDetails = function(shopId, numOfItems) {
             // in case we have only 1 item we don't have accordion, and don't want to toggle the color of the item-stable
-            if (numOfItems > 1)
-            {
+            if (numOfItems > 1) {
                 if ($scope.isDetailsShown(shopId)) {
                     $scope.c.showPriceDetailsForShop[shopId] = 0;
                 } else {

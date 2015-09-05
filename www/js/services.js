@@ -9,6 +9,11 @@ angular.module('ComparePrices.services', ['ngResource'])
             return $resource('resources/:jsonName.json', {}, {});
         }])
 
+    .factory('S3Jsons', ['$resources', function($resources) {
+        var jsonsVersion = localStorage.getItem('localVer');
+        return $resources('https://s3.amazonaws.com/compare.prices/stores/' + jsonsVersion + '/:jsonName.json.gz');s
+    }])
+
     .factory('ComparePricesStorage', ['ReadJson', 'MiscFunctions', '$q', '$resource',
         function (ReadJson, MiscFunctions, $q, $resource) {
             var createProductGroupsTbQuery              = 'CREATE TABLE IF NOT EXISTS tbProductGroups (ProductGroupID INTEGER PRIMARY KEY, ProductGroupName TEXT, ImageUrl TEXT)';
@@ -1084,22 +1089,22 @@ angular.module('ComparePrices.services', ['ngResource'])
 
                     $q.all([ComparePricesStorage.CreateTbProducts(),
                             ComparePricesStorage.CreateStoresLocationTable(),
-                            ComparePricesStorage.CreatePredefinedCarts()]).then(function() {
-                                ComparePricesStorage.GetAllCarts(function (result) {
-                                    _myCartsInfo = result.rows;
-                                    // check if user has own carts
-                                    var numOfCarts = _myCartsInfo.length;
-                                    for (var i = 0; i < numOfCarts; i++) {
-                                        if (_myCartsInfo[i]['IsPredefined'] == 0) {
-                                            _hasUserCarts = 1;
-                                            break;
-                                        }
-                                    }
-                                    defer.resolve();
-                                    localStorage.setItem('firstTimeLoad', 0);
-                                    $ionicLoading.hide();
-                                });
-                            });
+                            ComparePricesStorage.CreatePredefinedCarts()]).then(function () {
+                            ComparePricesStorage.GetAllCarts(function (result) {
+                            _myCartsInfo = result.rows;
+                            // check if user has own carts
+                            var numOfCarts = _myCartsInfo.length;
+                            for (var i = 0; i < numOfCarts; i++) {
+                                if (_myCartsInfo[i]['IsPredefined'] == 0) {
+                                    _hasUserCarts = 1;
+                                    break;
+                                }
+                            }
+                            defer.resolve();
+                            localStorage.setItem('firstTimeLoad', 0);
+                            $ionicLoading.hide();
+                        });
+                    });
                 } else {
                     ComparePricesStorage.GetAllCarts(function (result) {
                         _myCartsInfo = result.rows;
@@ -1296,6 +1301,36 @@ angular.module('ComparePrices.services', ['ngResource'])
                             }
                         }
                 );
+                return defer.promise;
+            }
+        }
+    }])
+
+    .factory('UpdatesFromServer', ['$resource, $q', function($resource, $q) {
+        var _config;
+        return {
+
+            CheckIfUpdateIsRequired : function() {
+                var defer = $q.defer();
+
+                var configJson = $resource('https://s3.amazonaws.com/compare.prices/stores/config.json',  {});
+                configJson.get(function(config) {
+                    _config = config;
+                    var localTimeStamp = localStorage.getItem('localTimeStamp');
+                    var localVer       = localStorage.getItem('localVer');
+                    // something that should never happen
+                    if (localTimeStamp == null || localVer == null) {
+                        localStorage.setItem('localTimeStamp', _config['timeStamp']);
+                        localStorage.setItem('localVer', _config['ver']);
+                        localStorage.setItem('firstTimeLoad', 1);
+                    } else {
+                        if (localTimeStamp != _config['timeStamp']) {
+                            localStorage.setItem('localTimeStamp', _config['timeStamp']);
+                            localStorage.setItem('localVer', _config['ver']);
+                            localStorage.setItem('newStoresVersionExists', 1);
+                        }
+                    }
+                });
                 return defer.promise;
             }
         }
