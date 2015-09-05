@@ -94,6 +94,23 @@ table.bottomBorder td { text-align:center; padding:3px;}
     display: block !important;
 }
 
+ion-popover-view.fit {
+    height: auto;
+}
+
+ion-popover-view.fit ion-content {
+    position: relative;
+}
+
+.platform-android ion-popover-view.fit {
+    margin-top: 5px;
+}
+
+.platform-ios ion-popover-view.fit {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
 .item-avatar-right > img:first-child {
     border-radius: 0;
 }

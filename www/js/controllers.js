@@ -42,7 +42,7 @@ angular.module('ComparePrices.controllers', [])
     })
 
     .controller('RootCtrl', function($scope, $ionicLoading, $timeout, $ionicSideMenuDelegate, PopUpFactory, ComparePricesStorage, ComparePricesConstants, UpdateStores, $cordovaGoogleAnalytics,
-                                     MiscFunctions) {
+                                     MiscFunctions, $ionicPopover) {
         $scope.c = {};
 
         $scope.c.currentCartName = "";
@@ -185,12 +185,41 @@ angular.module('ComparePrices.controllers', [])
             },500);
         };
 
+        // Popover for missing products in best_shops window
+        $scope.openPopover = function($event) {
+            var template = '<ion-popover-view class="fit"><ion-content scroll="false"> ' +
+                '<h5 style="white-space: pre-line; text-align:center; margin-top: 5px;"> ' +
+                '{{c.localize.strings["PartialComparisonMade"]}}<br>{{c.localize.strings["ShowShopsThatPartiallySuit"]}}' +
+                '</h5> <div class="settings-border-divider"></div> <h5 style="text-align:right; padding-right:10px;">';
+
+            for (var i=0; i < $scope.c.missingProducts.length; i++) {
+                var missingProductCode = $scope.c.missingProducts[i];
+                template += $scope.c.comparedProducts[missingProductCode].Name + '<br>';
+            }
+
+            template += '</h4></ion-content></ion-popover-view>';
+
+           //ng-repeat="productCode in c.missingProducts"
+            //<h2 style="text-align:right">{{c.comparedProducts[productCode].Name}}</h2>
+
+
+            $scope.popover = $ionicPopover.fromTemplate(template, {
+                scope: $scope
+            });
+            $scope.popover.show($event);
+        };
+        $scope.closePopover = function() {
+            $scope.popover.hide();
+        };
+        //Cleanup the popover when we're done with it!
+        $scope.$on('$destroy', function() {
+            $scope.popover.remove();
+        });
+
         $scope.c.ClearShowPriceDetailsForShop = function(){
             for (var i=0; i<$scope.c.maxShopsToShow; i++) {
                 $scope.c.showPriceDetailsForShop[i] = 0;
             }
-            // used for missing products
-            $scope.c.showPriceDetailsForShop[1000] = 0;
         };
 
         // toggle button allow my current location
@@ -304,6 +333,8 @@ angular.module('ComparePrices.controllers', [])
         $scope.data = {};
         $scope.data.allProductsFiltered = [];
         $scope.data.showSearchResults   = false;
+        $scope.c.hideTipInProductGroups = localStorage.getItem('hideTipInProductGroups') || 0;
+        localStorage.setItem('hideTipInProductGroups', 1);
 
         $scope.CancelFilterBar = undefined;
 
@@ -376,6 +407,7 @@ angular.module('ComparePrices.controllers', [])
                     // this function is needed to hide what is after backdrop, as backdrop dissappears immediately, and results come only after 500ms
                     $scope.$apply(function() {
                         $scope.c.keyPressed = 1;
+                        $scope.c.hideTipInProductGroups = 1;
                     });
                 },
                 filterProperties: 'ItemName'
