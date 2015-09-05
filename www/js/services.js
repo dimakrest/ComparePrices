@@ -11,9 +11,6 @@ angular.module('ComparePrices.services', ['ngResource'])
 
     .factory('ComparePricesStorage', ['ReadJson', 'MiscFunctions', '$q', '$resource',
         function (ReadJson, MiscFunctions, $q, $resource) {
-
-            var createCartsTbQuery      = 'CREATE TABLE IF NOT EXISTS tbCarts (CartID INTEGER PRIMARY KEY, CartName TEXT, ImageUrl TEXT, IsPredefined INTEGER)';
-            var createUserCartsTbQuery  = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID INTEGER, ItemCode TEXT, Amount INTEGER)';
             var createProductGroupsTbQuery              = 'CREATE TABLE IF NOT EXISTS tbProductGroups (ProductGroupID INTEGER PRIMARY KEY, ProductGroupName TEXT, ImageUrl TEXT)';
             var createProductsInProductGroupsTbQuery    = 'CREATE TABLE IF NOT EXISTS tbProductsInProductGroups (ProductGroupID INTEGER, ItemCode TEXT)';
 
@@ -39,6 +36,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 // TODO: change back to query after prices update
                 storeJson.get(function(response) {
                     db.transaction(function (tx) {
+                        tx.executeSql('DROP TABLE IF EXISTS ' + tableName);
                         tx.executeSql('CREATE TABLE IF NOT EXISTS ' + tableName + ' (ItemCode TEXT PRIMARY KEY, ItemPrice TEXT)'); // TODO: change item price to be double
                         var products = response['items'];
                         var numOfProducts = products.length;
@@ -81,8 +79,6 @@ angular.module('ComparePrices.services', ['ngResource'])
             }
 
             function initDB(tx) {
-                tx.executeSql(createUserCartsTbQuery);
-                tx.executeSql(createCartsTbQuery);
                 tx.executeSql(createProductGroupsTbQuery);
                 tx.executeSql(createProductsInProductGroupsTbQuery);
             }
@@ -239,6 +235,12 @@ angular.module('ComparePrices.services', ['ngResource'])
                         var products;
 
                         db.transaction(function (tx) {
+                            tx.executeSql('DROP TABLE IF EXISTS tbCarts');
+                            tx.executeSql('CREATE TABLE IF NOT EXISTS tbCarts (CartID INTEGER PRIMARY KEY, CartName TEXT, ImageUrl TEXT, IsPredefined INTEGER)');
+
+                            tx.executeSql('DROP TABLE IF EXISTS tbUserCarts');
+                            tx.executeSql('CREATE TABLE IF NOT EXISTS tbUserCarts (CartID INTEGER, ItemCode TEXT, Amount INTEGER)');
+
                             carts.forEach(function(singleCart) {
                                 tx.executeSql('INSERT INTO tbCarts (CartID, CartName, ImageUrl, IsPredefined)' +
                                     'VALUES (' + lastCartID + ', "' + singleCart['CartName'] + '", "' + singleCart['ImageUrl'] + '",1)');
@@ -930,10 +932,14 @@ angular.module('ComparePrices.services', ['ngResource'])
                 // if user wants to use his current location, need to check if his location changed
                 if ($scope.c.useUsersCurrentLocation) {
                     $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
-                    UpdateStores.UpdateStoresInfoIfRequired($scope).then(function() {
+                    UpdateStores.UpdateStoresInfoIfRequired($scope).then(function(isConnectedToInternet) {
                         $scope.c.HideLoading();
-                        FindBestShopPrivate($scope, productsToCalculatePrice);
-
+                        if (isConnectedToInternet) {
+                            FindBestShopPrivate($scope, productsToCalculatePrice);
+                        } else {
+                            var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotFinishDownloadingAllStores'];
+                            PopUpFactory.ErrorPopUp($scope, popUpText);
+                        }
                     });
                 } else {
                     FindBestShopPrivate($scope, productsToCalculatePrice);
@@ -1213,7 +1219,7 @@ angular.module('ComparePrices.services', ['ngResource'])
 
                         // if address is set and distance is less than margin => nothing to do
                         if (addressAlreadySet && (distanceBetweenTwoLocations < ComparePricesConstants.LOCATION_CHANGES_MARGIN)) {
-                            defer.resolve();
+                            defer.resolve(true);
                             return;
                         }
 
@@ -1235,35 +1241,54 @@ angular.module('ComparePrices.services', ['ngResource'])
                             PopUpFactory.ConfirmationPopUp($scope, popUpTitle, popUpText).then(function (confirmed) {
                                 if (confirmed) {
                                     $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
-                                    ReverseGeocodingAndUpdateStore($scope, lat, lon).then(function() {
-                                        defer.resolve();
-                                    });
+                                    // check for internet connection
+                                    if (MiscFunctions.IsConnectedToInternet()) {
+                                        ReverseGeocodingAndUpdateStore($scope, lat, lon).then(function() {
+                                            defer.resolve(true);
+                                        });
+                                    } else {
+                                        defer.resolve(false);
+                                    }
                                 } else { // user doesn't want to update his location
-                                    defer.resolve();
+                                    defer.resolve(true);
                                 }
                             })
                         } else {
-                            ReverseGeocodingAndUpdateStore($scope, lat, lon).then(function() {
-                                defer.resolve();
-                            });
+                            if (MiscFunctions.IsConnectedToInternet()) {
+                                ReverseGeocodingAndUpdateStore($scope, lat, lon).then(function () {
+                                    defer.resolve(true);
+                                });
+                            } else {
+                                defer.resolve(false);
+                            }
+
                         }
                     } , function (error) { // error callback
-                            defer.resolve();
                             $scope.c.HideLoading();
 
-                            var title = $scope.c.localize.strings['NavigateToSettings'];
-                            var text  = $scope.c.localize.strings['DoYouWantToOpenSettings'];
-                            PopUpFactory.ConfirmationPopUp($scope, title, text).then(function(confirmed) {
-                                if(confirmed) {
-                                    // add timeout in order to have time to close the confirmation popup
-                                    localStorage.setItem('UserClickedSettingsLocation', 1);
-                                    $ionicSideMenuDelegate.toggleRight();
-                                    cordova.plugins.settings.open();
-                                } else {
-                                    $ionicSideMenuDelegate.toggleRight();
-                                    $scope.c.useUsersCurrentLocation = false;
-                                }
-                            });
+                            if (error.code == 1) {
+                                defer.resolve(true);
+
+                                var title = $scope.c.localize.strings['NavigateToSettings'];
+                                var text = $scope.c.localize.strings['DoYouWantToOpenSettings'];
+                                PopUpFactory.ConfirmationPopUp($scope, title, text).then(function (confirmed) {
+                                    if (confirmed) {
+                                        localStorage.setItem('UserClickedSettingsLocation', 1);
+                                        if ($ionicSideMenuDelegate.isOpen()) {
+                                            $ionicSideMenuDelegate.toggleRight();
+                                        }
+                                        cordova.plugins.settings.open();
+                                    } else {
+                                        if ($ionicSideMenuDelegate.isOpen()) {
+                                            $ionicSideMenuDelegate.toggleRight();
+                                        }
+
+                                        $scope.c.useUsersCurrentLocation = false;
+                                    }
+                                });
+                            } else {
+                                resolve(false);
+                            }
                         }
                 );
                 return defer.promise;
