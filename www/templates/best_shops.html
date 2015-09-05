@@ -55,7 +55,8 @@
                     <div style="text-align:right; display:flex; align-items:center; -webkit-align-items:center;">
                         <div>
                             <h3>{{shop["BrandNameHeb"]}}</h3>
-                            <h2 style="white-space: pre-line; color: {{shop['PriceColor']}}">{{shop["PercentsToShowNearPrice"]}}{{::c.localize.strings['CurrencySign']}}{{::c.localize.strings['PriceInStore']}} {{shop["CartPrice"]}}</h2>
+                            <h2 style="white-space: pre-line; color: {{shop['PriceColor']}}">{{::c.localize.strings['CurrencySign']}}{{::c.localize.strings['PriceInStore']}} {{shop["CartPrice"]}}</h2>
+                            <h2 style="white-space: pre-line; color: {{shop['PriceColor']}}">{{shop["PercentsToShowNearPrice"]}}</h2>
                             <h4 style="white-space: pre-line;">{{::c.localize.strings['StoreAddress']}} {{shop["City"]}}, {{shop["Address"]}}</h4>
                         </div>
                     </div>
@@ -68,10 +69,26 @@
 
                 </ion-item>
 
-                <ion-item class="item-accordion" ng-repeat="product in shop.Products" ng-show="(shop.Products.length > 1) && IsDetailsShown(parentIndex)">
-                    <h2 style="text-align:right">{{c.comparedProducts[product.ItemCode].Name}}</h2>
-                    <h2 style="text-align:left; color:green; padding-top: 6px;">{{::c.localize.strings['CurrencySign']}}{{c.comparedProducts[product.ItemCode].Amount * product.ItemPrice | number : 2}}
-                        <span ng-hide="c.comparedProducts[product.ItemCode].Amount == 1"> = {{c.comparedProducts[product.ItemCode].Amount}} * {{::c.localize.strings['CurrencySign']}}{{product.ItemPrice * 1 | number : 2}}</span></h2>
+                <ion-item class="item-accordion"
+                          ng-repeat="product in shop.ProductsToShowInAccordion"
+                          style="border-bottom: 2px solid #DDDDDD"
+                          ng-style="{'background-color': product.Type == 'Regular' ? 'white' : (product.Type == 'DiscountS' || product.Type == 'DiscountM' ? '#9CFE99' : '#E0BCBE')}"
+                          ng-show="(shop.ProductsToShowInAccordion.length > 1) && IsDetailsShown(parentIndex)">
+                    <div ng-show="product.Type == 'Regular'">
+                        <h2 style="text-align:right">{{c.comparedProducts[product.ItemCode].Name}}</h2>
+                        <h2 style="text-align:left; color:green; padding-top: 6px;">
+                            {{::c.localize.strings['CurrencySign']}}{{product.Amount * product.ItemPrice | number : 2}}
+                            <span ng-hide="product.Amount == 1"> = {{product.Amount}} * {{::c.localize.strings['CurrencySign']}}{{product.ItemPrice * 1 | number : 2}}</span>
+                        </h2>
+                    </div>
+                    <div ng-show="product.Type == 'DiscountS'">
+                        <h2 style="text-align:right">{{c.comparedProducts[product.ItemCode].Name}}</h2>
+                        <h2 style="padding-top: 6px;">
+                            <span style="text-align:left; color:green;">{{::c.localize.strings['CurrencySign']}}{{product.Amount * product.ItemPrice | number : 2}}
+                            <span ng-hide="product.Amount == 1"> = {{product.Amount}} * {{::c.localize.strings['CurrencySign']}}{{product.ItemPrice * 1 | number : 2}}</span></span>
+                            <span style="text-align:right;">{{product.DiscountText}}</span>
+                        </h2>
+                    </div>
                 </ion-item>
             </div>
 

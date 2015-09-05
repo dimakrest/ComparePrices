@@ -51,7 +51,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                             {
                                 sqlQuery = 'INSERT INTO ' + tableName + ' VALUES ("' +
                                     singleProduct['IC'] + '", "' +
-                                    singleProduct['IP'] + '","","")';
+                                    singleProduct['IP'] + '","1","9.95")';
                             }
                             else
                                 sqlQuery = 'INSERT INTO ' + tableName + ' VALUES ("' +
@@ -681,19 +681,49 @@ angular.module('ComparePrices.services', ['ngResource'])
 
     .factory('FindBestShops', ['ComparePricesStorage', 'MiscFunctions', 'UpdateStores', 'ShowModal', 'PopUpFactory', '$q', function(ComparePricesStorage, MiscFunctions, UpdateStores, ShowModal, PopUpFactory, $q) {
 
-        function CalculatePriceForShop(productCart, productPriceInStore) {
+        function CalculatePriceForShop($scope, productCart, productPriceInStore) {
             var totalPrice = 0.0;
+            var productsToShowInAccordion = [];
             productPriceInStore.forEach(function(product) {
                 var numOfProductsInCart = productCart.length;
-                var amount = 0;
+                var singleProductInAccordion = [];
                 for (var i=0; i < numOfProductsInCart; i++) {
                     if (productCart[i]['ItemCode'] == product['ItemCode']) {
-                        amount += productCart[i]['Amount'];
+                        // check that we have discount for that products + sanity check that discount price is better
+                        // whole discount logic is in image on Slava mail with "ComparePrices discount description"
+                        if ((product['DiscountAmount'] != "") && (product['DiscountPrice'] != "") && (product['DiscountAmount']/product['DiscountPrice'] < product['ItemPrice']))
+                        {
+                            // easy case, when discount is even for single item
+                            if (product['DiscountAmount'] == 1)
+                            {
+                                singleProductInAccordion['ItemCode']     = product['ItemCode'];
+                                singleProductInAccordion['ItemPrice']    = product['DiscountPrice'];
+                                singleProductInAccordion['Amount']       = productCart[i]['Amount'];
+                                singleProductInAccordion['Type']         = "DiscountS";
+                                var percentsDiscount = Math.round((product['ItemPrice'] - product['DiscountPrice']) / product['ItemPrice'] * 100);
+                                singleProductInAccordion['DiscountText'] = $scope.c.localize.strings['Discount'] + " " + percentsDiscount + '%';
+
+                                totalPrice += parseFloat(product['ItemPrice']) * productCart[i]['Amount'];
+                            }
+                        }
+                        else // don't have any discount, regular price
+                        {
+                            singleProductInAccordion['ItemCode']     = product['ItemCode'];
+                            singleProductInAccordion['ItemPrice']    = product['ItemPrice'];
+                            singleProductInAccordion['Amount']       = productCart[i]['Amount'];
+                            singleProductInAccordion['Type']         = "Regular";
+                            singleProductInAccordion['DiscountText'] = "";
+
+                            totalPrice += parseFloat(product['ItemPrice']) * productCart[i]['Amount'];
+                        }
+                        break;
                     }
                 }
-                totalPrice += parseFloat(product['ItemPrice']) * amount;
+                productsToShowInAccordion.push(singleProductInAccordion);
             });
-            return (productPriceInStore.length == 1 ) ? totalPrice.toFixed(2) : Math.round(totalPrice);
+
+            var cartFinalPrice = (productPriceInStore.length == 1 ) ? totalPrice.toFixed(2) : Math.round(totalPrice);
+            return {"CartPrice":cartFinalPrice,"ProductsToShowInAccordion":productsToShowInAccordion};
         }
 
         function TwoArraysAreIdentical(Array1, Array2) {
@@ -710,7 +740,7 @@ angular.module('ComparePrices.services', ['ngResource'])
             return false;
         }
 
-        function FindMaxShopsWithMaxCommonProducts(cart, shops) {
+        function FindMaxShopsWithMaxCommonProducts($scope, cart, shops) {
             var maxNumOfProducts = 1; // we don't want to end with shops that have 0 products
             var optionalCartsWithMaxNumOfProducts = [];
 
@@ -782,7 +812,9 @@ angular.module('ComparePrices.services', ['ngResource'])
                 });
                 if (TwoArraysAreIdentical(productsInCartWithMaxAmount,productCodesInShop))
                 {
-                    shops[i].shopInfo['CartPrice'] = CalculatePriceForShop(cart, shops[i].rows);
+                    var calcPriceResult = CalculatePriceForShop($scope, cart, shops[i].rows);
+                    shops[i].shopInfo['CartPrice'] = calcPriceResult['CartPrice'];
+                    shops[i].shopInfo['ProductsToShowInAccordion'] = calcPriceResult['ProductsToShowInAccordion'];
                     shops[i].shopInfo['BrandImage'] = 'img/markets/' + shops[i].shopInfo['BrandName'] + '.jpg';
 
                     suitableShops.push(shops[i].shopInfo);
@@ -849,18 +881,8 @@ angular.module('ComparePrices.services', ['ngResource'])
             });
 
             ComparePricesStorage.GetProductsPerShopAndShops(productCodesInMyCart, radius).then(function(result) {
-                var numOfResults = result.length;
-                for (var i=0; i < numOfResults; i++) {
-                    result[i].shopInfo['NumOfProducts'] = result[i].rows.length;
-                    if (result[i].shopInfo['NumOfProducts'] == 0) {
-                        continue;
-                    }
-                    result[i].shopInfo['CartPrice'] = CalculatePriceForShop(cart, result[i].rows);
-                    // Add brand image
-                    result[i].shopInfo['BrandImage'] = 'img/markets/' + result[i].shopInfo['BrandName'] + '.jpg';
-                }
 
-                var findShopsResponse = FindMaxShopsWithMaxCommonProducts(cart, result);
+                var findShopsResponse = FindMaxShopsWithMaxCommonProducts($scope, cart, result);
                 var suitableShops = findShopsResponse['suitableShops'];
                 $scope.c.missingProducts = findShopsResponse['missingProducts'];
 

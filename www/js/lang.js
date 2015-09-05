@@ -44,6 +44,7 @@
         'ShowShopsThatPartiallySuit': 'בחנויות להלן חסרים מוצרים הבאים',
         'LocationUpdatePopupTitle': 'עידכון מיקום',
         'NoResults': 'לא נמצאו מוצרים',
+        'Discount': 'הנחה',
         'NoProductsInCart': 'בינתיים אין מוצרים בסל',
         'NoShopWithSuchItemInTheArea': 'באיזור שלך לא נמצא חנות הכולל את המוצר',
         'AddProduct': 'הוסף מוצר',
