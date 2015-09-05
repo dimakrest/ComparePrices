@@ -42,7 +42,8 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                 var full_address = place.formatted_address.replace(", ישראל", "");
                 // we check how many commas there are in the string. If no commas it means we don't have street there
                 // as we always have format "Israel, city". It means we have bad address and user inserted some place, so we will take also name
-                if ((full_address.match(/,/g) || []).length == 0)
+                // Second part of if is corner case for entering city, for example Netanya.
+                if (((full_address.match(/,/g) || []).length == 0) && (full_address != place.name))
                 {
                     $scope.c.lastAddress = full_address + ', ' + place.name;
                 }

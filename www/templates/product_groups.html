@@ -7,6 +7,10 @@
 <ion-view view-title={{::c.localize.strings['CompareProductsTitle']}}>
     <ion-content class="content-bg" ng-class="{'has-subheader': !c.showSearchBar}">
 
+        <div ng-hide="c.hideTipInProductGroups == 1" style="width:94%; margin-left:3%; margin-top:3%; border: 3px dashed #ADADAD; border-radius: 30px;">
+            <img style="width:auto; display:block; margin: 4px auto;" src='img/intro_2.png'>
+        </div>
+
         <ion-list class="list animate-blinds">
             <h3 class="item" style="text-align:right; border-bottom-width: 0; border-top-width: 0; padding-bottom: 0px;" ng-show="!data.showSearchResults && !c.keyPressed">
                 {{::c.localize.strings['PredefinedProductGroups']}}

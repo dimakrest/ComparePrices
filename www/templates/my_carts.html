@@ -18,7 +18,11 @@
                 </a>
             </div>
 
-            <div class="animate-blinds card">
+            <div ng-if=!c.hasUserCarts style="width:94%; margin-left:3%; margin-top:3%; border: 3px dashed #ADADAD; border-radius: 30px;">
+                    <img style="width:auto; display:block; margin: 4px auto;" src='img/intro_1.png'>
+            </div>
+
+            <div class="animate-blinds card" style="margin: 8px 10px;">
                 <h1 class="item item-divider" style="text-align:right; background-color: rgb(215, 225, 255);">
                     {{::c.localize.strings['PredefinedCarts']}}
                 </h1>
