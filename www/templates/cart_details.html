@@ -17,7 +17,7 @@
                     <div class="item item-avatar-right" style="height:72px">
                         <img style="width: auto;" ng-src={{product['ImagePath']}}>
 
-                        <div class="ionic-input-group" style="float:left;">
+                        <div class="ionic-input-group" style="float:left; margin-left: -10px;">
                             <span ng-hide="product.Amount == 0" class="ionic-input-group-addon-left" ng-click="UpdateProductAmount(product, -1, false); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
                             <span ng-hide="product.Amount == 0"><label class="ionic-form-control">{{product["Amount"]}}</label></span>
                             <span ng-class="{'ionic-input-group-addon-right': product.Amount != 0, 'ionic-input-group-addon-center': product.Amount == 0}" ng-click="UpdateProductAmount(product, +1, false); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
@@ -34,7 +34,7 @@
                     <div class="item item-avatar-right" style="height:72px">
                         <img style="width: auto;" ng-src={{product['ImagePath']}}>
 
-                        <div class="ionic-input-group" style="float:left;">
+                        <div class="ionic-input-group" style="float:left; margin-left: -10px;">
                             <span class="ionic-input-group-addon-left" ng-click="UpdateProductAmount(product, -1, true); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
                             <label class="ionic-form-control">{{product["Amount"]}}</label>
                             <span class="ionic-input-group-addon-right" ng-click="UpdateProductAmount(product, +1, true); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>

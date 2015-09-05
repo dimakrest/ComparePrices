@@ -13,7 +13,7 @@
 
                 <a class="item item-avatar-right" ng-repeat="cartInfo in c.myCartsInfo | filter:{ 'IsPredefined' : 0 } | orderBy:'-CartID'" ng-click="OpenCartDetails(cartInfo['CartID'])">
                     <img ng-src={{cartInfo['ImageUrl']}}>
-                    <i class="icon ion-chevron-left" style="float:left; padding-top: 10px;"></i>
+                    <i class="icon ion-chevron-left" style="float:left; padding-top: 10px; padding-right: 10px;"></i>
                     <h2 style="text-align:right; padding-top:10px;">{{cartInfo['CartName']}}</h2>
                 </a>
             </div>
@@ -29,7 +29,7 @@
 
                 <a class="item item-avatar-right" ng-repeat="cartInfo in c.myCartsInfo | filter:{ 'IsPredefined' : 1 }" ng-click="OpenCartDetails(cartInfo['CartID'])">
                     <img ng-src={{cartInfo['ImageUrl']}}>
-                    <i class="icon ion-chevron-left" style="float:left; padding-top: 10px;"></i>
+                    <i class="icon ion-chevron-left" style="float:left; padding-top: 10px; padding-right: 10px;"></i>
                     <h2 style="text-align:right; padding-top:10px;">{{cartInfo['CartName']}}</h2>
                 </a>
             </div>

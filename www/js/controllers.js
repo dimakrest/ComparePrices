@@ -293,18 +293,14 @@ angular.module('ComparePrices.controllers', [])
         };
 
         // 2 functions for toggling accordion in best_shops.html
-        $scope.toggleDetails = function(shopId, numOfItems) {
-            // in case we have only 1 item we don't have accordion, and don't want to toggle the color of the item-stable
-            if (numOfItems > 1)
-            {
-                if ($scope.isDetailsShown(shopId)) {
-                    $scope.c.showPriceDetailsForShop[shopId] = 0;
-                } else {
-                    $scope.c.showPriceDetailsForShop[shopId] = 1;
-                }
+        $scope.ToggleDetails = function(shopId) {
+            if ($scope.IsDetailsShown(shopId)) {
+                $scope.c.showPriceDetailsForShop[shopId] = 0;
+            } else {
+                $scope.c.showPriceDetailsForShop[shopId] = 1;
             }
         };
-        $scope.isDetailsShown = function(shopId) {
+        $scope.IsDetailsShown = function(shopId) {
             return $scope.c.showPriceDetailsForShop[shopId] == 1;
         };
 
