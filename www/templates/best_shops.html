@@ -21,11 +21,11 @@
 
             <div ng-repeat="shop in c.shopsNearThatHaveNeededProducts track by $index" ng-init="parentIndex = $index">
                 <ion-item class="item item-avatar-right"
-                          ng-click="toggleDetails($index, shop.Products.length)"
-                          ng-class="{active: isDetailsShown($index)}"
+                          ng-click="(shop.Products.length == 1) || ToggleDetails($index)"
+                          ng-class="{active: IsDetailsShown($index)}"
                           style="display: flex; justify-content: space-between; -webkit-justify-content: space-between; padding-top: 10px; padding-bottom: 10px;">
                     <img ng-src={{::shop['BrandImage']}}>
-                    <i ng-show="shop.Products.length > 1" class="icon" style="position: absolute; right: 30px; top: 80px;" ng-class="isDetailsShown($index) ? 'ion-android-arrow-dropup-circle' : 'ion-android-arrow-dropdown-circle'"></i>
+                    <i ng-show="shop.Products.length > 1" class="icon" style="position: absolute; right: 30px; top: 80px;" ng-class="IsDetailsShown($index) ? 'ion-android-arrow-dropup-circle' : 'ion-android-arrow-dropdown-circle'"></i>
                     <div style="margin-left: -10px; margin-right: 15px;">
                         <div ng-click="c.OpenWaze(shop['Lat'], shop['Lon']); $event.stopPropagation()">
                             <button class="waze-button" style="margin-top: 10px; margin-right: 10px; margin-bottom: 2px;"></button>
@@ -68,7 +68,7 @@
 
                 </ion-item>
 
-                <ion-item class="item-accordion" ng-repeat="product in shop.Products" ng-show="(shop.Products.length > 1) && isDetailsShown(parentIndex)">
+                <ion-item class="item-accordion" ng-repeat="product in shop.Products" ng-show="(shop.Products.length > 1) && IsDetailsShown(parentIndex)">
                     <h2 style="text-align:right">{{c.comparedProducts[product.ItemCode].Name}}</h2>
                     <h2 style="text-align:left; color:green; padding-top: 6px;">{{::c.localize.strings['CurrencySign']}}{{c.comparedProducts[product.ItemCode].Amount * product.ItemPrice | number : 2}}
                         <span ng-hide="c.comparedProducts[product.ItemCode].Amount == 1"> = {{c.comparedProducts[product.ItemCode].Amount}} * {{::c.localize.strings['CurrencySign']}}{{product.ItemPrice * 1 | number : 2}}</span></h2>
