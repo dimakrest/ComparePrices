@@ -39,7 +39,6 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                 }
 
                 $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
-                console.log(place);
                 $scope.c.lastAddress = place.formatted_address.replace(", ישראל", "");;
                 if ((localStorage.getItem('IsRunningOnDevice') || "0") != "0") {
                     $cordovaGoogleAnalytics.trackEvent('Settings', 'Change address', $scope.c.lastAddress, $scope.c.rangeForShops);
@@ -48,7 +47,8 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                 localStorage.setItem('Lat', place.geometry.location.G);
                 localStorage.setItem('Lon', place.geometry.location.K);
 
-                UpdateStores.UpdateStoresInfo($scope, place.geometry.location.G, place.geometry.location.K, $scope.c.rangeForShops).then(function() {
+                // No need to check for internet connection - if there's no internet user cannot use google autocomplete
+                UpdateStores.UpdateStoresInfo($scope, place.geometry.location.G, place.geometry.location.K, $scope.c.rangeForShops).then(function () {
                     $scope.c.HideLoading();
                     // Change the useUsersCurrentLocation variable, so we know that now we should use address from google autocompletion
                     $scope.c.useUsersCurrentLocation = false;

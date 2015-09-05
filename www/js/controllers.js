@@ -41,7 +41,8 @@ angular.module('ComparePrices.controllers', [])
       };
     })
 
-    .controller('RootCtrl', function($scope, $ionicLoading, $timeout, $ionicSideMenuDelegate, PopUpFactory, ComparePricesStorage, ComparePricesConstants, UpdateStores, $cordovaGoogleAnalytics) {
+    .controller('RootCtrl', function($scope, $ionicLoading, $timeout, $ionicSideMenuDelegate, PopUpFactory, ComparePricesStorage, ComparePricesConstants, UpdateStores, $cordovaGoogleAnalytics,
+                                     MiscFunctions) {
         $scope.c = {};
 
         $scope.c.currentCartName = "";
@@ -83,9 +84,7 @@ angular.module('ComparePrices.controllers', [])
         }
 
         function CheckConnection() {
-            var networkState = navigator.connection.type;
-
-            if (networkState == Connection.NONE) {
+            if (!MiscFunctions.IsConnectedToInternet()) {
                 var popUpText = $scope.c.localize.strings['NoInternetConnection'];
                 PopUpFactory.ErrorPopUp($scope, popUpText);
             }
@@ -158,12 +157,21 @@ angular.module('ComparePrices.controllers', [])
                 // get maximum radius value
                 var maxRangeForShops = parseInt(localStorage.getItem('MaxRangeForShops') || ComparePricesConstants.DEFAULT_SHOPS_RANGE);
                 if (parseInt($scope.c.rangeForShops) > maxRangeForShops) {
-                    localStorage.setItem('MaxRangeForShops', $scope.c.rangeForShops);
-                    // Need to recalculate and create missing stores info
-                    $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
-                    UpdateStores.UpdateStoresInfo($scope, lat, lon, $scope.c.rangeForShops).then(function () {
-                        $scope.c.HideLoading();
-                    });
+                    // Check for internet connection
+                    if (MiscFunctions.IsConnectedToInternet()) {
+                        localStorage.setItem('MaxRangeForShops', $scope.c.rangeForShops);
+                        // Need to recalculate and create missing stores info
+                        $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
+                        UpdateStores.UpdateStoresInfo($scope, lat, lon, $scope.c.rangeForShops).then(function () {
+                            $scope.c.HideLoading();
+                        });
+                    } else {
+                        // if there's no connection and we have to update stores list revert the value of shops range back
+                        $scope.c.rangeForShops = previousRangeForShops;
+                        localStorage.setItem('RangeForShops', previousRangeForShops);
+                        var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotUpdateStoresInRange'];
+                        PopUpFactory.ErrorPopUp($scope, popUpText);
+                    }
                 }
             },500);
         };

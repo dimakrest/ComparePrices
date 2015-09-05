@@ -54,7 +54,9 @@
         'PredefinedCarts': 'סלים לדוגמא',
         'PredefinedProductGroups': 'מוצרים פופולריים לפי מחלקות',
         'DoYouWantToOpenSettings':'האם אתה רוצה לפתוח הגדרות ולאשר את מיקומך?',
-        'NoInternetConnection' : 'אפליקציה זו דורשת חיבור לאינטרנט'
+        'NoInternetConnection' : 'אפליקציה זו דורשת חיבור לאינטרנט',
+        'NoInternetConnectionCannotUpdateStoresInRange': 'אפליקציה זו דורשת חיבור לאינטרנט. עידכון חנויות במרחק הנבחר נכשל.',
+        'NoInternetConnectionCannotFinishDownloadingAllStores': 'אפליקציה זו דורשת חיבור לאינטרנט. לא הצלחנו להוריד את כל החנויות לידך.'
     };
 
     document.selectLanguage = function(lang)
