@@ -497,7 +497,12 @@ angular.module('ComparePrices.services', ['ngResource'])
                                 var storeLat = singleStore['Lat'];
                                 var storeLon = singleStore['Lon'];
 
-                                var distance = MiscFunctions.CalculateDistance(myLat, myLon, storeLat, storeLon);
+                                var distance = 0;
+                                // For online shop the distance is 0
+                                if (storeLat != 0 || storeLon != 0) {
+                                    distance = MiscFunctions.CalculateDistance(myLat, myLon, storeLat, storeLon);
+                                }
+
                                 var sqlQuery = 'UPDATE tbStoresLocation SET Distance=' + distance + ' WHERE ChainID="' + singleStore['ChainID'] + '" AND StoreID="' +
                                     singleStore['StoreID'] + '";';
                                 tx.executeSql(sqlQuery);
