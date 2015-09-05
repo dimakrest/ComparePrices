@@ -930,10 +930,14 @@ angular.module('ComparePrices.services', ['ngResource'])
                 // if user wants to use his current location, need to check if his location changed
                 if ($scope.c.useUsersCurrentLocation) {
                     $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
-                    UpdateStores.UpdateStoresInfoIfRequired($scope).then(function() {
+                    UpdateStores.UpdateStoresInfoIfRequired($scope).then(function(isConnectedToInternet) {
                         $scope.c.HideLoading();
-                        FindBestShopPrivate($scope, productsToCalculatePrice);
-
+                        if (isConnectedToInternet) {
+                            FindBestShopPrivate($scope, productsToCalculatePrice);
+                        } else {
+                            var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotFinishDownloadingAllStores'];
+                            PopUpFactory.ErrorPopUp($scope, popUpText);
+                        }
                     });
                 } else {
                     FindBestShopPrivate($scope, productsToCalculatePrice);
@@ -1213,7 +1217,7 @@ angular.module('ComparePrices.services', ['ngResource'])
 
                         // if address is set and distance is less than margin => nothing to do
                         if (addressAlreadySet && (distanceBetweenTwoLocations < ComparePricesConstants.LOCATION_CHANGES_MARGIN)) {
-                            defer.resolve();
+                            defer.resolve(true);
                             return;
                         }
 
@@ -1235,35 +1239,54 @@ angular.module('ComparePrices.services', ['ngResource'])
                             PopUpFactory.ConfirmationPopUp($scope, popUpTitle, popUpText).then(function (confirmed) {
                                 if (confirmed) {
                                     $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
-                                    ReverseGeocodingAndUpdateStore($scope, lat, lon).then(function() {
-                                        defer.resolve();
-                                    });
+                                    // check for internet connection
+                                    if (MiscFunctions.IsConnectedToInternet()) {
+                                        ReverseGeocodingAndUpdateStore($scope, lat, lon).then(function() {
+                                            defer.resolve(true);
+                                        });
+                                    } else {
+                                        defer.resolve(false);
+                                    }
                                 } else { // user doesn't want to update his location
-                                    defer.resolve();
+                                    defer.resolve(true);
                                 }
                             })
                         } else {
-                            ReverseGeocodingAndUpdateStore($scope, lat, lon).then(function() {
-                                defer.resolve();
-                            });
+                            if (MiscFunctions.IsConnectedToInternet()) {
+                                ReverseGeocodingAndUpdateStore($scope, lat, lon).then(function () {
+                                    defer.resolve(true);
+                                });
+                            } else {
+                                defer.resolve(false);
+                            }
+
                         }
                     } , function (error) { // error callback
-                            defer.resolve();
                             $scope.c.HideLoading();
 
-                            var title = $scope.c.localize.strings['NavigateToSettings'];
-                            var text  = $scope.c.localize.strings['DoYouWantToOpenSettings'];
-                            PopUpFactory.ConfirmationPopUp($scope, title, text).then(function(confirmed) {
-                                if(confirmed) {
-                                    // add timeout in order to have time to close the confirmation popup
-                                    localStorage.setItem('UserClickedSettingsLocation', 1);
-                                    $ionicSideMenuDelegate.toggleRight();
-                                    cordova.plugins.settings.open();
-                                } else {
-                                    $ionicSideMenuDelegate.toggleRight();
-                                    $scope.c.useUsersCurrentLocation = false;
-                                }
-                            });
+                            if (error.code == 1) {
+                                defer.resolve(true);
+                                
+                                var title = $scope.c.localize.strings['NavigateToSettings'];
+                                var text = $scope.c.localize.strings['DoYouWantToOpenSettings'];
+                                PopUpFactory.ConfirmationPopUp($scope, title, text).then(function (confirmed) {
+                                    if (confirmed) {
+                                        localStorage.setItem('UserClickedSettingsLocation', 1);
+                                        if ($ionicSideMenuDelegate.isOpen()) {
+                                            $ionicSideMenuDelegate.toggleRight();
+                                        }
+                                        cordova.plugins.settings.open();
+                                    } else {
+                                        if ($ionicSideMenuDelegate.isOpen()) {
+                                            $ionicSideMenuDelegate.toggleRight();
+                                        }
+
+                                        $scope.c.useUsersCurrentLocation = false;
+                                    }
+                                });
+                            } else {
+                                resolve(false);
+                            }
                         }
                 );
                 return defer.promise;

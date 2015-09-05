@@ -109,20 +109,29 @@ angular.module('ComparePrices.controllers', [])
         }, false);
 
         document.addEventListener("resume", function () {
-            // Check for internet connection
-            CheckConnection($scope);
-
-            // app comes from background after user clicked settings button
+            // app comes from background check if after user clicked settings button
             var userClickedSettingsLocation = localStorage.getItem('UserClickedSettingsLocation') || "0";
             userClickedSettingsLocation = (userClickedSettingsLocation == "1");
-            if (userClickedSettingsLocation) {
-                $scope.c.useUsersCurrentLocation = true;
-                $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
-                UpdateStores.UpdateStoresInfoIfRequired($scope).then(function() {
-                    localStorage.setItem('UserClickedSettingsLocation', 0);
-                    localStorage.setItem('UseUsersCurrentLocation', $scope.c.useUsersCurrentLocation ? 1 : 0);
-                    $scope.c.HideLoading();
-                });
+
+            if (MiscFunctions.IsConnectedToInternet()) {
+                if (userClickedSettingsLocation) {
+                    $scope.c.useUsersCurrentLocation = true;
+                    $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
+                    UpdateStores.UpdateStoresInfoIfRequired($scope).then(function () {
+                        $scope.c.HideLoading();
+                        localStorage.setItem('UserClickedSettingsLocation', 0);
+                        localStorage.setItem('UseUsersCurrentLocation', $scope.c.useUsersCurrentLocation ? 1 : 0);
+                    });
+                }
+            } else {
+                var popUpText = '';
+                if (userClickedSettingsLocation) {
+                    $scope.c.useUsersCurrentLocation = false;
+                    popUpText = $scope.c.localize.strings['NoInternetConnectionCannotFinishDownloadingAllStores'];
+                } else {
+                    popUpText = $scope.c.localize.strings['NoInternetConnection'];
+                }
+                PopUpFactory.ErrorPopUp($scope, popUpText);
             }
         }, false);
 
@@ -188,9 +197,15 @@ angular.module('ComparePrices.controllers', [])
         $scope.c.LocationToggleChanged = function() {
             if ($scope.c.useUsersCurrentLocation) {
                 $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
-                UpdateStores.UpdateStoresInfoIfRequired($scope).then(function () {
-                    localStorage.setItem('UseUsersCurrentLocation', $scope.c.useUsersCurrentLocation ? 1 : 0);
+                UpdateStores.UpdateStoresInfoIfRequired($scope).then(function (isConnectedToInternet) {
                     $scope.c.HideLoading();
+                    if (isConnectedToInternet) {
+                        localStorage.setItem('UseUsersCurrentLocation', $scope.c.useUsersCurrentLocation ? 1 : 0);
+                    } else {
+                        $scope.c.useUsersCurrentLocation = false;
+                        var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotFinishDownloadingAllStores'];
+                        PopUpFactory.ErrorPopUp($scope, popUpText);
+                    }
                 });
             } else {
                 localStorage.setItem('UseUsersCurrentLocation', $scope.c.useUsersCurrentLocation ? 1 : 0);
