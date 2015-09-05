@@ -11,9 +11,6 @@ angular.module('ComparePrices.services', ['ngResource'])
 
     .factory('ComparePricesStorage', ['ReadJson', 'MiscFunctions', '$q', '$resource',
         function (ReadJson, MiscFunctions, $q, $resource) {
-
-            var createCartsTbQuery      = 'CREATE TABLE IF NOT EXISTS tbCarts (CartID INTEGER PRIMARY KEY, CartName TEXT, ImageUrl TEXT, IsPredefined INTEGER)';
-            var createUserCartsTbQuery  = 'CREATE TABLE IF NOT EXISTS tbUserCarts (CartID INTEGER, ItemCode TEXT, Amount INTEGER)';
             var createProductGroupsTbQuery              = 'CREATE TABLE IF NOT EXISTS tbProductGroups (ProductGroupID INTEGER PRIMARY KEY, ProductGroupName TEXT, ImageUrl TEXT)';
             var createProductsInProductGroupsTbQuery    = 'CREATE TABLE IF NOT EXISTS tbProductsInProductGroups (ProductGroupID INTEGER, ItemCode TEXT)';
 
@@ -39,6 +36,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 // TODO: change back to query after prices update
                 storeJson.get(function(response) {
                     db.transaction(function (tx) {
+                        tx.executeSql('DROP TABLE IF EXISTS ' + tableName);
                         tx.executeSql('CREATE TABLE IF NOT EXISTS ' + tableName + ' (ItemCode TEXT PRIMARY KEY, ItemPrice TEXT)'); // TODO: change item price to be double
                         var products = response['items'];
                         var numOfProducts = products.length;
@@ -81,8 +79,6 @@ angular.module('ComparePrices.services', ['ngResource'])
             }
 
             function initDB(tx) {
-                tx.executeSql(createUserCartsTbQuery);
-                tx.executeSql(createCartsTbQuery);
                 tx.executeSql(createProductGroupsTbQuery);
                 tx.executeSql(createProductsInProductGroupsTbQuery);
             }
@@ -239,6 +235,12 @@ angular.module('ComparePrices.services', ['ngResource'])
                         var products;
 
                         db.transaction(function (tx) {
+                            tx.executeSql('DROP TABLE IF EXISTS tbCarts');
+                            tx.executeSql('CREATE TABLE IF NOT EXISTS tbCarts (CartID INTEGER PRIMARY KEY, CartName TEXT, ImageUrl TEXT, IsPredefined INTEGER)');
+
+                            tx.executeSql('DROP TABLE IF EXISTS tbUserCarts');
+                            tx.executeSql('CREATE TABLE IF NOT EXISTS tbUserCarts (CartID INTEGER, ItemCode TEXT, Amount INTEGER)');
+
                             carts.forEach(function(singleCart) {
                                 tx.executeSql('INSERT INTO tbCarts (CartID, CartName, ImageUrl, IsPredefined)' +
                                     'VALUES (' + lastCartID + ', "' + singleCart['CartName'] + '", "' + singleCart['ImageUrl'] + '",1)');
@@ -1266,7 +1268,7 @@ angular.module('ComparePrices.services', ['ngResource'])
 
                             if (error.code == 1) {
                                 defer.resolve(true);
-                                
+
                                 var title = $scope.c.localize.strings['NavigateToSettings'];
                                 var text = $scope.c.localize.strings['DoYouWantToOpenSettings'];
                                 PopUpFactory.ConfirmationPopUp($scope, title, text).then(function (confirmed) {
