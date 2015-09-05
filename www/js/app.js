@@ -58,7 +58,8 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                 localStorage.setItem('Lat', place.geometry.location.G);
                 localStorage.setItem('Lon', place.geometry.location.K);
 
-                UpdateStores.UpdateStoresInfo($scope, place.geometry.location.G, place.geometry.location.K, $scope.c.rangeForShops).then(function() {
+                // No need to check for internet connection - if there's no internet user cannot use google autocomplete
+                UpdateStores.UpdateStoresInfo($scope, place.geometry.location.G, place.geometry.location.K, $scope.c.rangeForShops).then(function () {
                     $scope.c.HideLoading();
                     // Change the useUsersCurrentLocation variable, so we know that now we should use address from google autocompletion
                     $scope.c.useUsersCurrentLocation = false;

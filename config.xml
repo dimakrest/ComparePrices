@@ -10,7 +10,7 @@
   <content src="index.html"/>
   <access origin="*"/>
   <preference name="webviewbounce" value="false"/>
-  <preference name="UIWebViewBounce" value="true"/>
+  <preference name="UIWebViewBounce" value="false"/>
   <preference name="DisallowOverscroll" value="false"/>
   <preference name="android-minSdkVersion" value="16"/>
   <preference name="BackupWebStorage" value="none"/>

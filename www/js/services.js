@@ -639,7 +639,7 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
     }])
 
-    .factory('FindBestShops', ['ComparePricesStorage', 'UpdateStores', 'ShowModal', 'PopUpFactory', '$q', function(ComparePricesStorage, UpdateStores, ShowModal, PopUpFactory, $q) {
+    .factory('FindBestShops', ['ComparePricesStorage', 'MiscFunctions', 'UpdateStores', 'ShowModal', 'PopUpFactory', '$q', function(ComparePricesStorage, MiscFunctions, UpdateStores, ShowModal, PopUpFactory, $q) {
 
         function CalculatePriceForShop(productCart, productPriceInStore) {
             var totalPrice = 0.0;
@@ -908,18 +908,24 @@ angular.module('ComparePrices.services', ['ngResource'])
             });
         }
 
-        return function($scope, productsToCalculatePrice) {console.log(productsToCalculatePrice);
+        return function($scope, productsToCalculatePrice) {
             $scope.c.shopsNearThatHaveNeededProducts = [];
             // user closed the app before all tables were created
             var updateStoreInfoCompleted = localStorage.getItem('UpdateStoreInfoCompleted');
             if (updateStoreInfoCompleted == "0") {
-                $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
-                var myLat = localStorage.getItem('Lat');
-                var myLon = localStorage.getItem('Lon');
-                UpdateStores.UpdateStoresInfo($scope, myLat, myLon, $scope.c.rangeForShops).then(function () {
-                    $scope.c.HideLoading();
-                    FindBestShopPrivate($scope, productsToCalculatePrice);
-                });
+                // Need to check for internet connection
+                if (!MiscFunctions.IsConnectedToInternet()) {
+                    var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotFinishDownloadingAllStores'];
+                    PopUpFactory.ErrorPopUp($scope, popUpText);
+                } else {
+                    $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
+                    var myLat = localStorage.getItem('Lat');
+                    var myLon = localStorage.getItem('Lon');
+                    UpdateStores.UpdateStoresInfo($scope, myLat, myLon, $scope.c.rangeForShops).then(function () {
+                        $scope.c.HideLoading();
+                        FindBestShopPrivate($scope, productsToCalculatePrice);
+                    });
+                }
             } else {
                 // if user wants to use his current location, need to check if his location changed
                 if ($scope.c.useUsersCurrentLocation) {
@@ -1041,6 +1047,11 @@ angular.module('ComparePrices.services', ['ngResource'])
                 var distance = Math.max(Math.round(R * 2 * Math.asin(Math.sqrt(a))), 1);
 
                 return distance;
+            },
+
+            IsConnectedToInternet : function() {
+                var networkState = navigator.connection.type;
+                return (networkState != Connection.NONE);
             }
         }
     }])
