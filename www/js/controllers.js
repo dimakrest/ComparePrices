@@ -42,7 +42,7 @@ angular.module('ComparePrices.controllers', [])
     })
 
     .controller('RootCtrl', function($scope, $ionicLoading, $timeout, $ionicSideMenuDelegate, PopUpFactory, ComparePricesStorage, ComparePricesConstants, UpdateStores, $cordovaGoogleAnalytics,
-                                     MiscFunctions, $ionicPopover) {
+                                     MiscFunctions, $ionicPopover, UpdatesFromServer) {
         $scope.c = {};
 
         $scope.c.currentCartName = "";
@@ -110,6 +110,9 @@ angular.module('ComparePrices.controllers', [])
 
             // init and start google analytics
             StartGoogleAnalytics();
+
+            // check if new stores version is available
+            UpdatesFromServer.CheckIfUpdateIsRequired();
         }, false);
 
         document.addEventListener("resume", function () {
@@ -137,7 +140,16 @@ angular.module('ComparePrices.controllers', [])
                 }
                 PopUpFactory.ErrorPopUp($scope, popUpText);
             }
+
+            // check if new stores version is available
+            UpdatesFromServer.CheckIfUpdateIsRequired();
         }, false);
+
+        // In order to get the version in browser use this wa
+        var isRunningOnDevice = localStorage.getItem('IsRunningOnDevice') || 0;
+        if (isRunningOnDevice == 0) {
+            UpdatesFromServer.CheckIfUpdateIsRequired();
+        }
 
         // Update the local storage only when user finishes to enter the value
         // choose range bar
