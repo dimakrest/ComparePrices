@@ -10,8 +10,7 @@ angular.module('ComparePrices.services', ['ngResource'])
         }])
 
     .factory('S3Jsons', ['$resource', function($resource) {
-        var jsonsVersion = localStorage.getItem('localVer');
-        return $resource('https://s3.amazonaws.com/compare.prices/stores/' + jsonsVersion + '/:jsonName.json.gz');s
+        return $resource('https://s3.amazonaws.com/compare.prices/stores/:jsonName.json.gz');s
     }])
 
     .factory('ComparePricesStorage', ['ReadJson', 'S3Jsons', 'MiscFunctions', '$q',
@@ -169,7 +168,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                             defer.resolve();
                         });
                     } else {
-                        defer.resolve;
+                        defer.resolve();
                     }
                     return defer.promise;
                 },
@@ -586,6 +585,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                         }
                         var promises = [];
 
+                        var jsonsVersion = localStorage.getItem('localVer');
                         for (var i=0; i < numOfShops; i++) {
                             // need to pad store id with zeroes to get the right name
                             var singleShop  = shopsInfo.rows[i];
@@ -598,7 +598,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                             storeID  = storeID.substr(storeID.length - 3);
 
                             var tableName   = 'tb_' + singleShop['BrandName'] + '_' + singleShop['StoreID'];
-                            var fileName    =  singleShop['BrandName'] + '\/price-' + singleShop['BrandName'] + '-' + storeID;
+                            var fileName    =  jsonsVersion + '\/' + singleShop['BrandName'] + '\/price-' + singleShop['BrandName'] + '-' + storeID;
                             var chainID     = singleShop['ChainID'];
                             var storeID     = singleShop['StoreID'];
 
@@ -1072,7 +1072,7 @@ angular.module('ComparePrices.services', ['ngResource'])
         return function(lat, lon) {
             var defer = $q.defer();
 
-            var googleReverseGeocoding = $resource('https://maps.googleapis.com/maps/api/geocode/json',  {latlng:lat + ',' + lon, key:'AIzaSyBaHL-Agrso7SJGqUK5rfS0WQtpRlJdKF4',
+            var googleReverseGeocoding = $resource('https://maps.googleapis.com/maps/api/geocode/json',  {latlng:lat + ',' + lon, key:'AIzaSyBkW_9B1eMOoHIIkJ17PSQ8_yQ9ZJjPwME',
                 'language':'iw'});
             googleReverseGeocoding.get(function(result) {
                 var addressComponents = result['results'][0]['address_components'];
@@ -1128,7 +1128,7 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
     }])
 
-    .factory('PrepareInfoForControllers', ['$q', '$ionicLoading', 'ComparePricesStorage', function($q, $ionicLoading, ComparePricesStorage) {
+    .factory('PrepareInfoForControllers', ['$q', '$ionicLoading', 'ComparePricesStorage', 'UpdatesFromServer', function($q, $ionicLoading, ComparePricesStorage, UpdatesFromServer) {
         var _hasUserCarts       = 0;
         var _myCartsInfo        = [];
         var _myCart             = [];
@@ -1143,7 +1143,8 @@ angular.module('ComparePrices.services', ['ngResource'])
                         template: '<div class="loader"><svg class="circular"><circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10"/></svg></div>'
                     });
 
-                    $q.all([ComparePricesStorage.CreateTbProducts(),
+                    $q.all([UpdatesFromServer.InitConfigFirstTimeLoad(),
+                            ComparePricesStorage.CreateTbProducts(),
                             ComparePricesStorage.CreateStoresLocationTable(),
                             ComparePricesStorage.CreatePredefinedCarts()]).then(function () {
                             ComparePricesStorage.GetAllCarts(function (result) {
@@ -1330,6 +1331,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                                     }
                                 } else { // user doesn't want to update his location
                                     if (newStoresVersionExists == "1") { // force store updates
+                                        $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
                                         UpdateStoresInfoPrivate($scope, savedLat, savedLon, $scope.c.rangeForShops).then(function() {
                                             defer.resolve(true);
                                         });
@@ -1338,7 +1340,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                                     }
                                 }
                             })
-                        } else {
+                        } else { // use geolocation for a first time
                             if (MiscFunctions.IsConnectedToInternet()) {
                                 ReverseGeocodingAndUpdateStore($scope, lat, lon).then(function () {
                                     defer.resolve(true);
@@ -1372,7 +1374,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                                     }
                                 });
                             } else {
-                                resolve(false);
+                                defer.resolve(false);
                             }
                         }
                 );
@@ -1386,22 +1388,35 @@ angular.module('ComparePrices.services', ['ngResource'])
         return {
 
             CheckIfUpdateIsRequired : function() {
-
                 var configJson = $resource('https://s3.amazonaws.com/compare.prices/stores/config.json',  {});
                 configJson.get(function(config) {
                     _config = config;
                     var localTimeStamp = localStorage.getItem('localTimeStamp');
                     var localVer       = localStorage.getItem('localVer');
-                    // first time load
+                    // it's no supposed to happen
                     if (localTimeStamp == null || localVer == null) {
-                        localStorage.setItem('localTimeStamp', _config['timeStamp']);
-                        localStorage.setItem('localVer', _config['ver']);
+                        localStorage.setItem('firstTimeLoad', 1);
                     } else if (localTimeStamp != _config['timeStamp']) { // need to update the timestamp and mark that new version exists
                             localStorage.setItem('localTimeStamp', _config['timeStamp']);
                             localStorage.setItem('localVer', _config['ver']);
                             localStorage.setItem('newStoresVersionExists', 1);
                     }
                 });
+            },
+
+            InitConfigFirstTimeLoad : function() {
+                var defer = $q.defer();
+
+                var configJson = $resource('https://s3.amazonaws.com/compare.prices/stores/config.json',  {});
+                configJson.get(function(config) {
+                    _config = config;
+                    var localTimeStamp = localStorage.getItem('localTimeStamp');
+                    var localVer       = localStorage.getItem('localVer');
+                    localStorage.setItem('localTimeStamp', _config['timeStamp']);
+                    localStorage.setItem('localVer', _config['ver']);
+                    defer.resolve();
+                });
+                return defer.promise;
             }
         }
     }]);
