@@ -42,7 +42,7 @@ angular.module('ComparePrices.controllers', [])
     })
 
     .controller('RootCtrl', function($scope, $ionicLoading, $timeout, $ionicSideMenuDelegate, PopUpFactory, ComparePricesStorage, ComparePricesConstants, UpdateStores, $cordovaGoogleAnalytics,
-                                     MiscFunctions, $ionicPopover, UpdatesFromServer, $cordovaEmailComposer) {
+                                     MiscFunctions, $ionicPopover, UpdatesFromServer, $cordovaEmailComposer, $ionicScrollDelegate) {
         $scope.c = {};
 
         $scope.c.currentCartName = "";
@@ -313,6 +313,9 @@ angular.module('ComparePrices.controllers', [])
             } else {
                 $scope.c.showPriceDetailsForShop[shopId] = 1;
             }
+            setTimeout(function() {
+                $ionicScrollDelegate.$getByHandle('modalContent').resize();
+            }, 50);
         };
 
         $scope.IsDetailsShown = function(shopId) {
