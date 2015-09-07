@@ -63,9 +63,7 @@
         'NoInternetConnection' : 'אפליקציה זו דורשת חיבור לאינטרנט',
         'NoInternetConnectionCannotUpdateStoresInRange': 'אפליקציה זו דורשת חיבור לאינטרנט. עידכון חנויות במרחק הנבחר נכשל.',
         'NoInternetConnectionCannotFinishDownloadingAllStores': 'אפליקציה זו דורשת חיבור לאינטרנט. לא הצלחנו להוריד את כל החנויות לידך.',
-        'seekingForHelp' : 'Looking for help?',
-        'contactOurTeam' : 'Contact our team',
-        'contact' : 'Contact'
+        'ContactUs' : 'צרו קשר'
     };
 
     document.selectLanguage = function(lang)

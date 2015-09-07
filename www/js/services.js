@@ -679,7 +679,7 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
     }])
 
-    .factory('FindBestShops', ['ComparePricesStorage', 'MiscFunctions', 'UpdateStores', 'ShowModal', 'PopUpFactory', '$q', function(ComparePricesStorage, MiscFunctions, UpdateStores, ShowModal, PopUpFactory, $q) {
+    .factory('FindBestShops', ['ComparePricesStorage', 'MiscFunctions', 'UpdateStores', 'ShowModal', 'PopUpFactory', '$q', '$cordovaGoogleAnalytics', function(ComparePricesStorage, MiscFunctions, UpdateStores, ShowModal, PopUpFactory, $q, $cordovaGoogleAnalytics) {
 
         function CalculatePriceForShop($scope, productCart, productPriceInStore) {
             var totalPrice = 0.0;
@@ -922,6 +922,21 @@ angular.module('ComparePrices.services', ['ngResource'])
                 var findShopsResponse = FindMaxShopsWithMaxCommonProducts($scope, cart, result);
                 var suitableShops = findShopsResponse['suitableShops'];
                 $scope.c.missingProducts = findShopsResponse['missingProducts'];
+
+                if (suitableShops[0].Products.length == 1)
+                {
+                    if ((localStorage.getItem('IsRunningOnDevice') || "0") != "0") {
+                        // send product id, and num of shops in result
+                        $cordovaGoogleAnalytics.trackEvent('FindeBestShop', 'Product', suitableShops[0].Products[0].ItemCode, suitableShops.length);
+                    }
+                }
+                else
+                {
+                    if ((localStorage.getItem('IsRunningOnDevice') || "0") != "0") {
+                        // send cart id to understand if its predefined or user cart, and num of shops in result
+                        $cordovaGoogleAnalytics.trackEvent('FindeBestShop', 'Cart', $scope.cartID, suitableShops.length);
+                    }
+                }
 
                 // sort shops by price
                 suitableShops.sort(dynamicSortMultiple("CartPrice", "Distance"));
