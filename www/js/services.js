@@ -50,7 +50,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                             {
                                 sqlQuery = 'INSERT INTO ' + tableName + ' VALUES ("' +
                                     singleProduct['IC'] + '", "' +
-                                    singleProduct['IP'] + '","1","9.95")';
+                                    singleProduct['IP'] + '","","")';
                             }
                             else
                                 sqlQuery = 'INSERT INTO ' + tableName + ' VALUES ("' +
@@ -686,7 +686,7 @@ angular.module('ComparePrices.services', ['ngResource'])
             var productsToShowInAccordion = [];
             productPriceInStore.forEach(function(product) {
                 var numOfProductsInCart = productCart.length;
-                var singleProductInAccordion = [];
+
                 for (var i=0; i < numOfProductsInCart; i++) {
                     if (productCart[i]['ItemCode'] == product['ItemCode']) {
                         // check that we have discount for that products + sanity check that discount price is better
@@ -696,30 +696,67 @@ angular.module('ComparePrices.services', ['ngResource'])
                             // easy case, when discount is even for single item
                             if (product['DiscountAmount'] == 1)
                             {
+                                var singleProductInAccordion = [];
                                 singleProductInAccordion['ItemCode']     = product['ItemCode'];
                                 singleProductInAccordion['ItemPrice']    = product['DiscountPrice'];
                                 singleProductInAccordion['Amount']       = productCart[i]['Amount'];
                                 singleProductInAccordion['Type']         = "DiscountS";
                                 var percentsDiscount = Math.round((product['ItemPrice'] - product['DiscountPrice']) / product['ItemPrice'] * 100);
                                 singleProductInAccordion['DiscountText'] = $scope.c.localize.strings['Discount'] + " " + percentsDiscount + '%';
+                                singleProductInAccordion['DiscountAmount'] = "";
+                                productsToShowInAccordion.push(singleProductInAccordion);
 
-                                totalPrice += parseFloat(product['ItemPrice']) * productCart[i]['Amount'];
+                                totalPrice += parseFloat(singleProductInAccordion['ItemPrice']) * singleProductInAccordion['Amount'];
+                            }
+                            else // discount like '3 for 10 shekel'
+                            {
+                                // we have some items with discount
+                                if (Math.floor(productCart[i]['Amount'] / product['DiscountAmount']) > 0)
+                                {
+                                    var singleProductInAccordion = [];
+                                    singleProductInAccordion['ItemCode']     = product['ItemCode'];
+                                    singleProductInAccordion['ItemPrice']    = product['DiscountPrice'];
+                                    singleProductInAccordion['Amount']       = Math.floor(productCart[i]['Amount'] / product['DiscountAmount']);
+                                    singleProductInAccordion['Type']         = "DiscountM";
+                                    singleProductInAccordion['DiscountText'] = product['DiscountPrice'] + ' ' + $scope.c.localize.strings['Mivca'] + '  ' + product['DiscountAmount'] + ' ' + $scope.c.localize.strings['For'];
+                                    singleProductInAccordion['DiscountAmount'] = Math.floor(productCart[i]['Amount'] / product['DiscountAmount']) * product['DiscountAmount'];
+                                    productsToShowInAccordion.push(singleProductInAccordion);
+
+                                    totalPrice += parseFloat(singleProductInAccordion['ItemPrice']) * singleProductInAccordion['Amount'];
+                                }
+
+                                // we have some items that are not in discount because not enough items
+                                if (productCart[i]['Amount'] % product['DiscountAmount'] != 0)
+                                {
+                                    var singleProductInAccordion = [];
+                                    singleProductInAccordion['ItemCode']     = product['ItemCode'];
+                                    singleProductInAccordion['ItemPrice']    = product['ItemPrice'];
+                                    singleProductInAccordion['Amount']       = productCart[i]['Amount'] % product['DiscountAmount'];
+                                    singleProductInAccordion['Type']         = "NotEnoughForDiscount";
+                                    singleProductInAccordion['DiscountText'] = product['DiscountPrice'] + ' ' + $scope.c.localize.strings['HaveMivca'] + ' ' + product['DiscountAmount'] + ' ' + $scope.c.localize.strings['For'];
+                                    singleProductInAccordion['DiscountAmount'] = "";
+                                    productsToShowInAccordion.push(singleProductInAccordion);
+
+                                    totalPrice += parseFloat(singleProductInAccordion['ItemPrice']) * singleProductInAccordion['Amount'];
+                                }
                             }
                         }
                         else // don't have any discount, regular price
                         {
+                            var singleProductInAccordion = [];
                             singleProductInAccordion['ItemCode']     = product['ItemCode'];
                             singleProductInAccordion['ItemPrice']    = product['ItemPrice'];
                             singleProductInAccordion['Amount']       = productCart[i]['Amount'];
                             singleProductInAccordion['Type']         = "Regular";
                             singleProductInAccordion['DiscountText'] = "";
+                            singleProductInAccordion['DiscountAmount'] = "";
+                            productsToShowInAccordion.push(singleProductInAccordion);
 
-                            totalPrice += parseFloat(product['ItemPrice']) * productCart[i]['Amount'];
+                            totalPrice += parseFloat(singleProductInAccordion['ItemPrice']) * singleProductInAccordion['Amount'];
                         }
                         break;
                     }
                 }
-                productsToShowInAccordion.push(singleProductInAccordion);
             });
 
             var cartFinalPrice = (productPriceInStore.length == 1 ) ? totalPrice.toFixed(2) : Math.round(totalPrice);
