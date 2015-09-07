@@ -62,7 +62,10 @@
         'DoYouWantToOpenSettings':'האם אתה רוצה לפתוח הגדרות ולאשר את מיקומך?',
         'NoInternetConnection' : 'אפליקציה זו דורשת חיבור לאינטרנט',
         'NoInternetConnectionCannotUpdateStoresInRange': 'אפליקציה זו דורשת חיבור לאינטרנט. עידכון חנויות במרחק הנבחר נכשל.',
-        'NoInternetConnectionCannotFinishDownloadingAllStores': 'אפליקציה זו דורשת חיבור לאינטרנט. לא הצלחנו להוריד את כל החנויות לידך.'
+        'NoInternetConnectionCannotFinishDownloadingAllStores': 'אפליקציה זו דורשת חיבור לאינטרנט. לא הצלחנו להוריד את כל החנויות לידך.',
+        'seekingForHelp' : 'Looking for help?',
+        'contactOurTeam' : 'Contact our team',
+        'contact' : 'Contact'
     };
 
     document.selectLanguage = function(lang)

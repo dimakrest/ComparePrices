@@ -158,7 +158,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 MarkStoresToDownloadNewJsons : function(newStoresInfoExists) {
                     var defer = $q.defer();
 
-                    if (newStoresInfoExists) {
+                    if (newStoresInfoExists == 1) {
                         db.transaction(function (tx) {
                             var sqlQuery = 'UPDATE tbStoresLocation SET ProductListExists=0';
                             tx.executeSql(sqlQuery);
@@ -1377,7 +1377,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                                     }
                                 }
                             })
-                        } else { // use geolocation for a first time
+                        } else { // use geolocation
                             if (MiscFunctions.IsConnectedToInternet()) {
                                 ReverseGeocodingAndUpdateStore($scope, lat, lon).then(function () {
                                     defer.resolve(true);
