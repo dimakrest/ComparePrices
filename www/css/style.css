@@ -1820,26 +1820,16 @@ a {
 
 .waze-button {
     background-image: url('../img/waze_button.png');
-    background-repeat: no-repeat;
-    background-position: 50% 50%;
-    /* put the height and width of your image here */
     height: 35px;
     width: 94px;
     border: none;
-    padding: 0px;
-    border-radius: 10px;
 }
 
 .maps-button {
     background-image: url('../img/maps_button.png');
-    background-repeat: no-repeat;
-    background-position: 50% 50%;
-    /* put the height and width of your image here */
     height: 35px;
     width: 94px;
     border: none;
-    padding: 0px;
-    border-radius: 10px;
 }
 
 .pac-icon {
