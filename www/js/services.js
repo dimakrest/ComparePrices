@@ -621,9 +621,9 @@ angular.module('ComparePrices.services', ['ngResource'])
                     cssClass: 'non-transparent-pop-up'
                 });
 
-                $timeout(function() {
-                    ionicMaterialInk.displayEffect();
-                }, 0);
+//                $timeout(function() {
+//                    ionicMaterialInk.displayEffect();
+//                }, 0);
 
                 if (callback) {
                     alertPopup.then(callback);
@@ -631,9 +631,9 @@ angular.module('ComparePrices.services', ['ngResource'])
             },
 
             ConfirmationPopUp: function($scope, popUpTitle, popUpText) {
-                $timeout(function() {
-                    ionicMaterialInk.displayEffect();
-                }, 0);
+//                $timeout(function() {
+//                    ionicMaterialInk.displayEffect();
+//                }, 0);
 
                 return $ionicPopup.confirm({
                     title: popUpTitle,
