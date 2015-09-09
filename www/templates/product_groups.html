@@ -5,7 +5,7 @@
 </ion-header-bar>
 
 <ion-view view-title={{::c.localize.strings['CompareProductsTitle']}}>
-    <ion-content class="content-bg" ng-class="{'has-subheader': !c.showSearchBar}">
+    <ion-content class="content-bg" ng-class="{'has-subheader': !c.showSearchBar}" style="background-image: url('img/bg.png'); background-size: auto; background-repeat: repeat;">
 
         <div ng-hide="c.hideTipInProductGroups == 1" style="width:94%; margin-left:3%; margin-top:3%; border: 3px dashed #ADADAD; border-radius: 30px;">
             <img style="width:auto; display:block; margin: 4px auto;" src='img/intro_2.png'>
@@ -17,7 +17,7 @@
             </h3>
 
             <div ng-class="{'card': !data.showSearchResults}" collection-repeat="productOrProductGroupInfo in ((data.showSearchResults == true) ? data.allProductsFiltered : c.productGroupsInfo)" item-height="72px" divider-collection-repeat>
-                <a ng-show="data.showSearchResults" class="item item-avatar-right" ng-click="FindBestShop(productOrProductGroupInfo['ItemCode'], productOrProductGroupInfo['ItemName'], productOrProductGroupInfo['ImagePath'])">
+                <a ng-show="data.showSearchResults" class="item item-avatar-right" ng-click="FindBestShop(productOrProductGroupInfo['ItemCode'], productOrProductGroupInfo['ItemName'], productOrProductGroupInfo['ImagePath'])" style="background-color: white">
                         <img style="width: auto;" ng-src={{productOrProductGroupInfo['ImagePath']}}>
                         <i class="icon ion-chevron-left" style="float:left; padding-top: 10px; padding-right: 10px;"></i>
                         <h2 ng-style="{ 'padding-top': productOrProductGroupInfo.ItemName.length < 35 ? '10px' : '0px' }" style="text-align: right; padding-top:10px;">{{productOrProductGroupInfo['ItemName']}}</h2>

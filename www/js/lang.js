@@ -38,7 +38,7 @@
         'ToggleMyLocation': 'השתמש במיקום הנוכחי',
         'DistanceToShop': 'מרחק מקסימלי לחנות: ',
         'CancelSearch': 'ביטול',
-        'CannotGetCurrentLocation': 'לא הצחנו לקבל את מיקומל, אנא נסה שנית',
+        'CannotGetCurrentLocation': 'לא הצחנו לקבל את מיקומך, אנא נסה שנית',
         'DontHaveAllProducts': 'חנויות הכוללים רשימה חלקית של המוצרים',
         'PartialComparisonMade': 'ההשוואה נעשית על סמך רשימה חלקית',
         'ShowShopsThatPartiallySuit': 'בחנויות להלן חסרים מוצרים הבאים',

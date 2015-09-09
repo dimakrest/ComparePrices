@@ -718,7 +718,14 @@ angular.module('ComparePrices.services', ['ngResource'])
                                     singleProductInAccordion['ItemPrice']    = product['DiscountPrice'];
                                     singleProductInAccordion['Amount']       = Math.floor(productCart[i]['Amount'] / product['DiscountAmount']);
                                     singleProductInAccordion['Type']         = "DiscountM";
-                                    singleProductInAccordion['DiscountText'] = product['DiscountPrice'] + ' ' + $scope.c.localize.strings['Mivca'] + '  ' + product['DiscountAmount'] + ' ' + $scope.c.localize.strings['For'];
+                                    if ((product['DiscountAmount'] == 2) && (product['DiscountPrice'] == product['ItemPrice']))// special case for mivca 1+1
+                                    {
+                                        singleProductInAccordion['DiscountText'] = '1+1' + $scope.c.localize.strings['Mivca'];
+                                    }
+                                    else
+                                    {
+                                        singleProductInAccordion['DiscountText'] = product['DiscountPrice'] + ' ' + $scope.c.localize.strings['Mivca'] + '  ' + product['DiscountAmount'] + ' ' + $scope.c.localize.strings['For'];
+                                    }
                                     singleProductInAccordion['DiscountAmount'] = Math.floor(productCart[i]['Amount'] / product['DiscountAmount']) * product['DiscountAmount'];
                                     productsToShowInAccordion.push(singleProductInAccordion);
 
@@ -733,7 +740,14 @@ angular.module('ComparePrices.services', ['ngResource'])
                                     singleProductInAccordion['ItemPrice']    = product['ItemPrice'];
                                     singleProductInAccordion['Amount']       = productCart[i]['Amount'] % product['DiscountAmount'];
                                     singleProductInAccordion['Type']         = "NotEnoughForDiscount";
-                                    singleProductInAccordion['DiscountText'] = product['DiscountPrice'] + ' ' + $scope.c.localize.strings['HaveMivca'] + ' ' + product['DiscountAmount'] + ' ' + $scope.c.localize.strings['For'];
+                                    if ((product['DiscountAmount'] == 2) && (product['DiscountPrice'] == product['ItemPrice']))// special case for mivca 1+1
+                                    {
+                                        singleProductInAccordion['DiscountText'] = '1+1' + $scope.c.localize.strings['HaveMivca'];
+                                    }
+                                    else
+                                    {
+                                        singleProductInAccordion['DiscountText'] = product['DiscountPrice'] + ' ' + $scope.c.localize.strings['HaveMivca'] + ' ' + product['DiscountAmount'] + ' ' + $scope.c.localize.strings['For'];
+                                    }
                                     singleProductInAccordion['DiscountAmount'] = "";
                                     productsToShowInAccordion.push(singleProductInAccordion);
 
@@ -748,7 +762,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                             singleProductInAccordion['ItemPrice']    = product['ItemPrice'];
                             singleProductInAccordion['Amount']       = productCart[i]['Amount'];
                             singleProductInAccordion['Type']         = "Regular";
-                            singleProductInAccordion['DiscountText'] = "";
+                            singleProductInAccordion['DiscountText'] = '1+1' + $scope.c.localize.strings['Mivca'];
                             singleProductInAccordion['DiscountAmount'] = "";
                             productsToShowInAccordion.push(singleProductInAccordion);
 

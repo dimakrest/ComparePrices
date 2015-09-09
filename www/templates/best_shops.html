@@ -11,7 +11,7 @@
         <!--<button class="button button-icon icon ion-ios-upload-outline light" ng-click="c.ShareCartAndShopDetails()"></button>-->
     </ion-header-bar>
 
-    <ion-content class="content-bg">
+    <ion-content class="content-bg" style="background-image: url('img/bg.png'); background-size: auto; background-repeat: repeat;>
 
         <ion-list>
             <ion-item style="text-align:right; background-color: #f9ffde;" ng-show="c.missingProducts.length > 0" ng-click="openPopover($event)">
@@ -85,6 +85,7 @@
                         <h2 style="text-align:left; color:green; padding-top: 6px;">
                             {{::c.localize.strings['CurrencySign']}}{{product.Amount * product.ItemPrice | number : 2}}
                             <span ng-hide="product.Amount == 1"> = {{product.Amount}} * {{::c.localize.strings['CurrencySign']}}{{product.ItemPrice * 1 | number : 2}}</span>
+                            <span style="float: right; font-style: italic;">{{product.DiscountText}}</span>
                         </h2>
                     </div>
                     <div ng-show="product.Type == 'DiscountS'">
