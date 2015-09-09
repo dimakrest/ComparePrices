@@ -360,8 +360,8 @@ angular.module('ComparePrices.controllers', [])
         $scope.data = {};
         $scope.data.allProductsFiltered = [];
         $scope.data.showSearchResults   = false;
-        $scope.c.hideTipInProductGroups = localStorage.getItem('hideTipInProductGroups') || 0;
-        localStorage.setItem('hideTipInProductGroups', 1);
+        $scope.c.showTipInProductGroups = localStorage.getItem('showTipInProductGroups') || 1;
+        localStorage.setItem('showTipInProductGroups', 0);
 
         $scope.CancelFilterBar = undefined;
 
@@ -434,7 +434,7 @@ angular.module('ComparePrices.controllers', [])
                     // this function is needed to hide what is after backdrop, as backdrop dissappears immediately, and results come only after 500ms
                     $scope.$apply(function() {
                         $scope.c.keyPressed = 1;
-                        $scope.c.hideTipInProductGroups = 1;
+                        $scope.c.showTipInProductGroups = 0;
                     });
                 },
                 filterProperties: 'ItemName'

@@ -7,7 +7,7 @@
 <ion-view view-title={{::c.localize.strings['CompareProductsTitle']}}>
     <ion-content class="content-bg" ng-class="{'has-subheader': !c.showSearchBar}" style="background-image: url('img/bg.png'); background-size: auto; background-repeat: repeat;">
 
-        <div ng-hide="c.hideTipInProductGroups == 1" style="width:94%; margin-left:3%; margin-top:3%; border: 3px dashed #ADADAD; border-radius: 30px;">
+        <div ng-show="c.showTipInProductGroups == 1" style="width:94%; margin-left:3%; margin-top:3%; border: 3px dashed #ADADAD; border-radius: 30px;">
             <img style="width:auto; display:block; margin: 4px auto;" src='img/intro_2.png'>
         </div>
 
