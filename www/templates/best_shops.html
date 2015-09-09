@@ -1,4 +1,4 @@
-<ion-modal-view >
+<ion-modal-view>
     <ion-header-bar class="positive-bg text-center">
         <button class="button button-icon icon ion-ios-close-empty light" ng-click="modal.close()"></button>
         <div style="text-align:right; white-space: normal;" class="h1 title light">
@@ -11,7 +11,7 @@
         <!--<button class="button button-icon icon ion-ios-upload-outline light" ng-click="c.ShareCartAndShopDetails()"></button>-->
     </ion-header-bar>
 
-    <ion-content class="content-bg" style="background-image: url('img/bg.png'); background-size: auto; background-repeat: repeat;>
+    <ion-content class="content-bg" delegate-handle="modalContent" style="background-image: url('img/bg.png'); background-size: auto; background-repeat: repeat;>
 
         <ion-list>
             <ion-item style="text-align:right; background-color: #f9ffde;" ng-show="c.missingProducts.length > 0" ng-click="openPopover($event)">
@@ -79,7 +79,7 @@
                           ng-repeat="product in shop.ProductsToShowInAccordion"
                           style="border-bottom: 2px solid #DDDDDD"
                           ng-style="{'background-color': product.Type == 'Regular' ? 'white' : (product.Type == 'DiscountS' || product.Type == 'DiscountM' ? '#E1FFE0' : '#FFD7DA')}"
-                          ng-show="(shop.ProductsToShowInAccordion.length > 1) && IsDetailsShown(parentIndex)">
+                          ng-if="(shop.ProductsToShowInAccordion.length > 1) && IsDetailsShown(parentIndex)">
                     <div ng-show="product.Type == 'Regular'">
                         <h2 style="text-align:right">{{c.comparedProducts[product.ItemCode].Name}}</h2>
                         <h2 style="text-align:left; color:green; padding-top: 6px;">
@@ -117,9 +117,6 @@
 
 
         </ion-list>
-
-
-
     </ion-content>
 </ion-modal-view>
 
