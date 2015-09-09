@@ -79,7 +79,7 @@
                           ng-repeat="product in shop.ProductsToShowInAccordion"
                           style="border-bottom: 2px solid #DDDDDD"
                           ng-style="{'background-color': product.Type == 'Regular' ? 'white' : (product.Type == 'DiscountS' || product.Type == 'DiscountM' ? '#E1FFE0' : '#FFD7DA')}"
-                          ng-if="(shop.ProductsToShowInAccordion.length > 1) && IsDetailsShown(parentIndex)">
+                          ng-show="(shop.ProductsToShowInAccordion.length > 1) && IsDetailsShown(parentIndex)">
                     <div ng-show="product.Type == 'Regular'">
                         <h2 style="text-align:right">{{c.comparedProducts[product.ItemCode].Name}}</h2>
                         <h2 style="text-align:left; color:green; padding-top: 6px;">

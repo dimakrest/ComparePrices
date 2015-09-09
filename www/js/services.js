@@ -104,7 +104,6 @@ angular.module('ComparePrices.services', ['ngResource'])
             }
 
             function successCB() {
-                console.log("Db connection success!");
             }
 
             function IssueProductsSelectQuery(productCodes, tableName, shopInfo) {
@@ -333,7 +332,6 @@ angular.module('ComparePrices.services', ['ngResource'])
                     db.transaction(function (tx) {
                         tx.executeSql('SELECT * FROM tbProducts;', [], function (tx, rawresults) {
                             var len = rawresults.rows.length;
-                            console.log("GetAllProducts: " + len + " rows found.");
                             for (var i = 0; i < len; i++) {
                                 response.rows.push(rawresults.rows.item(i));
                             }
@@ -455,7 +453,6 @@ angular.module('ComparePrices.services', ['ngResource'])
                     db.transaction(function (tx) {
                         tx.executeSql(sqlQuery, [], function (tx, rawresults) {
                             var len = rawresults.rows.length;
-                            console.log("GetAllCarts: " + len + " rows found.");
                             for (var i = 0; i < len; i++) {
                                 singleItem = rawresults.rows.item(i);
                                 // Add IsChecked field
@@ -837,11 +834,6 @@ angular.module('ComparePrices.services', ['ngResource'])
                 }
             }
 
-            console.log("All possible shops");
-            console.log(shops);
-            console.log("All optional carts with max amount of products");
-            console.log(optionalCartsWithMaxNumOfProducts);
-
             // go over optional carts, and find max carts for the max amount of products.
             // For example above ([1,2,3],[1,2,3],[1,2,4]), we have 2 carts of [1,2,3] and 1 cart [1,2,4]
             var maxCartsWithMaxAmountOfProducts = 0;
@@ -872,9 +864,6 @@ angular.module('ComparePrices.services', ['ngResource'])
                 }
             }
 
-            console.log("Suitable Shops with max amount of products");
-            console.log(suitableShops);
-
             // calculate missing items
             var productCodesInMyCart = [];
             cart.forEach(function(singleItem) {
@@ -884,8 +873,6 @@ angular.module('ComparePrices.services', ['ngResource'])
             var missingProducts = productCodesInMyCart.filter(function(n) {
                 return (productsInCartWithMaxAmount.indexOf(n) == -1);
             });
-            console.log("Missing products");
-            console.log(missingProducts);
 
             return {"suitableShops":suitableShops,"missingProducts":missingProducts};
         }
