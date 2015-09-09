@@ -720,7 +720,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                                     singleProductInAccordion['Type']         = "DiscountM";
                                     if ((product['DiscountAmount'] == 2) && (product['DiscountPrice'] == product['ItemPrice']))// special case for mivca 1+1
                                     {
-                                        singleProductInAccordion['DiscountText'] = '1+1' + $scope.c.localize.strings['Mivca'];
+                                        singleProductInAccordion['DiscountText'] = '1+1 ' + $scope.c.localize.strings['Mivca'];
                                     }
                                     else
                                     {
@@ -742,7 +742,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                                     singleProductInAccordion['Type']         = "NotEnoughForDiscount";
                                     if ((product['DiscountAmount'] == 2) && (product['DiscountPrice'] == product['ItemPrice']))// special case for mivca 1+1
                                     {
-                                        singleProductInAccordion['DiscountText'] = '1+1' + $scope.c.localize.strings['HaveMivca'];
+                                        singleProductInAccordion['DiscountText'] = '1+1 ' + $scope.c.localize.strings['HaveMivca'];
                                     }
                                     else
                                     {
@@ -762,7 +762,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                             singleProductInAccordion['ItemPrice']    = product['ItemPrice'];
                             singleProductInAccordion['Amount']       = productCart[i]['Amount'];
                             singleProductInAccordion['Type']         = "Regular";
-                            singleProductInAccordion['DiscountText'] = '1+1' + $scope.c.localize.strings['Mivca'];
+                            singleProductInAccordion['DiscountText'] = "";
                             singleProductInAccordion['DiscountAmount'] = "";
                             productsToShowInAccordion.push(singleProductInAccordion);
 
