@@ -45,17 +45,17 @@ table.bottomBorder td { text-align:center; padding:3px;}
             box-shadow: 0 -3px 6px -2px #777;
 }
 
+.button.button-positive {
+    border-color: #2F566D;
+    background-color: #5593B7;
+    color: #fff;
+}
+
 .settings-border-divider {
     border-top: 1px solid #43505C;
     width: 90%;
     margin-top: 5px;
     margin-left: 5%;
-}
-
-.input-settings-address .item-input-wrapper {
-    border-color: #4C5865;
-    background-color: #4C5865;
-    color: #A2A8AD;
 }
 
 .input-settings-address .item-input-wrapper #searchBar::-webkit-input-placeholder {
@@ -933,7 +933,7 @@ a {
 .button-bar-positive.activated,
 .bar-positive.activated,
 .positive-border.activated {
-    background-color: #387ef5;
+    background-color: #5593B7;
     color: #fff; }
 
 .positive-900-bg,

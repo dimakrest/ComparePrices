@@ -4,7 +4,7 @@
             <span style="color: #ed474b; margin-left:10px;  padding:10px;"  ng-hide="myCart.length == 0" ng-click="ToggleDeleteValue()">{{::c.localize.strings['RemoveProducts']}}</span>
         </div>
         <div>
-            <span style="color: cornflowerblue; margin-right:10px; padding:10px;" ng-click="ShowFilterBar()">{{::c.localize.strings['AddProduct']}}</span>
+            <span style="color: #5593B7; margin-right:10px; padding:10px;" ng-click="ShowFilterBar()">{{::c.localize.strings['AddProduct']}}</span>
         </div>
     </div>
 
@@ -61,10 +61,10 @@
     </ion-content>
 
     <ion-footer-bar ng-show="!c.showSearchBar && !c.keyPressed" style="justify-content: space-between; -webkit-justify-content: space-between;" class="effectFooter" >
-        <div ng-click="DeleteCart()" class="box effect1 button-fab" style="background-color: #cd3a3d; border: 1px solid #d42a07;">
+        <div ng-click="DeleteCart()" class="box effect1 button-fab" style="background-color: #D05558">
             {{::c.localize.strings['AreYouSureWantToDeleteCartTitle']}}
         </div>
-        <div ng-click="FindBestShop()" class="box effect1 button-fab">
+        <div ng-click="FindBestShop()" class="box effect1 button-fab" style="background-color: #5593B7">
             {{::c.localize.strings['FindBestShop']}}
         </div>
     </ion-footer-bar>
