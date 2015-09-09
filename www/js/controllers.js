@@ -313,9 +313,12 @@ angular.module('ComparePrices.controllers', [])
             } else {
                 $scope.c.showPriceDetailsForShop[shopId] = 1;
             }
+            // to fix the scrolling bug in best_shops modal
+            $ionicScrollDelegate.$getByHandle('modalContent').freezeScroll(true);
             setTimeout(function() {
+                $ionicScrollDelegate.$getByHandle('modalContent').freezeScroll(false);
                 $ionicScrollDelegate.$getByHandle('modalContent').resize();
-            }, 50);
+            }, 350);
         };
 
         $scope.IsDetailsShown = function(shopId) {
@@ -454,7 +457,6 @@ angular.module('ComparePrices.controllers', [])
         ComparePricesStorage.GetProductGroup($scope.productGroupID, function(result) {
             $scope.$apply(function() {
                 $scope.myProductGroup = result.rows;
-                console.log($scope.myProductGroup);
             });
         });
 
