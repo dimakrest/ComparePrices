@@ -444,7 +444,7 @@ angular.module('ComparePrices.controllers', [])
         $scope.$on('$ionicView.afterEnter', function(){
             setTimeout(function() {
                 ionicMaterialMotion.blinds();
-                ionicMaterialInk.displayEffect();
+////                ionicMaterialInk.displayEffect();
             }, 50);
         });
     })
@@ -481,11 +481,11 @@ angular.module('ComparePrices.controllers', [])
             }
         };
 
-        $scope.$on('$ionicView.afterEnter', function(){
-            setTimeout(function() {
-                ionicMaterialInk.displayEffect();
-            }, 50);
-        });
+//        $scope.$on('$ionicView.afterEnter', function(){
+//            setTimeout(function() {
+////                ionicMaterialInk.displayEffect();
+//            }, 50);
+//        });
     })
 
     .controller('MyCartsCtrl', function($scope, $timeout, $ionicPopup, PopUpFactory, ComparePricesStorage, ComparePricesConstants, PrepareInfoForControllers, ionicMaterialInk, ionicMaterialMotion) {
@@ -548,9 +548,9 @@ angular.module('ComparePrices.controllers', [])
                     }
                 ]
             });
-            $timeout(function() {
-                ionicMaterialInk.displayEffect();
-            }, 0);
+//            $timeout(function() {
+//                ionicMaterialInk.displayEffect();
+//            }, 0);
             myPopup.then(function(res) {
                 if (res == 'CancelButtonPressed') {
                     return;
@@ -578,7 +578,7 @@ angular.module('ComparePrices.controllers', [])
         $scope.$on('$ionicView.afterEnter', function(){
             setTimeout(function() {
                 ionicMaterialMotion.blinds();
-                ionicMaterialInk.displayEffect();
+//                ionicMaterialInk.displayEffect();
             }, 50);
         });
     })
@@ -797,9 +797,9 @@ angular.module('ComparePrices.controllers', [])
             });
         };
 
-        $scope.$on('$ionicView.afterEnter', function(){
-            setTimeout(function() {
-                ionicMaterialInk.displayEffect();
-            }, 50);
-        });
+//        $scope.$on('$ionicView.afterEnter', function(){
+//            setTimeout(function() {
+//                ionicMaterialInk.displayEffect();
+//            }, 50);
+//        });
 });
