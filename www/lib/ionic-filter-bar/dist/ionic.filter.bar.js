@@ -502,7 +502,7 @@ angular.module('jett.ionic.filter.bar', ['ionic']);
           scope.$deregisterBackButton = $ionicPlatform.registerBackButtonAction(
             function() {
               $timeout(scope.cancelFilterBar);
-            }, 300
+            }, 150
           );
 
           // Removes the filterBar from the body and cleans up vars/events.  Once the backdrop is hidden we can invoke done
@@ -527,14 +527,14 @@ angular.module('jett.ionic.filter.bar', ['ionic']);
                 scope.cancelFilterBar.$scope = $scrollContainer = scrollView = filterWrapperEl = backdropEl = input = null;
                 isShown = false;
                 (done || angular.noop)();
-              }, 350);
+              }, 200);
             });
 
             $timeout(function () {
               // wait to remove this due to a 300ms delay native
               // click which would trigging whatever was underneath this
               scope.container.removeClass('filter-bar-open');
-            }, 400);
+            }, 350);
 
             scope.$deregisterBackButton();
             stateChangeListenDone();
@@ -552,7 +552,8 @@ angular.module('jett.ionic.filter.bar', ['ionic']);
             scope.container.append(element).addClass('filter-bar-open');
 
             //scroll items to the top before starting the animation
-            scope.scrollItemsTop();
+            // When search in a new view, no need to scroll
+//            scope.scrollItemsTop();
 
             //start filterBar animation, show backrop and focus the input
             ionic.requestAnimationFrame(function () {

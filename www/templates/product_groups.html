@@ -1,41 +1,29 @@
-<ion-header-bar style="justify-content: flex-end; -webkit-justify-content: flex-end;" ng-if="!c.showSearchBar && !c.keyPressed" class="bar bar-subheader item-input-inset  effectSubHeader">
+<ion-header-bar style="justify-content: flex-end; -webkit-justify-content: flex-end;" class="bar bar-subheader item-input-inset  effectSubHeader">
     <div>
         <span style="color: #5593B7; margin-right:10px; padding:10px;" ng-click="ShowFilterBar()">{{::c.localize.strings['FindProduct']}}</span>
     </div>
 </ion-header-bar>
 
 <ion-view view-title={{::c.localize.strings['CompareProductsTitle']}}>
-    <ion-content class="content-bg" ng-class="{'has-subheader': !c.showSearchBar}" style="background-image: url('img/bg.png'); background-size: auto; background-repeat: repeat;">
+    <ion-content class="content-bg has-subheader" style="background-image: url('img/bg.png'); background-size: auto; background-repeat: repeat;">
 
         <div ng-if="c.showTipInProductGroups == 1" style="width:94%; margin-left:3%; margin-top:3%; border: 3px dashed #ADADAD; border-radius: 30px;">
             <img style="width:auto; display:block; margin: 4px auto;" src='img/intro_2.png'>
         </div>
 
         <ion-list class="list animate-blinds">
-            <h3 class="item" style="text-align:right; border-bottom-width: 0; border-top-width: 0; padding-bottom: 0px;" ng-show="!data.showSearchResults && !c.keyPressed">
+            <h3 class="item" style="text-align:right; border-bottom-width: 0; border-top-width: 0; padding-bottom: 0px;">
                 {{::c.localize.strings['PredefinedProductGroups']}}
             </h3>
 
-            <div ng-class="{'card': !data.showSearchResults}" collection-repeat="productOrProductGroupInfo in ((data.showSearchResults == true) ? data.allProductsFiltered : c.productGroupsInfo)" item-height="72px" divider-collection-repeat>
-                <a ng-show="data.showSearchResults" class="item item-avatar-right" ng-click="FindBestShop(productOrProductGroupInfo['ItemCode'], productOrProductGroupInfo['ItemName'], productOrProductGroupInfo['ImagePath'])" style="background-color: white">
-                        <img style="width: auto;" ng-src={{productOrProductGroupInfo['ImagePath']}}>
-                        <i class="icon ion-chevron-left" style="float:left; padding-top: 10px; padding-right: 10px;"></i>
-                        <h2 ng-style="{ 'padding-top': productOrProductGroupInfo.ItemName.length < 35 ? '10px' : '0px' }" style="text-align: right; padding-top:10px;">{{productOrProductGroupInfo['ItemName']}}</h2>
-                </a>
-
-                <a ng-show="!data.showSearchResults && !c.keyPressed" class="item item-avatar-right" ng-click="OpenProductGroupDetails(productOrProductGroupInfo['ProductGroupID'])" style="height:72px">
-                        <img ng-src={{productOrProductGroupInfo['ImageUrl']}}>
-                        <i class="icon ion-chevron-left" style="float:left; padding-top: 10px;"></i>
-                        <h2 style="text-align: right; padding-top:10px; white-space: pre-line;">{{productOrProductGroupInfo['ProductGroupName']}}</h2>
+            <div class="card" collection-repeat="productGroupInfo in c.productGroupsInfo" item-height="72px" divider-collection-repeat>
+                <a class="item item-avatar-right" ng-click="OpenProductGroupDetails(productGroupInfo['ProductGroupID'])" style="height:72px">
+                    <img ng-src={{productGroupInfo['ImageUrl']}}>
+                    <i class="icon ion-chevron-left" style="float:left; padding-top: 10px;"></i>
+                    <h2 style="text-align: right; padding-top:10px; white-space: pre-line;">{{productGroupInfo['ProductGroupName']}}</h2>
                 </a>
             </div>
-
         </ion-list>
-
-
-        <div ng-if="data.showSearchResults && data.allProductsFiltered !== undefined && !data.allProductsFiltered.length" class="no-results">
-            <p>{{::c.localize.strings['NoResults']}}</p>
-        </div>
 
     </ion-content>
 </ion-view>

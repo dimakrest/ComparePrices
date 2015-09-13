@@ -1184,80 +1184,129 @@ angular.module('ComparePrices.services', ['ngResource'])
     .factory('PrepareInfoForControllers', ['$q', '$ionicLoading', 'ComparePricesStorage', 'UpdatesFromServer', function($q, $ionicLoading, ComparePricesStorage, UpdatesFromServer) {
         var _hasUserCarts       = 0;
         var _myCartsInfo        = [];
+        var _myCartID           = -1;
         var _myCart             = [];
         var _productGroupsInfo  = [];
+        var _allProducts        = [];
+
+        function MyCartsInitFirstTimeLoadPrivate(firstTimeLoad) {
+            var defer = $q.defer();
+
+            if (firstTimeLoad == 1) {
+                $ionicLoading.show({
+                    template: '<div class="loader"><svg class="circular"><circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10"/></svg></div>'
+                });
+
+                $q.all([UpdatesFromServer.InitConfigFirstTimeLoad(),
+                    ComparePricesStorage.CreateTbProducts(),
+                    ComparePricesStorage.CreateStoresLocationTable(),
+                    ComparePricesStorage.CreatePredefinedCarts()]).then(function () {
+                        defer.resolve();
+                        localStorage.setItem('firstTimeLoad', 0);
+                        $ionicLoading.hide();
+                    });
+            } else {
+                defer.resolve();
+            }
+            return defer.promise;
+        }
+
+        function MyCartsInitPrivate() {
+            var defer = $q.defer();
+            if (_myCartsInfo.length == 0) {
+                ComparePricesStorage.GetAllCarts(function (result) {
+                    _myCartsInfo = result.rows;
+                    // check if user has own carts
+                    var numOfCarts = _myCartsInfo.length;
+                    for (var i = 0; i < numOfCarts; i++) {
+                        if (_myCartsInfo[i]['IsPredefined'] == 0) {
+                            _hasUserCarts = 1;
+                            break;
+                        }
+                    }
+                    defer.resolve();
+                });
+            } else {
+                defer.resolve();
+            }
+            return defer.promise;
+        }
+
+        function InitInfoForSearchBarPrivate() {
+            var defer = $q.defer();
+
+            if (_allProducts.length == 0) {
+                ComparePricesStorage.GetAllProducts(function (result) {
+                    _allProducts    = result.rows;
+                    defer.resolve();
+                });
+            } else {
+                defer.resolve();
+            }
+            return defer.promise;
+        }
+
+        function InitMyCartPrivate (cartID) {
+            var defer = $q.defer();
+
+            if ((_myCartID != cartID) || (_myCart.length == 0)) {
+                ComparePricesStorage.GetMyCart(cartID, function (result) {
+                    _myCartID   = cartID;
+                    _myCart     = result.rows;
+                    defer.resolve();
+                });
+            } else {
+                defer.resolve();
+            }
+            return defer.promise;
+        }
+
+        function InitProductGroupsPrivate(initPredefinedProducts) {
+            var defer = $q.defer();
+
+            if (initPredefinedProducts == 1) {
+                ComparePricesStorage.CreatePredefinedProducts().then(function() {
+                    ComparePricesStorage.GetAllProductGroups(function (result) {
+                        _productGroupsInfo = result.rows;
+                        defer.resolve();
+                    });
+                });
+            } else {
+                if (_productGroupsInfo.length == 0) {
+                    ComparePricesStorage.GetAllProductGroups(function (result) {
+                        _productGroupsInfo = result.rows;
+                        defer.resolve();
+                    });
+                } else {
+                    defer.resolve();
+                }
+            }
+            return defer.promise;
+        }
 
         return {
             'MyCartsInit': function(firstTimeLoad) {
                 var defer = $q.defer();
-                if (firstTimeLoad == 1) {
 
-                    $ionicLoading.show({
-                        template: '<div class="loader"><svg class="circular"><circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10"/></svg></div>'
-                    });
-
-                    $q.all([UpdatesFromServer.InitConfigFirstTimeLoad(),
-                            ComparePricesStorage.CreateTbProducts(),
-                            ComparePricesStorage.CreateStoresLocationTable(),
-                            ComparePricesStorage.CreatePredefinedCarts()]).then(function () {
-                            ComparePricesStorage.GetAllCarts(function (result) {
-                            _myCartsInfo = result.rows;
-                            // check if user has own carts
-                            var numOfCarts = _myCartsInfo.length;
-                            for (var i = 0; i < numOfCarts; i++) {
-                                if (_myCartsInfo[i]['IsPredefined'] == 0) {
-                                    _hasUserCarts = 1;
-                                    break;
-                                }
-                            }
-                            defer.resolve();
-                            localStorage.setItem('firstTimeLoad', 0);
-                            $ionicLoading.hide();
-                        });
-                    });
-                } else {
-                    ComparePricesStorage.GetAllCarts(function (result) {
-                        _myCartsInfo = result.rows;
-                        // check if user has own carts
-                        var numOfCarts = _myCartsInfo.length;
-                        for (var i = 0; i < numOfCarts; i++) {
-                            if (_myCartsInfo[i]['IsPredefined'] == 0) {
-                                _hasUserCarts = 1;
-                                break;
-                            }
-                        }
+                MyCartsInitFirstTimeLoadPrivate(firstTimeLoad).then(function() {
+                    $q.all([MyCartsInitPrivate(), InitInfoForSearchBarPrivate()]).then(function() {
                         defer.resolve();
                     });
-                }
+                });
                 return defer.promise;
             },
 
             InitMyCart : function(cartID) {
-                var defer = $q.defer();
-
-                ComparePricesStorage.GetMyCart(cartID, function(result) {
-                    _myCart = result.rows;
-                    defer.resolve();
-                });
-                return defer.promise;
+                return InitMyCartPrivate(cartID);
             },
 
             InitProductGroups : function(initPredefinedProducts) {
                 var defer = $q.defer();
 
-                if (initPredefinedProducts == 1) {
-                    ComparePricesStorage.CreatePredefinedProducts().then(function() {
-                        ComparePricesStorage.GetAllProductGroups(function (result) {
-                            _productGroupsInfo = result.rows;
-                            defer.resolve();
-                        });
-                    });
-                } else {
-                    ComparePricesStorage.GetAllProductGroups(function (result) {
-                        _productGroupsInfo = result.rows;
-                        defer.resolve();
-                    });
-                }
+                $q.all([InitProductGroupsPrivate(initPredefinedProducts), InitInfoForSearchBarPrivate()]).then(function() {
+                    defer.resolve();
+                });
+
                 return defer.promise;
             },
 
@@ -1275,6 +1324,10 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             GetProductGroups : function() {
                 return _productGroupsInfo;
+            },
+
+            GetAllProducts : function() {
+                return _allProducts;
             }
         }
     }])

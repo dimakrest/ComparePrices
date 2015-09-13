@@ -1,5 +1,5 @@
 <ion-view view-title={{::c.currentCartName}}>
-    <div style="justify-content: space-between; -webkit-justify-content: space-between;" ng-if="!c.showSearchBar && !c.keyPressed" class="bar bar-subheader item-input-inset effectSubHeader">
+    <div style="justify-content: space-between; -webkit-justify-content: space-between;" class="bar bar-subheader item-input-inset effectSubHeader">
         <div>
             <span style="color: #ed474b; margin-left:10px;  padding:10px;"  ng-hide="myCart.length == 0" ng-click="ToggleDeleteValue()">{{::c.localize.strings['RemoveProducts']}}</span>
         </div>
@@ -8,36 +8,19 @@
         </div>
     </div>
 
-    <ion-content class="content-bg" ng-class="{'has-subheader': !c.showSearchBar}" style="background-image: url('img/bg.png'); background-size: auto; background-repeat: repeat;">
+    <ion-content class="content-bg has-subheader" style="background-image: url('img/bg.png'); background-size: auto; background-repeat: repeat;">
 
         <ion-list class="list" show-delete="shouldShowDelete">
-            <div collection-repeat="product in ((data.showSearchResults == true) ? data.allProductsFiltered : myCart)" divider-collection-repeat>
+            <div collection-repeat="product in c.myCart" divider-collection-repeat>
 
-                <ion-item ng-if="data.showSearchResults">
+                <ion-item>
                     <div class="item item-avatar-right" style="height:72px; background-color: white">
                         <img style="width: auto;" ng-src={{product['ImagePath']}}>
 
                         <div class="ionic-input-group" style="float:left; margin-left: -10px;">
-                            <span ng-hide="product.Amount == 0" class="ionic-input-group-addon-left" ng-click="UpdateProductAmount(product, -1, false); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
-                            <span ng-hide="product.Amount == 0"><label class="ionic-form-control">{{product["Amount"]}}</label></span>
-                            <span ng-class="{'ionic-input-group-addon-right': product.Amount != 0, 'ionic-input-group-addon-center': product.Amount == 0}" ng-click="UpdateProductAmount(product, +1, false); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
-                        </div>
-                        <h2 ng-style="{ 'padding-top': product.ItemName.length < 15 ? '7px' : '0px' }" style="text-align: right; white-space: pre-line;">{{product.ItemName}}</h2>
-
-                        <ion-delete-button class="ion-minus-circled"
-                                           ng-click="DeleteProduct(product)">
-                        </ion-delete-button>
-                    </div>
-                </ion-item>
-
-                <ion-item ng-if="!data.showSearchResults && !c.keyPressed">
-                    <div class="item item-avatar-right" style="height:72px; background-color: white">
-                        <img style="width: auto;" ng-src={{product['ImagePath']}}>
-
-                        <div class="ionic-input-group" style="float:left; margin-left: -10px;">
-                            <span class="ionic-input-group-addon-left" ng-click="UpdateProductAmount(product, -1, true); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
+                            <span class="ionic-input-group-addon-left" ng-click="c.UpdateProductAmount(product, -1, true); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
                             <label class="ionic-form-control">{{product["Amount"]}}</label>
-                            <span class="ionic-input-group-addon-right" ng-click="UpdateProductAmount(product, +1, true); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
+                            <span class="ionic-input-group-addon-right" ng-click="c.UpdateProductAmount(product, +1, true); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
                         </div>
                         <h2 ng-style="{ 'padding-top': product.ItemName.length < 15 ? '7px' : '0px' }" style="text-align: right; white-space: pre-line;">{{product.ItemName}}</h2>
 
@@ -48,19 +31,15 @@
                 </ion-item>
 
             </div>
-            <div ng-if="data.showSearchResults && data.allProductsFiltered !== undefined && !data.allProductsFiltered.length" class="no-results">
-                <p>{{::c.localize.strings['NoResults']}}</p>
-            </div>
-            <div ng-if="!data.showSearchResults && !c.keyPressed && !myCart.length" class="no-results">
+            <div ng-if="myCart.length == 0" class="no-results">
                 <p>{{::c.localize.strings['NoProductsInCart']}}</p>
             </div>
-
 
         </ion-list>
 
     </ion-content>
 
-    <ion-footer-bar ng-show="!c.showSearchBar && !c.keyPressed" style="justify-content: space-between; -webkit-justify-content: space-between;" class="effectFooter" >
+    <ion-footer-bar style="justify-content: space-between; -webkit-justify-content: space-between;" class="effectFooter" >
         <div ng-click="DeleteCart()" class="box effect1 button-fab" style="background-color: #D05558">
             {{::c.localize.strings['AreYouSureWantToDeleteCartTitle']}}
         </div>

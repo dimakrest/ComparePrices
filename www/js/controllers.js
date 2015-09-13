@@ -42,16 +42,13 @@ angular.module('ComparePrices.controllers', [])
     })
 
     .controller('RootCtrl', function($scope, $ionicLoading, $timeout, $ionicSideMenuDelegate, PopUpFactory, ComparePricesStorage, ComparePricesConstants, UpdateStores, $cordovaGoogleAnalytics,
-                                     MiscFunctions, $ionicPopover, UpdatesFromServer, $cordovaEmailComposer, $ionicScrollDelegate) {
+                                     MiscFunctions, $ionicPopover, UpdatesFromServer, $cordovaEmailComposer, $ionicScrollDelegate, FindBestShops, ImageCache) {
         $scope.c = {};
-
+        $scope.c.searchResultsStyle ='';
         $scope.c.currentCartName = "";
         $scope.c.currentProductGroupName = "";
         $scope.c.isCurrentCartPredefined    = 0;
-        $scope.c.showSearchBar = 0;
-        $scope.c.keyPressed = 0;
         $scope.c.comparedProducts = [];
-        $scope.c.allProducts = [];
         $scope.c.showPriceDetailsForShop = [];
         $scope.c.currentlyShopsDownloaded = 0;
         $scope.c.currentlyShopsDownloadedPercentage = 0;
@@ -61,7 +58,8 @@ angular.module('ComparePrices.controllers', [])
 
         $scope.c.shopsNearThatHaveNeededProducts = [];
         $scope.c.missingProducts = [];
-
+        $scope.c.filteredProductsToShow = [];
+        $scope.c.myCart      = [];
         // init localization array
         $scope.c.localize = document.localize;
         document.selectLanguage('heb');
@@ -72,6 +70,8 @@ angular.module('ComparePrices.controllers', [])
 
         $scope.c.useUsersCurrentLocation = parseInt(localStorage.getItem('UseUsersCurrentLocation')) || 0;
         $scope.c.useUsersCurrentLocation = $scope.c.useUsersCurrentLocation == 1;
+
+        $scope.CancelFilterBar = undefined;
 
         function generateGuid() {
             function s4() {
@@ -352,24 +352,99 @@ angular.module('ComparePrices.controllers', [])
             };
             $cordovaEmailComposer.open(email).then(null, null);
         }
+
+        $scope.c.FindBestShopProductGroups = function(productID, productName, productImage) {
+            if ($scope.c.lastAddress == '')
+            {
+                if (typeof ($scope.c.CancelFilterBar) != "undefined") {
+                    $scope.c.CancelFilterBar();
+                }
+                $scope.c.HandleAddressIsNotSet();
+            }
+            else
+            {
+                var structForFindBestShop = [];
+                structForFindBestShop['ItemCode'] = productID;
+                structForFindBestShop['ItemName'] = productName;
+                structForFindBestShop['ImagePath'] = productImage;
+                structForFindBestShop['Amount'] = 1;
+
+                FindBestShops($scope, [structForFindBestShop]);
+            }
+        };
+
+        // this function called also from cartDetails list, and also in search
+        $scope.c.UpdateProductAmount = function(itemInfo, amountToAdd, showConfirmationPopUp) {
+
+            $scope.c.UpdateProductAmountInMyCart(itemInfo, amountToAdd, showConfirmationPopUp);
+
+            // when this is called from cartDetails list, and not search, length will be zero, so below code is not relevant
+            // TODO: is there a better way?
+
+            var numOfFilteredProducts = $scope.c.filteredProductsToShow.length;
+            for (var i=0; i < numOfFilteredProducts; i++) {
+                if ($scope.c.filteredProductsToShow[i]['ItemCode'] == itemInfo['ItemCode']) {
+                    $scope.c.filteredProductsToShow[i]['Amount'] += parseInt(amountToAdd);
+                    break;
+                }
+            }
+        };
+
+        $scope.c.UpdateProductAmountInMyCart = function(itemInfo, amountToAdd, showConfirmationPopUp) {
+            var numOfProductsInCart = $scope.c.myCart.length;
+            var productIndex        = -1;
+            for (var i=0; i < numOfProductsInCart; i++) {
+                if ($scope.c.myCart[i]['ItemCode'] == itemInfo['ItemCode']) {
+                    productIndex = i;
+                    break;
+                }
+            }
+            // new product added, need to cache image, we cache only images for products in cart
+            if (productIndex == -1) {
+                var newItemInCart = {'CartID': $scope.c.cartID,
+                    'ItemCode': itemInfo['ItemCode'],
+                    'ItemName': itemInfo['ItemName'],
+                    'ImagePath': itemInfo['ImagePath'],
+                    'Amount': parseInt(amountToAdd)};
+                $scope.c.myCart.push(newItemInCart);
+                ImageCache.CacheImage(itemInfo['ItemCode'], itemInfo['ImagePath']);
+                ComparePricesStorage.UpdateCart($scope.c.cartID, $scope.c.myCart);
+            } else {
+                // if amount is 0, delete the product
+                var newAmount = $scope.c.myCart[productIndex]['Amount'] + parseInt(amountToAdd);
+                if (newAmount == 0) {
+                    if (showConfirmationPopUp) {
+                        var title = $scope.c.localize.strings['AreYouSureWantToDeleteProductTitle'];
+                        var text  = $scope.c.localize.strings['AreYouSureWantToDeleteProductText'];
+                        PopUpFactory.ConfirmationPopUp($scope, title, text).then(function(confirmed) {
+                            if(confirmed) {
+                                $scope.c.myCart.splice(productIndex, 1);
+                                ComparePricesStorage.UpdateCart($scope.c.cartID, $scope.c.myCart);
+                            }
+                        });
+                    }
+                    else
+                    {
+                        $scope.c.myCart.splice(productIndex, 1);
+                        ComparePricesStorage.UpdateCart($scope.c.cartID, $scope.c.myCart);
+                        // we come here in case we remove items from search. It can be done when ion-minus-circled delete buttons
+                        // Need to turn off ion-minus-circled delete buttons in case we don't have more products
+                        if ($scope.c.myCart.length == 0)
+                        {
+                            $scope.shouldShowDelete = false;
+                        }
+                    }
+                } else {
+                    $scope.c.myCart[productIndex]['Amount'] = newAmount;
+                    ComparePricesStorage.UpdateCart($scope.c.cartID, $scope.c.myCart);
+                }
+            }
+        };
     })
 
-    .controller('ProductGroupsCtrl', function($scope, ComparePricesStorage, PrepareInfoForControllers, FindBestShops, $ionicFilterBar, ionicMaterialMotion, ionicMaterialInk) {
-
-        // TODO: try to implement the bar without all structures
-        $scope.data = {};
-        $scope.data.allProductsFiltered = [];
-        $scope.data.showSearchResults   = false;
+    .controller('ProductGroupsCtrl', function($scope, ComparePricesStorage, PrepareInfoForControllers, ionicMaterialMotion, $ionicHistory, ionicMaterialInk) {
         $scope.c.showTipInProductGroups = localStorage.getItem('showTipInProductGroups') || 1;
         localStorage.setItem('showTipInProductGroups', 0);
-
-        $scope.CancelFilterBar = undefined;
-
-        if ($scope.c.allProducts.length == 0) {
-            ComparePricesStorage.GetAllProducts(function (result) {
-                $scope.c.allProducts    = result.rows;
-            });
-        }
 
         $scope.c.productGroupsInfo = PrepareInfoForControllers.GetProductGroups();
 
@@ -387,58 +462,15 @@ angular.module('ComparePrices.controllers', [])
             },100);
         };
 
-        $scope.FindBestShop = function(productID, productName, productImage) {
-            if ($scope.c.lastAddress == '')
-            {
-                if (typeof ($scope.CancelFilterBar) != "undefined") {
-                    $scope.CancelFilterBar();
-                }
-                $scope.c.HandleAddressIsNotSet();
-            }
-            else
-            {
-                var structForFindBestShop = [];
-                structForFindBestShop['ItemCode'] = productID;
-                structForFindBestShop['ItemName'] = productName;
-                structForFindBestShop['ImagePath'] = productImage;
-                structForFindBestShop['Amount'] = 1;
-
-                FindBestShops($scope, [structForFindBestShop]);
-            }
-        };
-
         // based on https://github.com/djett41/ionic-filter-bar
         $scope.ShowFilterBar = function () {
-            $scope.CancelFilterBar = $ionicFilterBar.show({
-                // items gets the array to filter
-                items: $scope.c.allProducts,
-                // this function is called when filtering is done
-                // we take filtered items and place items that already in cart in the top of the list
-                update: function (filteredItems) {
-                    $scope.c.showSearchBar = 1;
-                    $scope.data.showSearchResults   = true;
-                    $scope.data.allProductsFiltered = filteredItems;
-                },
-                // Called after the filterBar is removed. This can happen when the cancel button is pressed, the backdrop is tapped
-                // or swiped, or the back button is pressed.
-                cancel: function() {
-                    $scope.data.allProductsFiltered = [];
-                    $scope.data.showSearchResults = false;
-                    $scope.c.showSearchBar = 0;
-                    $scope.c.keyPressed = 0;
-                },
-                debounce: true,
-                cancelText: $scope.c.localize.strings['CancelSearch'],
-                delay: 500,
-                keyPressed: function () {
-                    // this function is needed to hide what is after backdrop, as backdrop dissappears immediately, and results come only after 500ms
-                    $scope.$apply(function() {
-                        $scope.c.keyPressed = 1;
-                        $scope.c.showTipInProductGroups = 0;
-                    });
-                },
-                filterProperties: 'ItemName'
+            $ionicHistory.nextViewOptions({
+                disableAnimate: true
             });
+            $scope.c.searchResultsStyle = 'productGroups';
+            setTimeout(function() {
+                location.href = '#/tab/searchBarProductGroups';
+            }, 100);
         };
 
         $scope.$on('$ionicView.afterEnter', function(){
@@ -449,7 +481,7 @@ angular.module('ComparePrices.controllers', [])
         });
     })
 
-    .controller('ProductsCtrl', function($scope, $stateParams, $ionicHistory, ComparePricesStorage, FindBestShops, PopUpFactory, ComparePricesConstants, ImageCache, ionicMaterialInk) {
+    .controller('ProductsCtrl', function($scope, $stateParams, ComparePricesStorage, FindBestShops,  ionicMaterialInk) {
 
         $scope.myProductGroup = [];
         $scope.productGroupID = $stateParams.productGroupID;
@@ -583,25 +615,84 @@ angular.module('ComparePrices.controllers', [])
         });
     })
 
-    .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicHistory, PrepareInfoForControllers, ComparePricesStorage, FindBestShops, PopUpFactory, ComparePricesConstants, ImageCache, ionicMaterialInk, $ionicFilterBar) {
+    .controller('SearchBarCtrl', function($scope, $ionicFilterBar, $ionicHistory, PrepareInfoForControllers) {
+
+        $scope.allProducts      = PrepareInfoForControllers.GetAllProducts();
+        $scope.numOfAllProducts = $scope.allProducts.length;
+        $scope.c.filteredProductsToShow = [];
+        $scope.showNoResults    = false;
+
+        $scope.$on('$ionicView.afterEnter', function () {
+            $scope.c.CancelFilterBar = $ionicFilterBar.show({
+                // items gets the array to filter
+                items: $scope.allProducts,
+                // this function is called when filtering is done
+                // we take filtered items and place items that already in cart in the top of the list
+                update: function (filteredItems) {
+                    $scope.showNoResults    = (filteredItems.length == 0);
+
+                    if ($scope.c.searchResultsStyle == 'cartDetails') {
+                        if (filteredItems.length == $scope.numOfAllProducts) {
+                            $scope.c.filteredProductsToShow = [];
+                        } else {
+                            var numOfProductsInCart = $scope.c.myCart.length;
+                            var numOfFilteredProducts = filteredItems.length;
+
+                            // Add products that appear in my cart
+                            for (var i = 0; i < numOfProductsInCart; i++) {
+                                for (var j = 0; j < numOfFilteredProducts; j++) {
+                                    if ($scope.c.myCart[i]['ItemCode'] == filteredItems[j]['ItemCode']) {
+                                        $scope.c.filteredProductsToShow.push(angular.copy($scope.c.myCart[i]));
+                                        break;
+                                    }
+                                }
+                            }
+                            // Now add products that don't exist in the cart
+                            for (var i = 0; i < numOfFilteredProducts; i++) {
+                                var singleProduct = filteredItems[i];
+                                var productFound = false;
+
+                                for (var j = 0; j < numOfProductsInCart; j++) {
+                                    if ($scope.c.myCart[j]['ItemCode'] == singleProduct['ItemCode']) {
+                                        productFound = true;
+                                        break;
+                                    }
+                                }
+                                if (!productFound) {
+                                    singleProduct['Amount'] = 0;
+                                    $scope.c.filteredProductsToShow.push(singleProduct);
+                                }
+                            }
+                        }
+                    } else if ($scope.c.searchResultsStyle == 'productGroups') {
+                        $scope.c.filteredProductsToShow = (filteredItems.length == $scope.numOfAllProducts) ? [] : filteredItems;
+                    }
+                },
+                // Called after the filterBar is removed. This can happen when the cancel button is pressed, the backdrop is tapped
+                // or swiped, or the back button is pressed.
+                cancel: function () {
+                    $scope.c.CancelFilterBar    = undefined;
+                    $scope.c.filteredProductsToShow   = [];
+                    setTimeout(function() {
+                        $ionicHistory.goBack();
+                    }, 0);
+                },
+                debounce: true,
+                cancelText: $scope.c.localize.strings['CancelSearch'],
+                delay: 500,
+                keyPressed: function () {
+                },
+                filterProperties: 'ItemName'
+            });
+        })
+    })
+
+    .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicHistory, PrepareInfoForControllers, ComparePricesStorage, FindBestShops, PopUpFactory, ionicMaterialInk) {
         // ionic related variables. Used to create advanced  <ion-list>
         $scope.shouldShowDelete = false;
 
-        // TODO: try to implement the bar without all structures
-        $scope.data = {};
-        $scope.data.allProductsFiltered = [];
-        $scope.data.showSearchResults   = false;
-
-        $scope.myCart      = [];
-        $scope.cartID = $stateParams.cartID;
-
-        $scope.myCart = PrepareInfoForControllers.GetMyCart();
-
-        if ($scope.c.allProducts.length == 0) {
-            ComparePricesStorage.GetAllProducts(function (result) {
-                $scope.c.allProducts    = result.rows;
-            });
-        }
+        $scope.c.cartID = $stateParams.cartID;
+        $scope.c.myCart = PrepareInfoForControllers.GetMyCart();
 
         $scope.FindBestShop = function() {
             if ($scope.c.lastAddress == '')
@@ -611,7 +702,7 @@ angular.module('ComparePrices.controllers', [])
             else
             {
                 // check if location changed, if yes download new stores. After it find best shop
-                FindBestShops($scope, $scope.myCart);
+                FindBestShops($scope, $scope.c.myCart);
             }
         };
 
@@ -627,7 +718,7 @@ angular.module('ComparePrices.controllers', [])
                         if ($scope.c.myCartsInfo[i]['IsPredefined'] == 0) {
                             numOfUserCarts++;
                         }
-                        if ($scope.c.myCartsInfo[i]['CartID'] == $scope.cartID) {
+                        if ($scope.c.myCartsInfo[i]['CartID'] == $scope.c.cartID) {
                             cartIndex = i;
                         }
                     }
@@ -638,27 +729,27 @@ angular.module('ComparePrices.controllers', [])
                         $scope.c.myCartsInfo.splice(cartIndex, 1);
                     }
 
-                    ComparePricesStorage.DeleteCart($scope.cartID);
+                    ComparePricesStorage.DeleteCart($scope.c.cartID);
                     $ionicHistory.goBack();
                 }
             });
         };
 
         $scope.DeleteProduct = function(product) {
-            var numOfProductsInCart = $scope.myCart.length;
+            var numOfProductsInCart = $scope.c.myCart.length;
             var productIndex        = -1;
             for (var i=0; i < numOfProductsInCart; i++) {
-                if ($scope.myCart[i]['ItemCode'] == product['ItemCode']) {
+                if ($scope.c.myCart[i]['ItemCode'] == product['ItemCode']) {
                     productIndex = i;
                     break;
                 }
             }
             if (productIndex != -1) {
-                $scope.myCart.splice(productIndex, 1);
+                $scope.c.myCart.splice(productIndex, 1);
             }
-            ComparePricesStorage.UpdateCart($scope.cartID, $scope.myCart);
+            ComparePricesStorage.UpdateCart($scope.c.cartID, $scope.c.myCart);
 
-            if ($scope.myCart.length == 0)
+            if ($scope.c.myCart.length == 0)
             {
                 $scope.shouldShowDelete = false;
             }
@@ -668,133 +759,15 @@ angular.module('ComparePrices.controllers', [])
             $scope.shouldShowDelete = !$scope.shouldShowDelete;
         };
 
-        // this function called also from cartDetails list, and also in search
-        $scope.UpdateProductAmount = function(itemInfo, amountToAdd, showConfirmationPopUp) {
-
-            $scope.UpdateProductAmountInMyCart(itemInfo, amountToAdd, showConfirmationPopUp);
-
-            // when this is called from cartDetails list, and not search, length will be zero, so below code is not relevant
-            // TODO: is there a better way?
-            var numOfFilteredProducts = $scope.data.allProductsFiltered.length;
-            for (var i=0; i < numOfFilteredProducts; i++) {
-                if ($scope.data.allProductsFiltered[i]['ItemCode'] == itemInfo['ItemCode']) {
-                    $scope.data.allProductsFiltered[i]['Amount'] += parseInt(amountToAdd);
-                    break;
-                }
-            }
-        };
-
-        $scope.UpdateProductAmountInMyCart = function(itemInfo, amountToAdd, showConfirmationPopUp) {
-            var numOfProductsInCart = $scope.myCart.length;
-            var productIndex        = -1;
-            for (var i=0; i < numOfProductsInCart; i++) {
-                if ($scope.myCart[i]['ItemCode'] == itemInfo['ItemCode']) {
-                    productIndex = i;
-                    break;
-                }
-            }
-            // new product added, need to cache image, we cache only images for products in cart
-            if (productIndex == -1) {
-                var newItemInCart = {'CartID': $scope.cartID,
-                    'ItemCode': itemInfo['ItemCode'],
-                    'ItemName': itemInfo['ItemName'],
-                    'ImagePath': itemInfo['ImagePath'],
-                    'Amount': parseInt(amountToAdd)};
-                $scope.myCart.push(newItemInCart);
-                ImageCache.CacheImage(itemInfo['ItemCode'], itemInfo['ImagePath']);
-                ComparePricesStorage.UpdateCart($scope.cartID, $scope.myCart);
-            } else {
-                // if amount is 0, delete the product
-                var newAmount = $scope.myCart[productIndex]['Amount'] + parseInt(amountToAdd);
-                if (newAmount == 0) {
-                    if (showConfirmationPopUp) {
-                        var title = $scope.c.localize.strings['AreYouSureWantToDeleteProductTitle'];
-                        var text  = $scope.c.localize.strings['AreYouSureWantToDeleteProductText'];
-                        PopUpFactory.ConfirmationPopUp($scope, title, text).then(function(confirmed) {
-                            if(confirmed) {
-                                $scope.myCart.splice(productIndex, 1);
-                                ComparePricesStorage.UpdateCart($scope.cartID, $scope.myCart);
-                            }
-                        });
-                    }
-                    else
-                    {
-                        $scope.myCart.splice(productIndex, 1);
-                        ComparePricesStorage.UpdateCart($scope.cartID, $scope.myCart);
-                        // we come here in case we remove items from search. It can be done when ion-minus-circled delete buttons
-                        // Need to turn off ion-minus-circled delete buttons in case we don't have more products
-                        if ($scope.myCart.length == 0)
-                        {
-                            $scope.shouldShowDelete = false;
-                        }
-                    }
-                } else {
-                    $scope.myCart[productIndex]['Amount'] = newAmount;
-                    ComparePricesStorage.UpdateCart($scope.cartID, $scope.myCart);
-                }
-            }
-        };
-
         // based on https://github.com/djett41/ionic-filter-bar
         $scope.ShowFilterBar = function () {
-            $ionicFilterBar.show({
-                // items gets the array to filter
-                items: $scope.c.allProducts,
-                // this function is called when filtering is done
-                // we take filtered items and place items that already in cart in the top of the list
-                update: function (filteredItems) {
-                    $scope.c.showSearchBar = 1;
-                    $scope.data.showSearchResults   = true;
-                    $scope.data.allProductsFiltered = [];
-
-                    var numOfProductsInCart     = $scope.myCart.length;
-                    var numOfFilteredProducts   = filteredItems.length;
-
-                    // Add products that appear in my cart
-                    for (var i=0; i < numOfProductsInCart; i++) {
-                        for (var j=0; j < numOfFilteredProducts; j++) {
-                            if ($scope.myCart[i]['ItemCode'] == filteredItems[j]['ItemCode']) {
-                                $scope.data.allProductsFiltered.push(angular.copy($scope.myCart[i]));
-                                break;
-                            }
-                        }
-                    }
-                    // Now add products that don't exist in the cart
-                    for (var i=0; i < numOfFilteredProducts; i++) {
-                        var singleProduct   = filteredItems[i];
-                        var productFound    = false;
-
-                        for (var j=0; j < numOfProductsInCart; j++) {
-                            if ($scope.myCart[j]['ItemCode'] == singleProduct['ItemCode']) {
-                                productFound = true;
-                                break;
-                            }
-                        }
-                        if (!productFound) {
-                            singleProduct['Amount'] = 0;
-                            $scope.data.allProductsFiltered.push(singleProduct);
-                        }
-                    }
-                },
-                // Called after the filterBar is removed. This can happen when the cancel button is pressed, the backdrop is tapped
-                // or swiped, or the back button is pressed.
-                cancel: function() {
-                    $scope.data.allProductsFiltered = [];
-                    $scope.data.showSearchResults = false;
-                    $scope.c.showSearchBar = 0;
-                    $scope.c.keyPressed = 0;
-                },
-                debounce: true,
-                cancelText: $scope.c.localize.strings['CancelSearch'],
-                delay: 500,
-                keyPressed: function () {
-                    // this function is needed to hide what is after backdrop, as backdrop dissappears immediately, and results come only after 500ms
-                    $scope.$apply(function() {
-                        $scope.c.keyPressed = 1;
-                    });
-                },
-                filterProperties: 'ItemName'
+            $scope.c.searchResultsStyle = 'cartDetails';
+            $ionicHistory.nextViewOptions({
+                disableAnimate: true
             });
+            setTimeout(function() {
+                location.href = '#/tab/searchBarCartDetails';
+            }, 100);
         };
 
 //        $scope.$on('$ionicView.afterEnter', function(){
