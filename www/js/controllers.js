@@ -442,7 +442,7 @@ angular.module('ComparePrices.controllers', [])
         };
     })
 
-    .controller('ProductGroupsCtrl', function($scope, ComparePricesStorage, PrepareInfoForControllers, ionicMaterialMotion, $ionicHistory, ionicMaterialInk) {
+    .controller('ProductGroupsCtrl', function($scope, ComparePricesStorage, PrepareInfoForControllers, ionicMaterialMotion, $ionicHistory) {
         $scope.c.showTipInProductGroups = localStorage.getItem('showTipInProductGroups') || 1;
         localStorage.setItem('showTipInProductGroups', 0);
 
@@ -476,12 +476,11 @@ angular.module('ComparePrices.controllers', [])
         $scope.$on('$ionicView.afterEnter', function(){
             setTimeout(function() {
                 ionicMaterialMotion.blinds();
-////                ionicMaterialInk.displayEffect();
-            }, 50);
+            }, 0);
         });
     })
 
-    .controller('ProductsCtrl', function($scope, $stateParams, ComparePricesStorage, FindBestShops,  ionicMaterialInk) {
+    .controller('ProductsCtrl', function($scope, $stateParams, ComparePricesStorage, FindBestShops) {
 
         $scope.myProductGroup = [];
         $scope.productGroupID = $stateParams.productGroupID;
@@ -512,15 +511,9 @@ angular.module('ComparePrices.controllers', [])
                 FindBestShops($scope, [structForFindBestShop]);
             }
         };
-
-//        $scope.$on('$ionicView.afterEnter', function(){
-//            setTimeout(function() {
-////                ionicMaterialInk.displayEffect();
-//            }, 50);
-//        });
     })
 
-    .controller('MyCartsCtrl', function($scope, $timeout, $ionicPopup, PopUpFactory, ComparePricesStorage, ComparePricesConstants, PrepareInfoForControllers, ionicMaterialInk, ionicMaterialMotion) {
+    .controller('MyCartsCtrl', function($scope, $timeout, $ionicPopup, PopUpFactory, ComparePricesStorage, ComparePricesConstants, PrepareInfoForControllers, ionicMaterialMotion) {
 
         $scope.newCartName = "";
 
@@ -580,9 +573,6 @@ angular.module('ComparePrices.controllers', [])
                     }
                 ]
             });
-//            $timeout(function() {
-//                ionicMaterialInk.displayEffect();
-//            }, 0);
             myPopup.then(function(res) {
                 if (res == 'CancelButtonPressed') {
                     return;
@@ -610,8 +600,7 @@ angular.module('ComparePrices.controllers', [])
         $scope.$on('$ionicView.afterEnter', function(){
             setTimeout(function() {
                 ionicMaterialMotion.blinds();
-//                ionicMaterialInk.displayEffect();
-            }, 50);
+            }, 0);
         });
     })
 
@@ -687,7 +676,7 @@ angular.module('ComparePrices.controllers', [])
         })
     })
 
-    .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicHistory, PrepareInfoForControllers, ComparePricesStorage, FindBestShops, PopUpFactory, ionicMaterialInk) {
+    .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicHistory, PrepareInfoForControllers, ComparePricesStorage, FindBestShops, PopUpFactory) {
         // ionic related variables. Used to create advanced  <ion-list>
         $scope.shouldShowDelete = false;
 
@@ -769,10 +758,4 @@ angular.module('ComparePrices.controllers', [])
                 location.href = '#/tab/searchBarCartDetails';
             }, 100);
         };
-
-//        $scope.$on('$ionicView.afterEnter', function(){
-//            setTimeout(function() {
-//                ionicMaterialInk.displayEffect();
-//            }, 50);
-//        });
 });
