@@ -11,19 +11,17 @@
             <img style="width:auto; display:block; margin: 4px auto;" src='img/intro_2.png'>
         </div>
 
-        <ion-list class="list animate-blinds">
-            <h3 class="item" style="text-align:right; border-bottom-width: 0; border-top-width: 0; padding-bottom: 0px;">
+        <div class="card animate-blinds">
+            <h1 class="item item-divider" style="text-align:right; background-color: #C1D6E2;">
                 {{::c.localize.strings['PredefinedProductGroups']}}
-            </h3>
+            </h1>
 
-            <div class="card" collection-repeat="productGroupInfo in c.productGroupsInfo" item-height="72px" divider-collection-repeat>
-                <a class="item item-avatar-right" ng-click="OpenProductGroupDetails(productGroupInfo['ProductGroupID'])" style="height:72px">
-                    <img ng-src={{productGroupInfo['ImageUrl']}}>
-                    <i class="icon ion-chevron-left" style="float:left; padding-top: 10px;"></i>
-                    <h2 style="text-align: right; padding-top:10px; white-space: pre-line;">{{productGroupInfo['ProductGroupName']}}</h2>
-                </a>
-            </div>
-        </ion-list>
+            <a class="item item-avatar-right" ng-click="OpenProductGroupDetails(productGroupInfo['ProductGroupID'])" ng-repeat="productGroupInfo in c.productGroupsInfo" style="height:72px">
+                <img ng-src={{productGroupInfo['ImageUrl']}}>
+                <i class="icon ion-chevron-left" style="float:left; padding-top: 10px;"></i>
+                <h2 style="text-align: right; padding-top:10px; white-space: pre-line;">{{productGroupInfo['ProductGroupName']}}</h2>
+            </a>
+        </div>
 
     </ion-content>
 </ion-view>

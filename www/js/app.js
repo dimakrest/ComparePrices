@@ -82,6 +82,7 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
 
         .state('tabs.myCarts', {
             url: "/myCarts",
+            cache: false,
             views: {
                 'tabMyCarts': {
                 templateUrl: "templates/my_carts.html",
@@ -98,8 +99,8 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
 
         // Don't cache this state and tabs.productGroups - there's some bug with caching and search bar. Cached view is updated(at least) tries to update and we get an error
         .state('tabs.cartDetails', {
-            cache: false,
             url: "/myCarts/cartDetails/:cartID",
+            cache: false,
             views: {
                 'tabMyCarts': {
                     templateUrl: "templates/cart_details.html",
@@ -124,8 +125,8 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
         })
 
         .state('tabs.productGroups', {
-            cache: false,
             url: "/productGroups",
+            cache: false,
             views: {
                 'tabProducts': {
                     templateUrl: "templates/product_groups.html",
@@ -171,8 +172,4 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
     // for android make the tabs to be at the bottom
     $ionicConfigProvider.tabs.style('standard').position('bottom');
     $ionicConfigProvider.navBar.alignTitle('center').positionPrimaryButtons('left');
-
-    // disable cache it causes some errorns in the repoeat-collection directive and cached views
-//    $ionicConfigProvider.views.maxCache(0);
-
     });
