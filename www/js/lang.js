@@ -6,6 +6,15 @@
     document.localize = {};
 
     var heb = {
+        'CartHint1':'לבדיקת המחיר',
+        'CartHint2':'תיצור סל חדש',
+        'CartHint3':'(+ לחץ על)',
+        'CartHint4':'תבחר מתוך',
+        'CartHint5':'סלים לדוגמא',
+        'ProductHint1':'לבדיקת המחיר',
+        'ProductHint2':'חפש מוצר',
+        'ProductHint3':'תבחר מתוך',
+        'ProductHint4':'מוצרים הפופולריים',
         'Amount':'כמות:',
         'AddressPlaceHolder': 'הכנס כתובת',
         'SearchQueryCartDetailsPlaceholder': 'הקלד שם מוצר',

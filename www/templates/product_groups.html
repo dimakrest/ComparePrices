@@ -7,8 +7,13 @@
 <ion-view view-title={{::c.localize.strings['CompareProductsTitle']}}>
     <ion-content class="content-bg has-subheader" style="background-image: url('img/bg.png'); background-size: auto; background-repeat: repeat;">
 
-        <div ng-if="c.showTipInProductGroups == 1" style="width:94%; margin-left:3%; margin-top:3%; border: 3px dashed #ADADAD; border-radius: 30px;">
-            <img style="width:auto; display:block; margin: 4px auto;" src='img/intro_2.png'>
+        <div ng-if="c.showTipInProductGroups == 1" style="width:94%; margin-left:3%; margin-top:3%; border: 3px dashed #ADADAD; border-radius: 30px; text-align:center; font-family: simpleHebrewFont; font-size: 16pt; color: #A2A2A2">
+            <div style="margin-bottom:5px; margin-top:5px;"> {{::c.localize.strings['ProductHint1']}} <br>
+                {{::c.localize.strings['ProductHint2']}} <br>
+                {{::c.localize.strings['Or']}} <br>
+                {{::c.localize.strings['ProductHint3']}} <br>
+                {{::c.localize.strings['ProductHint4']}}
+            </div>
         </div>
 
         <div class="card animate-blinds">
