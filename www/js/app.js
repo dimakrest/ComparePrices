@@ -56,11 +56,14 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                     $cordovaGoogleAnalytics.trackEvent('Settings', 'Change address', $scope.c.lastAddress, $scope.c.rangeForShops);
                 }
                 localStorage.setItem('lastAddress', $scope.c.lastAddress);
-                localStorage.setItem('Lat', place.geometry.location.G);
-                localStorage.setItem('Lon', place.geometry.location.K);
+                var latLonKeys = Object.keys(place.geometry.location)
+                var myLat = place.geometry.location[latLonKeys[0]];
+                var myLon = place.geometry.location[latLonKeys[1]];
+                localStorage.setItem('Lat', myLat);
+                localStorage.setItem('Lon', myLon);
 
                 // No need to check for internet connection - if there's no internet user cannot use google autocomplete
-                UpdateStores.UpdateStoresInfo($scope, place.geometry.location.G, place.geometry.location.K, $scope.c.rangeForShops).then(function () {
+                UpdateStores.UpdateStoresInfo($scope, myLat, myLon, $scope.c.rangeForShops).then(function () {
                     $scope.c.HideLoading();
                     // Change the useUsersCurrentLocation variable, so we know that now we should use address from google autocompletion
                     $scope.c.useUsersCurrentLocation = false;
