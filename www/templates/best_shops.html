@@ -23,47 +23,50 @@
                 <ion-item class="item item-avatar-right"
                           ng-click="(shop.Products.length == 1) || ToggleDetails($index)"
                           ng-class="{active: IsDetailsShown($index)}"
-                          style="display: flex; justify-content: space-between; -webkit-justify-content: space-between; padding-top: 10px; padding-bottom: 10px; background-color: white">
+                          style="padding-top: 10px; padding-bottom: 10px; background-color: white"> <!-- display: flex; justify-content: space-between; -webkit-justify-content: space-between;  -->
                     <img ng-src={{::shop['BrandImage']}}>
                     <i ng-show="shop.Products.length > 1" class="icon" style="position: absolute; right: 30px; top: 80px;" ng-class="IsDetailsShown($index) ? 'ion-android-arrow-dropup-circle' : 'ion-android-arrow-dropdown-circle'"></i>
-                    <div ng-show="shop['Distance'] != 0" style="margin-left: -10px; margin-right: 15px;">
-                        <div ng-click="c.OpenWaze(shop['Lat'], shop['Lon']); $event.stopPropagation()">
-                            <button class="waze-button" style="margin-top: 10px; margin-right: 10px; margin-bottom: 2px;"></button>
-                        </div>
-                        <div ng-click="c.OpenGoogleMaps(shop['Lat'], shop['Lon']); $event.stopPropagation()">
-                            <button class="maps-button" style="margin-bottom: 10px; margin-right: 10px; margin-top: 2px;"></button>
-                        </div>
-                        <!--It's made with a table as it doesn't work the other way with KM in hebrew. DON'T TOUCH!-->
-                        <table>
-                            <tr>
-                                <td style=width:33px;">
-                                </td>
-                                <td style="text-align:right;">
-                                    <h4>
-                                        {{c.localize.strings['Kilometer']}}
-                                    </h4>
-                                </td>
-                                <td style="text-align:left;">
-                                    <h4>
-                                        &nbsp;{{shop['Distance']}}
-                                    </h4>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                    <div ng-show="shop['Distance'] == 0" style="margin-left: 10px; margin-right: 15px; display:flex; align-items:center; -webkit-align-items:center;">
-                        <h3>
-                            {{::c.localize.strings['OnlineShop']}}
-                        </h3>
-                    </div>
 
-                    <div style="text-align:right; display:flex; align-items:center; -webkit-align-items:center;">
-                        <div>
-                            <h3>{{shop["BrandNameHeb"]}}</h3>
-                            <h2 style="white-space: pre-line; color: {{shop['PriceColor']}}">{{::c.localize.strings['CurrencySign']}}{{::c.localize.strings['PriceInStore']}} {{shop["CartPrice"]}}</h2>
-                            <h2 style="white-space: pre-line; color: {{shop['PriceColor']}}">{{shop["PercentsToShowNearPrice"]}}</h2>
-                            <h4 ng-show="shop['Distance'] != 0" style="white-space: pre-line;">{{::c.localize.strings['StoreAddress']}} {{shop["City"]}}, {{shop["Address"]}}</h4>
-                            <h4 ng-show="shop['Distance'] == 0" style="white-space: pre-line;">{{::c.localize.strings['StoreAddress']}} {{shop["Address"]}}</h4>
+                    <div>
+                        <div ng-show="shop['Distance'] != 0" style="margin-left: -10px; margin-right: 15px; max-width: 104px; float:left">
+                            <div style="width: 104px; height: 47px" ng-click="c.OpenWaze(shop['Lat'], shop['Lon']); $event.stopPropagation()">
+                                <button class="waze-button" style="margin-top: 10px; margin-right: 10px; margin-bottom: 2px;"></button>
+                            </div>
+                            <div style="width: 104px; height: 47px" ng-click="c.OpenGoogleMaps(shop['Lat'], shop['Lon']); $event.stopPropagation()">
+                                <button class="maps-button" style="margin-bottom: 10px; margin-right: 10px; margin-top: 2px;"></button>
+                            </div>
+                            <!--It's made with a table as it doesn't work the other way with KM in hebrew. DON'T TOUCH!-->
+                            <table>
+                                <tr>
+                                    <td style=width:33px;">
+                                    </td>
+                                    <td style="text-align:right;">
+                                        <h4>
+                                            {{c.localize.strings['Kilometer']}}
+                                        </h4>
+                                    </td>
+                                    <td style="text-align:left;">
+                                        <h4>
+                                            &nbsp;{{shop['Distance']}}
+                                        </h4>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div ng-show="shop['Distance'] == 0" style="margin-left: 10px; margin-right: 15px; max-width: 104px; float:left">
+                            <h3>
+                                {{::c.localize.strings['OnlineShop']}}
+                            </h3>
+                        </div>
+
+                        <div style="text-align:right; margin-top:20px; float:right;">
+                            <div>
+                                <h3>{{shop["BrandNameHeb"]}}</h3>
+                                <h2 style="white-space: pre-line; color: {{shop['PriceColor']}}">{{::c.localize.strings['CurrencySign']}}{{::c.localize.strings['PriceInStore']}} {{shop["CartPrice"]}}</h2>
+                                <h2 style="white-space: pre-line; color: {{shop['PriceColor']}}">{{shop["PercentsToShowNearPrice"]}}</h2>
+                                <h4 ng-show="shop['Distance'] != 0" style="white-space: pre-line;">{{::c.localize.strings['StoreAddress']}} {{shop["City"]}}, {{shop["Address"]}}</h4>
+                                <h4 ng-show="shop['Distance'] == 0" style="white-space: pre-line;">{{::c.localize.strings['StoreAddress']}} {{shop["Address"]}}</h4>
+                            </div>
                         </div>
                     </div>
 
