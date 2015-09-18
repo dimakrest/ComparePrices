@@ -1,22 +1,31 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<widget id="com.ionicframework.comparepricesclient433936" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-  <name>ComparePricesClient</name>
-  <description>
+<widget id="co.kem.shnyaga" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Shnyaga</name>
+    <description>
         An Ionic Framework and Cordova project.
     </description>
-  <author email="hi@ionicframework" href="http://ionicframework.com/">
-      Ionic Framework Team
+    <author email="hi@ionicframework" href="http://ionicframework.com/">
+        Ionic Framework Team
     </author>
-  <content src="index.html"/>
-  <access origin="*"/>
-  <preference name="webviewbounce" value="false"/>
-  <preference name="UIWebViewBounce" value="false"/>
-  <preference name="DisallowOverscroll" value="false"/>
-  <preference name="android-minSdkVersion" value="16"/>
-  <preference name="BackupWebStorage" value="none"/>
-  <preference name="orientation" value="portrait" />
-  <preference name="KeyboardDisplayRequiresUserAction" value="false" />
-  <feature name="StatusBar">
-    <param name="ios-package" value="CDVStatusBar" onload="true"/>
-  </feature>
+    <content src="index.html"/>
+    <access origin="*"/>
+    <preference name="webviewbounce" value="false"/>
+    <preference name="UIWebViewBounce" value="false"/>
+    <preference name="DisallowOverscroll" value="false"/>
+    <preference name="android-minSdkVersion" value="16"/>
+    <preference name="BackupWebStorage" value="none"/>
+    <preference name="orientation" value="portrait" />
+    <preference name="KeyboardDisplayRequiresUserAction" value="false" />
+    <feature name="StatusBar">
+        <param name="ios-package" value="CDVStatusBar" onload="true"/>
+    </feature>
+
+    <platform name="android">
+        <icon src="res/android/drawable-hdpi/ic_launcher.png" density="hdpi"/>
+        <icon src="res/android/drawable-ldpi/ic_launcher.png" density="ldpi"/>
+        <icon src="res/android/drawable-mdpi/ic_launcher.png" density="mdpi"/>
+        <icon src="res/android/drawable-xhdpi/ic_launcher.png" density="xhdpi"/>
+        <icon src="res/android/drawable-xxhdpi/ic_launcher.png" density="xxhdpi"/>
+        <icon src="res/android/drawable-xxxhdpi/ic_launcher.png" density="xxxhdpi"/>
+    </platform>
 </widget>
