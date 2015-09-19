@@ -72,7 +72,9 @@
         'NoInternetConnection' : 'אפליקציה זו דורשת חיבור לאינטרנט',
         'NoInternetConnectionCannotUpdateStoresInRange': 'אפליקציה זו דורשת חיבור לאינטרנט. עידכון חנויות במרחק הנבחר נכשל.',
         'NoInternetConnectionCannotFinishDownloadingAllStores': 'אפליקציה זו דורשת חיבור לאינטרנט. לא הצלחנו להוריד את כל החנויות לידך.',
-        'ContactUs' : 'צרו קשר'
+        'ContactUs' : 'צרו קשר',
+        'HowWeDoThis' : 'איך אנחנו עושים את זה',
+        'HowWeDoThisText' : 'לפי החוק רשתות מזון חייבות לפרסם את המחירים באינטרנט. אנחנו לוקחים את המידע הזה ובעזרתו עושים השוואת מחירים ומוצאים את החנות הכי זולה. בדיקה ועידכון מתבצע כל יום ואתם תמיד מקבלים את המחירים הכי עדכניים.'
     };
 
     document.selectLanguage = function(lang)

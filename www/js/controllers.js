@@ -42,7 +42,7 @@ angular.module('ComparePrices.controllers', [])
     })
 
     .controller('RootCtrl', function($scope, $ionicLoading, $timeout, $ionicSideMenuDelegate, PopUpFactory, ComparePricesStorage, ComparePricesConstants, UpdateStores, $cordovaGoogleAnalytics,
-                                     MiscFunctions, $ionicPopover, UpdatesFromServer, $cordovaEmailComposer, $ionicScrollDelegate, FindBestShops, ImageCache) {
+                                     MiscFunctions, $ionicPopover, UpdatesFromServer, $cordovaEmailComposer, $ionicScrollDelegate, FindBestShops, ImageCache, ShowModal) {
         $scope.c = {};
         $scope.c.searchResultsStyle ='';
         $scope.c.currentCartName = "";
@@ -351,7 +351,11 @@ angular.module('ComparePrices.controllers', [])
                 isHtml: true
             };
             $cordovaEmailComposer.open(email).then(null, null);
-        }
+        };
+
+        $scope.c.HowWeDoThis = function() {
+            ShowModal($scope, 'templates/how_we_do_this.html');
+        };
 
         $scope.c.FindBestShopProductGroups = function(productID, productName, productImage) {
             if ($scope.c.lastAddress == '')
