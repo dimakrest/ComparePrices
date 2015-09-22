@@ -215,7 +215,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                         db.transaction(function (tx) {
                             tx.executeSql('DROP TABLE IF EXISTS tbStoresLocation');
                             tx.executeSql('CREATE TABLE IF NOT EXISTS tbStoresLocation (BrandName TEXT, BrandNameHeb TEXT, StoreID TEXT, Lat REAL, Lon REAL, ' +
-                                'City TEXT, Address TEXT, Distance INTEGER, ProductListExists INTEGER, PRIMARY KEY (BrandName, StoreID))');
+                                'City TEXT, Address TEXT, Distance FLOAT, ProductListExists INTEGER, PRIMARY KEY (BrandName, StoreID))');
                             var numOfBrands = storesInfo.length;
                             for (var brandIndex=0; brandIndex < numOfBrands; brandIndex++) {
                                 var brandInfo       = storesInfo[brandIndex];
@@ -521,7 +521,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                                 var storeLat = singleStore['Lat'];
                                 var storeLon = singleStore['Lon'];
 
-                                var distance = 0;
+                                var distance = 0.0;
                                 // For online shop the distance is 0
                                 if (storeLat != 0 || storeLon != 0) {
                                     distance = MiscFunctions.CalculateDistance(myLat, myLon, storeLat, storeLon);
@@ -1159,7 +1159,8 @@ angular.module('ComparePrices.services', ['ngResource'])
                 var dLat = (myLat - storeLat) * Math.PI / 180;  // deg2rad below
                 var dLon = (myLon - storeLon) * Math.PI / 180;
                 var a = 0.5 - Math.cos(dLat) / 2 + Math.cos(storeLat * Math.PI / 180) * Math.cos(myLat * Math.PI / 180) * (1 - Math.cos(dLon)) / 2;
-                var distance = Math.max(Math.round(R * 2 * Math.asin(Math.sqrt(a))), 1);
+                var distance = R * 2 * Math.asin(Math.sqrt(a));
+                distance = Math.max((Math.round(distance * 10) / 10), 0.1);
 
                 return distance;
             },
