@@ -645,9 +645,9 @@ angular.module('ComparePrices.controllers', [])
                     $scope.showNoResults    = (filteredItems.length == 0);
 
                     if ($scope.c.searchResultsStyle == 'cartDetails') {
-                        if (filteredItems.length == $scope.numOfAllProducts) {
-                            $scope.c.filteredProductsToShow = [];
-                        } else {
+                        $scope.c.filteredProductsToShow = [];
+                        if (filteredItems.length != $scope.numOfAllProducts) {
+
                             var numOfProductsInCart = $scope.c.myCart.length;
                             var numOfFilteredProducts = filteredItems.length;
 
