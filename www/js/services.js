@@ -23,16 +23,16 @@ angular.module('ComparePrices.services', ['ngResource'])
             db.transaction(initDB, errorCB, successCB); // creates tables for the first time if required
 
             // Function to mark that for this store products json exists
-            function SuccessTableCreation(chainID, storeID, defer) {
+            function SuccessTableCreation(brandName, storeID, defer) {
                 db.transaction(function (tx) {
-                    var sqlQuery = 'UPDATE tbStoresLocation SET ProductListExists=1 WHERE ChainID="' + chainID + '" AND StoreID="' + storeID + '";';
+                    var sqlQuery = 'UPDATE tbStoresLocation SET ProductListExists=1 WHERE BrandName="' + brandName + '" AND StoreID="' + storeID + '";';
                     tx.executeSql(sqlQuery);
                 }, errorCB, function() {
                     defer.resolve();
                 });
             }
 
-            function CreateProductTableForSingleShop($scope, numOfShops, tableName, fileName, chainID, storeID)
+            function CreateProductTableForSingleShop($scope, numOfShops, tableName, fileName, brandName, storeID)
             {
                 var defer = $q.defer();
                 // TODO: change back to query after prices update
@@ -41,24 +41,24 @@ angular.module('ComparePrices.services', ['ngResource'])
                         tx.executeSql('DROP TABLE IF EXISTS ' + tableName);
                         tx.executeSql('CREATE TABLE IF NOT EXISTS ' + tableName + ' (ItemCode TEXT PRIMARY KEY, ItemPrice TEXT, DiscountAmount TEXT KEY, DiscountPrice TEXT)'); // TODO: change item price to be double
                         var products = response['items'];
-                        var numOfProducts = products.length;
-                        for (var i = 0; i < numOfProducts; i++) {
-                            var singleProduct = products[i];
+                        for (var itemCode in products) {
+                            if (!products.hasOwnProperty(itemCode)) {
+                                continue;
+                            }
+                            var singleProduct = products[itemCode];
                             // we don't have discounts for all the items
                             var sqlQuery = "";
-                            if (typeof(singleProduct['DA']) == "undefined" || typeof(singleProduct['DP']) == "undefined")
-                            {
+                            if (typeof(singleProduct['Q']) == "undefined" || typeof(singleProduct['dP']) == "undefined") {
                                 sqlQuery = 'INSERT INTO ' + tableName + ' VALUES ("' +
-                                    singleProduct['IC'] + '", "' +
-                                    singleProduct['IP'] + '","","")';
+                                    itemCode + '", "' +
+                                    singleProduct['P'] + '","","")';
+                            } else {
+                                sqlQuery = 'INSERT INTO ' + tableName + ' VALUES ("' +
+                                    itemCode + '", "' +
+                                    singleProduct['P'] + '", "' +
+                                    singleProduct['Q'] + '", "' +
+                                    singleProduct['dP'] + '")';
                             }
-                            else
-                                sqlQuery = 'INSERT INTO ' + tableName + ' VALUES ("' +
-                                    singleProduct['IC'] + '", "' +
-                                    singleProduct['IP'] + '", "' +
-                                    singleProduct['DA'] + '", "' +
-                                    singleProduct['DP'] + '")';
-
                             tx.executeSql(sqlQuery)
                         }
                 }, function() {
@@ -71,7 +71,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                         $scope.c.currentlyShopsDownloaded++;
                         $scope.c.currentlyShopsDownloadedPercentage = Math.max(1, Math.round($scope.c.currentlyShopsDownloaded / numOfShops * 100));
                         $scope.c.globalProgressLoadingPointer.update($scope.c.currentlyShopsDownloadedPercentage);
-                        SuccessTableCreation(chainID, storeID, defer)
+                        SuccessTableCreation(brandName, storeID, defer)
                     });
                 }, function() { // storeJson error cb
                     $scope.c.currentlyShopsDownloaded++;
@@ -194,8 +194,8 @@ angular.module('ComparePrices.services', ['ngResource'])
                                 }
 
                                 var sqlQuery = 'INSERT INTO tbProducts VALUES ("' +
-                                    singleProduct['IC'] + '", "' +
-                                    singleProduct['IN'].replace(/\"/g, "\'\'").replace(/^\s+/, '').replace(/\s+$/, '') + '", "' +
+                                    singleProduct['C'] + '", "' +
+                                    singleProduct['N'].replace(/\"/g, "\'\'").replace(/^\s+/, '').replace(/\s+$/, '') + '", "' +
                                     imagePath + '")';
                                 tx.executeSql(sqlQuery)
                             }
@@ -214,18 +214,14 @@ angular.module('ComparePrices.services', ['ngResource'])
                     ReadJson.query({jsonName:'stores'}, function (storesInfo) {
                         db.transaction(function (tx) {
                             tx.executeSql('DROP TABLE IF EXISTS tbStoresLocation');
-                            tx.executeSql('CREATE TABLE IF NOT EXISTS tbStoresLocation (ChainID TEXT, BrandName TEXT, BrandNameHeb TEXT, StoreID TEXT, Lat REAL, Lon REAL, ' +
-                                'City TEXT, Address TEXT, Distance INTEGER, ProductListExists INTEGER, PRIMARY KEY (ChainID, StoreID))');
+                            tx.executeSql('CREATE TABLE IF NOT EXISTS tbStoresLocation (BrandName TEXT, BrandNameHeb TEXT, StoreID TEXT, Lat REAL, Lon REAL, ' +
+                                'City TEXT, Address TEXT, Distance INTEGER, ProductListExists INTEGER, PRIMARY KEY (BrandName, StoreID))');
                             var numOfBrands = storesInfo.length;
                             for (var brandIndex=0; brandIndex < numOfBrands; brandIndex++) {
-                                var brandInfo = storesInfo[brandIndex];
+                                var brandInfo       = storesInfo[brandIndex];
                                 var brandName       = brandInfo['brand'];
                                 var brandNameHeb    = brandInfo['heb'];
-                                var chainID         = brandInfo['ChainId'];
 
-                                if (typeof (chainID) == "undefined" || chainID == "undefined") {
-                                    continue;
-                                }
                                 var numOfBranches = brandInfo['branches'].length;
                                 // TODO: how better mask ' and "
                                 for (var branchIndex = 0; branchIndex < numOfBranches; branchIndex++) {
@@ -236,7 +232,6 @@ angular.module('ComparePrices.services', ['ngResource'])
                                         continue;
                                     }
                                     var sqlQuery = 'INSERT INTO tbStoresLocation VALUES ("' +
-                                        chainID + '", "' +
                                         brandName + '", "' +
                                         brandNameHeb + '", "' +
                                         singleBranch['StoreId'] + '", ' +
@@ -517,7 +512,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 UpdateStoreRadiusFromLocations: function(myLat, myLon) {
                     var defer = $q.defer();
 
-                    var sqlQuery = "SELECT ChainID, StoreID, Lat, Lon FROM tbStoresLocation;";
+                    var sqlQuery = "SELECT BrandName, StoreID, Lat, Lon FROM tbStoresLocation;";
                     db.transaction(function (tx) {
                         tx.executeSql(sqlQuery, [], function (tx, rawresults) {
                             var len = rawresults.rows.length;
@@ -532,7 +527,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                                     distance = MiscFunctions.CalculateDistance(myLat, myLon, storeLat, storeLon);
                                 }
 
-                                var sqlQuery = 'UPDATE tbStoresLocation SET Distance=' + distance + ' WHERE ChainID="' + singleStore['ChainID'] + '" AND StoreID="' +
+                                var sqlQuery = 'UPDATE tbStoresLocation SET Distance=' + distance + ' WHERE BrandName="' + singleStore['BrandName'] + '" AND StoreID="' +
                                     singleStore['StoreID'] + '";';
                                 tx.executeSql(sqlQuery);
                             }
@@ -593,13 +588,13 @@ angular.module('ComparePrices.services', ['ngResource'])
 
                             var storeID = ("000" + singleShop['StoreID']);
                             storeID  = storeID.substr(storeID.length - 3);
+                            var brandName = singleShop['BrandName'];
 
                             var tableName   = 'tb_' + singleShop['BrandName'] + '_' + singleShop['StoreID'];
-                            var fileName    =  jsonsVersion + '\/' + singleShop['BrandName'] + '\/price-' + singleShop['BrandName'] + '-' + storeID;
-                            var chainID     = singleShop['ChainID'];
+                            var fileName    =  jsonsVersion + '\/stores/' + brandName + '\/price-' + singleShop['BrandName'] + '-' + storeID;
                             var storeID     = singleShop['StoreID'];
 
-                            promises.push(CreateProductTableForSingleShop($scope, realNumOfShops, tableName, fileName, chainID, storeID));
+                            promises.push(CreateProductTableForSingleShop($scope, realNumOfShops, tableName, fileName, brandName, storeID));
                         }
                         $q.all(promises).then(function() {
                             defer.resolve();
