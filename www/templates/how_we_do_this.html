@@ -3,10 +3,19 @@
         <div class="h1 title light">{{::c.localize.strings['HowWeDoThis']}}</div>
         <button class="button button-icon icon ion-ios-close-empty light" ng-click="modal.close()"></button>
     </ion-header-bar >
-    <ion-content >
-        <p>
-            {{::c.localize.strings['HowWeDoThisText']}}
-        </p>
+    <ion-content>
+        <div style="direction: rtl; text-align: right; margin: 10px">
+            {{::c.localize.strings['HowWeDoThisText1']}} <br><br>
+            {{::c.localize.strings['HowWeDoThisText2']}} <br>
+            <ol style="direction: rtl;">
+                <li>{{::c.localize.strings['HowWeDoThisText3']}}</li>
+                <li>{{::c.localize.strings['HowWeDoThisText4']}}</li>
+                <li>{{::c.localize.strings['HowWeDoThisText5']}}</li>
+                <li>{{::c.localize.strings['HowWeDoThisText6']}}</li>
+            </ol>
+            <br>
+            {{::c.localize.strings['HowWeDoThisText7']}} <br>
+        </div>
     </ion-content>
 
 </ion-modal-view>

@@ -683,7 +683,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     if (productCart[i]['ItemCode'] == product['ItemCode']) {
                         // check that we have discount for that products + sanity check that discount price is better
                         // whole discount logic is in image on Slava mail with "ComparePrices discount description"
-                        if ((product['DiscountAmount'] != "") && (product['DiscountPrice'] != "") && (product['DiscountAmount']/product['DiscountPrice'] < product['ItemPrice']))
+                        if ((product['DiscountAmount'] != "") && (product['DiscountPrice'] != "") && (product['DiscountPrice'] != 0) && (product['DiscountAmount']/product['DiscountPrice'] < product['ItemPrice']))
                         {
                             // easy case, when discount is even for single item
                             if (product['DiscountAmount'] == 1)
