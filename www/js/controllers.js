@@ -53,8 +53,8 @@ angular.module('ComparePrices.controllers', [])
         $scope.c.currentlyShopsDownloaded = 0;
         $scope.c.currentlyShopsDownloadedPercentage = 0;
         $scope.c.globalProgressLoadingPointer = "";
-        $scope.c.maxShopsToShow = ComparePricesConstants.DEFAULT_MAX_SHOPS_TO_SHOW;
-        $scope.c.maxShopsOfTheSameBrand = ComparePricesConstants.DEFAULT_MAX_SHOPS_OF_THE_SAME_BRAND;
+        $scope.c.maxShopsToShow         = localStorage.getItem('MaxShopsToShow') || ComparePricesConstants.DEFAULT_MAX_SHOPS_TO_SHOW;
+        $scope.c.maxShopsOfTheSameBrand = localStorage.getItem('MaxShopsToShowOfTheSameBrand') ||ComparePricesConstants.DEFAULT_MAX_SHOPS_OF_THE_SAME_BRAND;
 
         $scope.c.shopsNearThatHaveNeededProducts = [];
         $scope.c.missingProducts = [];
@@ -198,6 +198,26 @@ angular.module('ComparePrices.controllers', [])
                         PopUpFactory.ErrorPopUp($scope, popUpText);
                     }
                 }
+            },500);
+        };
+
+        var updateMaxShopsToShowPromise;
+        $scope.c.UpdateMaxShopsToShow = function() {
+            if(updateMaxShopsToShowPromise){
+                $timeout.cancel(rangeForShopsChangedPromise);
+            }
+            updateMaxShopsToShowPromise = $timeout(function() {
+                localStorage.setItem('MaxShopsToShow', $scope.c.maxShopsToShow);
+            },500);
+        };
+
+        var updateMaxShopsToShowOfTheSameBrandPromise;
+        $scope.c.UpdateMaxShopsOfTheSameBrand = function() {
+            if(updateMaxShopsToShowOfTheSameBrandPromise){
+                $timeout.cancel(updateMaxShopsToShowOfTheSameBrandPromise);
+            }
+            updateMaxShopsToShowOfTheSameBrandPromise = $timeout(function() {
+                localStorage.setItem('MaxShopsToShowOfTheSameBrand', $scope.c.maxShopsOfTheSameBrand);
             },500);
         };
 
