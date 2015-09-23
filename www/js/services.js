@@ -185,10 +185,10 @@ angular.module('ComparePrices.services', ['ngResource'])
                                 var singleProduct = products[i];
                                 // build the image path: 1 is jpg, 2 for png all others are no_product_img.jpg
                                 var imagePath = '';
-                                if (singleProduct['IT'] == '1') {
-                                    imagePath = 'https://s3.eu-central-1.amazonaws.com/compare.prices.frankfurt/product_images/product_' + singleProduct['IC'] + '.jpg';
-                                } else if (singleProduct['IT'] == '2') {
-                                    imagePath = 'https://s3.eu-central-1.amazonaws.com/compare.prices.frankfurt/product_images/product_' + singleProduct['IC'] + '.png';
+                                if (singleProduct['T'] == '1') {
+                                    imagePath = 'https://s3.eu-central-1.amazonaws.com/compare.prices.frankfurt/product_images/product_' + singleProduct['C'] + '.jpg';
+                                } else if (singleProduct['T'] == '2') {
+                                    imagePath = 'https://s3.eu-central-1.amazonaws.com/compare.prices.frankfurt/product_images/product_' + singleProduct['C'] + '.png';
                                 } else {
                                     imagePath = 'img/no_product_img.jpg';
                                 }
