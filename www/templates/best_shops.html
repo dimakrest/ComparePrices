@@ -19,12 +19,20 @@
                 {{::c.localize.strings['DontHaveAllProducts']}}
             </ion-item>
 
+            <div style="display: flex; margin-top: 7px; margin-bottom: 7px; flex-direction: row-reverse;">
+                <span style="direction: rtl; margin-right: 60px; margin-top: 4px;">{{::c.localize.strings['SortBy']}}</span>
+                <span class="circled-button-group" style="margin-right: 10px">
+                    <span class="circled-button-left" ng-click="c.SortShopsBy('price')" ng-style="{'background-color': c.SortShopsByDistance == 1 ? 'white' : '#8FB5CC'}">{{::c.localize.strings['Price']}}</span>
+                    <span class="circled-button-right" ng-click="c.SortShopsBy('distance')" ng-style="{'background-color': c.SortShopsByDistance == 1 ? '#8FB5CC' : 'white'}">{{::c.localize.strings['Distance']}}</span>
+                </span>
+            </div>
+
             <div ng-repeat="shop in c.shopsNearThatHaveNeededProducts track by $index" ng-init="parentIndex = $index">
                 <ion-item class="item item-avatar-right"
                           ng-click="(shop.Products.length == 1) || ToggleDetails($index)"
                           ng-class="{active: IsDetailsShown($index)}"
                           style="padding-top: 10px; padding-bottom: 10px; background-color: white"> <!-- display: flex; justify-content: space-between; -webkit-justify-content: space-between;  -->
-                    <img ng-src={{::shop['BrandImage']}}>
+                    <img ng-src={{shop['BrandImage']}}>
                     <i ng-show="shop.Products.length > 1" class="icon" style="position: absolute; right: 30px; top: 80px;" ng-class="IsDetailsShown($index) ? 'ion-android-arrow-dropup-circle' : 'ion-android-arrow-dropdown-circle'"></i>
 
                     <div>
@@ -55,17 +63,17 @@
                         </div>
                         <div ng-show="shop['Distance'] == 0" style="margin-left: 10px; margin-right: 5px; max-width: 104px; float:left">
                             <h3>
-                                {{::c.localize.strings['OnlineShop']}}
+                                {{c.localize.strings['OnlineShop']}}
                             </h3>
                         </div>
 
                         <div style="text-align:right; margin-top:20px; float:right; max-width:120px;">
                             <div>
                                 <h3>{{shop["BrandNameHeb"]}}</h3>
-                                <h2 style="white-space: pre-line; color: {{shop['PriceColor']}}">{{::c.localize.strings['CurrencySign']}}{{::c.localize.strings['PriceInStore']}} {{shop["CartPrice"]}}</h2>
+                                <h2 style="white-space: pre-line; color: {{shop['PriceColor']}}">{{c.localize.strings['CurrencySign']}}{{c.localize.strings['PriceInStore']}} {{shop["CartPrice"]}}</h2>
                                 <h2 style="white-space: pre-line; color: {{shop['PriceColor']}}">{{shop["PercentsToShowNearPrice"]}}</h2>
-                                <h4 ng-show="shop['Distance'] != 0" style="white-space: pre-line;">{{::c.localize.strings['StoreAddress']}} {{shop["City"]}}, {{shop["Address"]}}</h4>
-                                <h4 ng-show="shop['Distance'] == 0" style="white-space: pre-line;">{{::c.localize.strings['StoreAddress']}} {{shop["Address"]}}</h4>
+                                <h4 ng-show="shop['Distance'] != 0" style="white-space: pre-line;">{{c.localize.strings['StoreAddress']}} {{shop["City"]}}, {{shop["Address"]}}</h4>
+                                <h4 ng-show="shop['Distance'] == 0" style="white-space: pre-line;">{{c.localize.strings['StoreAddress']}} {{shop["Address"]}}</h4>
                             </div>
                         </div>
                     </div>

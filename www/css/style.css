@@ -197,6 +197,52 @@ ion-popover-view.fit ion-content {
     display: table-cell;
 }
 
+.circled-button-group
+{
+    width: 10%;
+    position: relative;
+    display: table;
+    border-collapse: separate;
+}
+
+.circled-button-left
+{
+    border: 1px solid #ccc;
+    border-right: 0px;
+    border-radius: 4px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+    padding: 6px 12px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1;
+    color: #2C2F2F;
+    text-align: center;
+    width: 1%;
+    white-space: nowrap;
+    vertical-align: middle;
+    display: table-cell;
+}
+
+.circled-button-right
+{
+    border: 1px solid #ccc;
+    border-left: 0px;
+    border-radius: 4px;
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+    padding: 6px 12px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1;
+    color: #2C2F2F;
+    text-align: center;
+    width: 1%;
+    white-space: nowrap;
+    vertical-align: middle;
+    display: table-cell;
+}
+
 .ionic-form-control
 {
     display: block;
