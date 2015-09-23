@@ -31,7 +31,7 @@
                 <ion-item class="item item-avatar-right"
                           ng-click="(shop.Products.length == 1) || ToggleDetails($index)"
                           ng-class="{active: IsDetailsShown($index)}"
-                          style="padding-top: 10px; padding-bottom: 10px; background-color: white"> <!-- display: flex; justify-content: space-between; -webkit-justify-content: space-between;  -->
+                          style="padding-top: 10px; padding-bottom: 10px; background-color: white; border-bottom-width: 2px;"> <!-- display: flex; justify-content: space-between; -webkit-justify-content: space-between;  -->
                     <img ng-src={{shop['BrandImage']}}>
                     <i ng-show="shop.Products.length > 1" class="icon" style="position: absolute; right: 30px; top: 80px;" ng-class="IsDetailsShown($index) ? 'ion-android-arrow-dropup-circle' : 'ion-android-arrow-dropdown-circle'"></i>
 
