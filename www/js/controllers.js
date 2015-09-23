@@ -42,7 +42,7 @@ angular.module('ComparePrices.controllers', [])
     })
 
     .controller('RootCtrl', function($scope, $ionicLoading, $timeout, $ionicSideMenuDelegate, PopUpFactory, ComparePricesStorage, ComparePricesConstants, UpdateStores, $cordovaGoogleAnalytics,
-                                     MiscFunctions, $ionicPopover, UpdatesFromServer, $cordovaEmailComposer, $ionicScrollDelegate, FindBestShops, ImageCache, ShowModal) {
+                                     MiscFunctions, SortShops, $ionicPopover, UpdatesFromServer, $cordovaEmailComposer, $ionicScrollDelegate, FindBestShops, ImageCache, ShowModal) {
         $scope.c = {};
         $scope.c.searchResultsStyle ='';
         $scope.c.currentCartName = "";
@@ -57,12 +57,15 @@ angular.module('ComparePrices.controllers', [])
         $scope.c.maxShopsOfTheSameBrand = localStorage.getItem('MaxShopsToShowOfTheSameBrand') ||ComparePricesConstants.DEFAULT_MAX_SHOPS_OF_THE_SAME_BRAND;
 
         $scope.c.shopsNearThatHaveNeededProducts = [];
+        $scope.c.allShopsNearThatHaveNeededProducts = [];
+
         $scope.c.missingProducts = [];
         $scope.c.filteredProductsToShow = [];
         $scope.c.myCart      = [];
         // init localization array
         $scope.c.localize = document.localize;
         document.selectLanguage('heb');
+        $scope.c.SortShopsByDistance = 1;
 
         $scope.c.lastAddress = localStorage.getItem('lastAddress') || "";
 
@@ -72,6 +75,7 @@ angular.module('ComparePrices.controllers', [])
         $scope.c.useUsersCurrentLocation = $scope.c.useUsersCurrentLocation == 1;
 
         $scope.CancelFilterBar = undefined;
+
 
         function generateGuid() {
             function s4() {
@@ -149,6 +153,19 @@ angular.module('ComparePrices.controllers', [])
         var isRunningOnDevice = localStorage.getItem('IsRunningOnDevice') || 0;
         if (isRunningOnDevice == 0) {
             UpdatesFromServer.CheckIfUpdateIsRequired();
+        }
+
+        $scope.c.SortShopsBy = function(sortBy) {
+            if (sortBy == "price")
+            {
+                $scope.c.SortShopsByDistance = 0;
+                SortShops.SortAndLimitAmount($scope, "CartPrice", "Distance");
+            }
+            else // distance
+            {
+                $scope.c.SortShopsByDistance = 1;
+                SortShops.SortAndLimitAmount($scope, "Distance", "CartPrice");
+            }
         }
 
         // Update the local storage only when user finishes to enter the value

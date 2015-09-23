@@ -671,7 +671,7 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
     }])
 
-    .factory('FindBestShops', ['ComparePricesStorage', 'MiscFunctions', 'UpdateStores', 'ShowModal', 'PopUpFactory', '$q', '$cordovaGoogleAnalytics', function(ComparePricesStorage, MiscFunctions, UpdateStores, ShowModal, PopUpFactory, $q, $cordovaGoogleAnalytics) {
+    .factory('FindBestShops', ['ComparePricesStorage', 'MiscFunctions', 'SortShops', 'UpdateStores', 'ShowModal', 'PopUpFactory', '$q', '$cordovaGoogleAnalytics', function(ComparePricesStorage, MiscFunctions, SortShops, UpdateStores, ShowModal, PopUpFactory, $q, $cordovaGoogleAnalytics) {
 
         function CalculatePriceForShop($scope, productCart, productPriceInStore) {
             var totalPrice = 0.0;
@@ -683,7 +683,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     if (productCart[i]['ItemCode'] == product['ItemCode']) {
                         // check that we have discount for that products + sanity check that discount price is better
                         // whole discount logic is in image on Slava mail with "ComparePrices discount description"
-                        if ((product['DiscountAmount'] != "") && (product['DiscountPrice'] != "") && (product['DiscountPrice'] != 0) && (product['DiscountAmount']/product['DiscountPrice'] < product['ItemPrice']))
+                        if ((product['DiscountAmount'] != "") && (product['DiscountPrice'] != "") && (product['DiscountPrice'] != 0) && (product['DiscountPrice'] / product['DiscountAmount'] < product['ItemPrice']))
                         {
                             // easy case, when discount is even for single item
                             if (product['DiscountAmount'] == 1)
@@ -693,7 +693,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                                 singleProductInAccordion['ItemPrice']    = product['DiscountPrice'];
                                 singleProductInAccordion['Amount']       = productCart[i]['Amount'];
                                 singleProductInAccordion['Type']         = "DiscountS";
-                                var percentsDiscount = Math.round((product['ItemPrice'] - product['DiscountPrice']) / product['ItemPrice'] * 100);
+                                var percentsDiscount = Math.round((product['ItemPrice'] - product['DiscountPrice']/product['DiscountAmount']) / product['ItemPrice'] * 100);
                                 singleProductInAccordion['DiscountText'] = $scope.c.localize.strings['Discount'] + " " + percentsDiscount + '%';
                                 singleProductInAccordion['DiscountAmount'] = "";
                                 productsToShowInAccordion.push(singleProductInAccordion);
@@ -716,7 +716,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                                     }
                                     else
                                     {
-                                        singleProductInAccordion['DiscountText'] = product['DiscountPrice'] + ' ' + $scope.c.localize.strings['Mivca'] + '  ' + product['DiscountAmount'] + ' ' + $scope.c.localize.strings['For'];
+                                        singleProductInAccordion['DiscountText'] = product['DiscountPrice'] + ' ' + $scope.c.localize.strings['Mivca'] + '  ' + parseInt(product['DiscountAmount']) + ' ' + $scope.c.localize.strings['For'];
                                     }
                                     singleProductInAccordion['DiscountAmount'] = Math.floor(productCart[i]['Amount'] / product['DiscountAmount']) * product['DiscountAmount'];
                                     productsToShowInAccordion.push(singleProductInAccordion);
@@ -738,7 +738,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                                     }
                                     else
                                     {
-                                        singleProductInAccordion['DiscountText'] = product['DiscountPrice'] + ' ' + $scope.c.localize.strings['HaveMivca'] + ' ' + product['DiscountAmount'] + ' ' + $scope.c.localize.strings['For'];
+                                        singleProductInAccordion['DiscountText'] = product['DiscountPrice'] + ' ' + $scope.c.localize.strings['HaveMivca'] + ' ' + parseInt(product['DiscountAmount']) + ' ' + $scope.c.localize.strings['For'];
                                     }
                                     singleProductInAccordion['DiscountAmount'] = "";
                                     productsToShowInAccordion.push(singleProductInAccordion);
@@ -872,38 +872,6 @@ angular.module('ComparePrices.services', ['ngResource'])
             return {"suitableShops":suitableShops,"missingProducts":missingProducts};
         }
 
-        function dynamicSort(property) {
-            var sortOrder = 1;
-            if(property[0] === "-") {
-                sortOrder = -1;
-                property = property.substr(1);
-            }
-            return function (a,b) {
-                var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
-                return result * sortOrder;
-            }
-        }
-
-        function dynamicSortMultiple() {
-            /*
-             * save the arguments object as it will be overwritten
-             * note that arguments object is an array-like object
-             * consisting of the names of the properties to sort by
-             */
-            var props = arguments;
-            return function (obj1, obj2) {
-                var i = 0, result = 0, numberOfProperties = props.length;
-                /* try getting a different result from 0 (equal)
-                 * as long as we have extra properties to compare
-                 */
-                while(result === 0 && i < numberOfProperties) {
-                    result = dynamicSort(props[i])(obj1, obj2);
-                    i++;
-                }
-                return result;
-            }
-        }
-
         function FindBestShopInRadius ($scope, cart, radius) {
             var d = $q.defer();
 
@@ -934,48 +902,14 @@ angular.module('ComparePrices.services', ['ngResource'])
                     }
                 }
 
-                // sort shops by price
-                suitableShops.sort(dynamicSortMultiple("CartPrice", "Distance"));
-
-                var totalShops = 0;
-                var shopsOfSpecificBrand = [];
-                var minimalPrice = suitableShops[0]['CartPrice'];
-
-                for (var i=0; i < suitableShops.length; i++)
+                SortShops.SortByPriceAndStoreInGlobalVar($scope, suitableShops); // needed to add % of additional price
+                if ($scope.c.SortShopsByDistance == 1)
                 {
-                    if (totalShops < $scope.c.maxShopsToShow)
-                    {
-                        if (suitableShops[i]['CartPrice'] > minimalPrice)
-                        {
-                            var percentsToShowNearPrice = Math.round((suitableShops[i]['CartPrice'] / minimalPrice - 1) * 100);
-                            suitableShops[i]['PercentsToShowNearPrice'] = (percentsToShowNearPrice == 0) ? "" : ' (+' + percentsToShowNearPrice + '%) ';
-                            suitableShops[i]['PriceColor'] = (percentsToShowNearPrice < 30) ? "orange" : "red";
-                        }
-                        else
-                        {
-                            suitableShops[i]['PercentsToShowNearPrice'] = "";
-                            suitableShops[i]['PriceColor'] = "green";
-                        }
-
-                        var brandName = suitableShops[i]['BrandName'];
-                        if (typeof (shopsOfSpecificBrand[brandName]) == "undefined")
-                        {
-                            shopsOfSpecificBrand[brandName] = 1;
-                            $scope.c.shopsNearThatHaveNeededProducts.push(suitableShops[i]);
-                            totalShops++;
-                        }
-                        else {
-                            if (shopsOfSpecificBrand[brandName] < $scope.c.maxShopsOfTheSameBrand) {
-                                shopsOfSpecificBrand[brandName]++;
-                                $scope.c.shopsNearThatHaveNeededProducts.push(suitableShops[i]);
-                                totalShops++;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        break;
-                    }
+                    SortShops.SortAndLimitAmount($scope, "Distance", "CartPrice");
+                }
+                else
+                {
+                    SortShops.SortAndLimitAmount($scope, "CartPrice", "Distance");
                 }
 
                 // after all we need products names, images to show in accordions
@@ -1172,6 +1106,95 @@ angular.module('ComparePrices.services', ['ngResource'])
                     return (networkState != Connection.NONE);
                 } else {
                     return true;
+                }
+            }
+        }
+    }])
+
+    .factory('SortShops', [ function() {
+        function dynamicSort(property) {
+            var sortOrder = 1;
+            if(property[0] === "-") {
+                sortOrder = -1;
+                property = property.substr(1);
+            }
+            return function (a,b) {
+                var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+                return result * sortOrder;
+            }
+        }
+
+        function dynamicSortMultiple() {
+            /*
+             * save the arguments object as it will be overwritten
+             * note that arguments object is an array-like object
+             * consisting of the names of the properties to sort by
+             */
+            var props = arguments;
+            return function (obj1, obj2) {
+                var i = 0, result = 0, numberOfProperties = props.length;
+                /* try getting a different result from 0 (equal)
+                 * as long as we have extra properties to compare
+                 */
+                while(result === 0 && i < numberOfProperties) {
+                    result = dynamicSort(props[i])(obj1, obj2);
+                    i++;
+                }
+                return result;
+            }
+        }
+
+        return {
+            SortByPriceAndStoreInGlobalVar : function ($scope, suitableShops) {
+                // sort shops by price
+                suitableShops.sort(dynamicSortMultiple("CartPrice", "Distance"));
+
+                var minimalPrice = suitableShops[0]['CartPrice'];
+
+                for (var i = 0; i < suitableShops.length; i++) {
+                    if (suitableShops[i]['CartPrice'] > minimalPrice) {
+                        var percentsToShowNearPrice = Math.round((suitableShops[i]['CartPrice'] / minimalPrice - 1) * 100);
+                        suitableShops[i]['PercentsToShowNearPrice'] = (percentsToShowNearPrice == 0) ? "" : ' (+' + percentsToShowNearPrice + '%) ';
+                        suitableShops[i]['PriceColor'] = (percentsToShowNearPrice == 0) ? "green" : (percentsToShowNearPrice < 30) ? "orange" : "red";
+                    }
+                    else {
+                        suitableShops[i]['PercentsToShowNearPrice'] = "";
+                        suitableShops[i]['PriceColor'] = "green";
+                    }
+                }
+                $scope.c.allShopsNearThatHaveNeededProducts = suitableShops;
+            },
+
+
+            SortAndLimitAmount : function ($scope, firstSort, secondSort) {
+                var suitableShops = $scope.c.allShopsNearThatHaveNeededProducts;
+
+                // sort shops by price
+                suitableShops.sort(dynamicSortMultiple(firstSort, secondSort));
+
+                var totalShops = 0;
+                var shopsOfSpecificBrand = [];
+                $scope.c.shopsNearThatHaveNeededProducts = [];
+
+                for (var i = 0; i < suitableShops.length; i++) {
+                    if (totalShops < $scope.c.maxShopsToShow) {
+                        var brandName = suitableShops[i]['BrandName'];
+                        if (typeof (shopsOfSpecificBrand[brandName]) == "undefined") {
+                            shopsOfSpecificBrand[brandName] = 1;
+                            $scope.c.shopsNearThatHaveNeededProducts.push(suitableShops[i]);
+                            totalShops++;
+                        }
+                        else {
+                            if (shopsOfSpecificBrand[brandName] < $scope.c.maxShopsOfTheSameBrand) {
+                                shopsOfSpecificBrand[brandName]++;
+                                $scope.c.shopsNearThatHaveNeededProducts.push(suitableShops[i]);
+                                totalShops++;
+                            }
+                        }
+                    }
+                    else {
+                        break;
+                    }
                 }
             }
         }
