@@ -61,7 +61,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                             }
                             tx.executeSql(sqlQuery)
                         }
-                }, function() {
+                }, function() { // error cb
                         $scope.c.currentlyShopsDownloaded++;
                         $scope.c.currentlyShopsDownloadedPercentage = Math.max(1, Math.round($scope.c.currentlyShopsDownloaded / numOfShops * 100));
                         $scope.c.globalProgressLoadingPointer.update($scope.c.currentlyShopsDownloadedPercentage);
@@ -231,6 +231,11 @@ angular.module('ComparePrices.services', ['ngResource'])
                                         (singleBranch['Lat'] == "unknown") || (singleBranch['Lng'] == "unknown")) {
                                         continue;
                                     }
+                                    // skip the online stores
+                                    if ((singleBranch['Lat'] == 0) || (singleBranch['Lng'] == 0)) {
+                                        continue;
+                                    }
+
                                     var sqlQuery = 'INSERT INTO tbStoresLocation VALUES ("' +
                                         brandName + '", "' +
                                         brandNameHeb + '", "' +
