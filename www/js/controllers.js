@@ -645,7 +645,7 @@ angular.module('ComparePrices.controllers', [])
         });
     })
 
-    .controller('SearchBarCtrl', function($scope, $ionicFilterBar, $ionicHistory, PrepareInfoForControllers) {
+    .controller('SearchBarCtrl', function($scope, $ionicFilterBar, $ionicHistory, PrepareInfoForControllers, ComparePricesStorage) {
 
         $scope.allProducts      = PrepareInfoForControllers.GetAllProducts();
         $scope.numOfAllProducts = $scope.allProducts.length;
@@ -655,53 +655,113 @@ angular.module('ComparePrices.controllers', [])
         $scope.$on('$ionicView.afterEnter', function () {
             $scope.c.CancelFilterBar = $ionicFilterBar.show({
                 // items gets the array to filter
-                items: $scope.allProducts,
+                items: [],
+                //items: $scope.allProducts,
+
                 // this function is called when filtering is done
                 // we take filtered items and place items that already in cart in the top of the list
-                update: function (filteredItems) {
-                    $scope.showNoResults    = (filteredItems.length == 0);
+                update: function (filteredItems, searchPattern) {
 
-                    if ($scope.c.searchResultsStyle == 'cartDetails') {
+                    if (searchPattern == "" || searchPattern == undefined) // when we press in X in search bar
+                    {
                         $scope.c.filteredProductsToShow = [];
-                        if (filteredItems.length != $scope.numOfAllProducts) {
+                        $scope.showNoResults = false;
+                    }
+                    else
+                    {
+                        ComparePricesStorage.GetProductsBySearchPattern(searchPattern, 0).then(function (results) {
+                            if ($scope.c.searchResultsStyle == 'cartDetails')
+                            {
+                                    $scope.showNoResults = (results.rows.length == 0);
+                                    var foundItems = results.rows;
+                                    $scope.c.filteredProductsToShow = [];
+                                    if (foundItems.length != $scope.numOfAllProducts) {
 
-                            var numOfProductsInCart = $scope.c.myCart.length;
-                            var numOfFilteredProducts = filteredItems.length;
+                                        var numOfProductsInCart = $scope.c.myCart.length;
+                                        var numOfFilteredProducts = foundItems.length;
 
-                            // Add products that appear in my cart
-                            for (var i = 0; i < numOfProductsInCart; i++) {
-                                for (var j = 0; j < numOfFilteredProducts; j++) {
-                                    if ($scope.c.myCart[i]['ItemCode'] == filteredItems[j]['ItemCode']) {
-                                        $scope.c.filteredProductsToShow.push(angular.copy($scope.c.myCart[i]));
-                                        break;
+                                        // Add products that appear in my cart
+                                        for (var i = 0; i < numOfProductsInCart; i++) {
+                                            for (var j = 0; j < numOfFilteredProducts; j++) {
+                                                if ($scope.c.myCart[i]['ItemCode'] == foundItems[j]['ItemCode']) {
+                                                    $scope.c.filteredProductsToShow.push(angular.copy($scope.c.myCart[i]));
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        // Now add products that don't exist in the cart
+                                        for (var i = 0; i < numOfFilteredProducts; i++) {
+                                            var singleProduct = foundItems[i];
+                                            var productFound = false;
+
+                                            for (var j = 0; j < numOfProductsInCart; j++) {
+                                                if ($scope.c.myCart[j]['ItemCode'] == singleProduct['ItemCode']) {
+                                                    productFound = true;
+                                                    break;
+                                                }
+                                            }
+                                            if (!productFound) {
+                                                singleProduct['Amount'] = 0;
+                                                $scope.c.filteredProductsToShow.push(singleProduct);
+                                            }
+                                        }
                                     }
-                                }
                             }
-                            // Now add products that don't exist in the cart
-                            for (var i = 0; i < numOfFilteredProducts; i++) {
-                                var singleProduct = filteredItems[i];
-                                var productFound = false;
-
-                                for (var j = 0; j < numOfProductsInCart; j++) {
-                                    if ($scope.c.myCart[j]['ItemCode'] == singleProduct['ItemCode']) {
-                                        productFound = true;
-                                        break;
-                                    }
-                                }
-                                if (!productFound) {
-                                    singleProduct['Amount'] = 0;
-                                    $scope.c.filteredProductsToShow.push(singleProduct);
-                                }
+                            else if ($scope.c.searchResultsStyle == 'productGroups')
+                            {
+                                    $scope.showNoResults = (results.rows.length == 0);
+                                    $scope.c.filteredProductsToShow = results.rows;
                             }
-                        }
-                    } else if ($scope.c.searchResultsStyle == 'productGroups') {
-                        $scope.c.filteredProductsToShow = (filteredItems.length == $scope.numOfAllProducts) ? [] : filteredItems;
+                        });
                     }
                 },
+
+                //update: function (filteredItems) {
+                //    $scope.showNoResults    = (filteredItems.length == 0);
+                //
+                //    if ($scope.c.searchResultsStyle == 'cartDetails') {
+                //        $scope.c.filteredProductsToShow = [];
+                //        if (filteredItems.length != $scope.numOfAllProducts) {
+                //
+                //            var numOfProductsInCart = $scope.c.myCart.length;
+                //            var numOfFilteredProducts = filteredItems.length;
+                //
+                //            // Add products that appear in my cart
+                //            for (var i = 0; i < numOfProductsInCart; i++) {
+                //                for (var j = 0; j < numOfFilteredProducts; j++) {
+                //                    if ($scope.c.myCart[i]['ItemCode'] == filteredItems[j]['ItemCode']) {
+                //                        $scope.c.filteredProductsToShow.push(angular.copy($scope.c.myCart[i]));
+                //                        break;
+                //                    }
+                //                }
+                //            }
+                //            // Now add products that don't exist in the cart
+                //            for (var i = 0; i < numOfFilteredProducts; i++) {
+                //                var singleProduct = filteredItems[i];
+                //                var productFound = false;
+                //
+                //                for (var j = 0; j < numOfProductsInCart; j++) {
+                //                    if ($scope.c.myCart[j]['ItemCode'] == singleProduct['ItemCode']) {
+                //                        productFound = true;
+                //                        break;
+                //                    }
+                //                }
+                //                if (!productFound) {
+                //                    singleProduct['Amount'] = 0;
+                //                    $scope.c.filteredProductsToShow.push(singleProduct);
+                //                }
+                //            }
+                //        }
+                //    } else if ($scope.c.searchResultsStyle == 'productGroups') {
+                //        $scope.c.filteredProductsToShow = (filteredItems.length == $scope.numOfAllProducts) ? [] : filteredItems;
+                //    }
+                //},
+
                 // Called after the filterBar is removed. This can happen when the cancel button is pressed, the backdrop is tapped
                 // or swiped, or the back button is pressed.
                 cancel: function () {
-                    $scope.c.CancelFilterBar    = undefined;
+                    $scope.c.CancelFilterBar = undefined;
+                    $scope.showNoResults     = false;
                     $scope.c.filteredProductsToShow   = [];
                     setTimeout(function() {
                         $ionicHistory.goBack();

@@ -369,6 +369,28 @@ angular.module('ComparePrices.services', ['ngResource'])
                     return d.promise;
                 },
 
+                GetProductsBySearchPattern: function (pattern, isItemCode) {
+                    var d = $q.defer();
+
+                    var searchField = isItemCode == 1 ? 'ItemCode' : 'ItemName';
+                    var response = {};
+                    response.rows = [];
+
+                    db.transaction(function (tx) {
+                        tx.executeSql('SELECT ItemCode, ItemName, ImagePath FROM tbProducts WHERE (' + searchField + ' LIKE ?)', ['%'+pattern+'%'], function (tx, rawresults) {
+                            var len = rawresults.rows.length;
+                            for (var i = 0; i < len; i++) {
+                                // Amount is changed in the cart, so I have to make a copy,
+                                // otherwise it doesn't work in Safari. The properties are immutable.
+                                response.rows.push(rawresults.rows.item(i));
+                            }
+                            d.resolve(response);
+                        });
+                    }, errorCB, successCB);
+
+                    return d.promise;
+                },
+
                 GetMyCart: function (cartID, success, error) {
                     var response = {};
                     response.rows = [];

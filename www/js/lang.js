@@ -17,7 +17,7 @@
         'ProductHint4':'מוצרים הפופולריים',
         'Amount':'כמות:',
         'AddressPlaceHolder': 'הכנס כתובת',
-        'SearchQueryCartDetailsPlaceholder': 'הקלד שם מוצר',
+        'SearchQueryCartDetailsPlaceholder': "הקלד שם מוצר או מק''ט",
         'CompareCartsTitle': 'מחיר לסל',
         'CompareProductsTitle': 'מחיר למוצר',
         'CancelButton': 'בטל',
