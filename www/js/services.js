@@ -3,18 +3,12 @@
  */
 
 angular.module('ComparePrices.services', ['ngResource'])
-
-    .factory('ReadJson', ['$resource',
-        function($resource){
-            return $resource('resources/:jsonName.json', {}, {});
-        }])
-
     .factory('S3Jsons', ['$resource', function($resource) {
         return $resource('https://s3.amazonaws.com/compare.prices/stores/:jsonName.json.gz');s
     }])
 
-    .factory('ComparePricesStorage', ['ReadJson', 'S3Jsons', 'MiscFunctions', '$q',
-        function (ReadJson, S3Jsons, MiscFunctions, $q) {
+    .factory('ComparePricesStorage', ['S3Jsons', 'MiscFunctions', '$q',
+        function (S3Jsons, MiscFunctions, $q) {
             var createProductGroupsTbQuery              = 'CREATE TABLE IF NOT EXISTS tbProductGroups (ProductGroupID INTEGER PRIMARY KEY, ProductGroupName TEXT, ImageUrl TEXT)';
             var createProductsInProductGroupsTbQuery    = 'CREATE TABLE IF NOT EXISTS tbProductsInProductGroups (ProductGroupID INTEGER, ItemCode TEXT)';
 
@@ -175,7 +169,8 @@ angular.module('ComparePrices.services', ['ngResource'])
                 CreateTbProducts : function() {
                     var defer = $q.defer();
 
-                    ReadJson.query({jsonName:'all_products'}, function (products) {
+                    var jsonsVersion = localStorage.getItem('localVer');
+                    S3Jsons.query({jsonName:jsonsVersion + '/stores/all_products'}, function (products) {
                         db.transaction(function (tx) {
                             tx.executeSql('DROP TABLE IF EXISTS tbProducts');
                             tx.executeSql('CREATE TABLE IF NOT EXISTS tbProducts (ItemCode TEXT PRIMARY KEY, ItemName TEXT, ImagePath TEXT)');
@@ -211,7 +206,8 @@ angular.module('ComparePrices.services', ['ngResource'])
                 CreateStoresLocationTable : function() {
                     var defer = $q.defer();
 
-                    ReadJson.query({jsonName:'stores'}, function (storesInfo) {
+                    var jsonsVersion = localStorage.getItem('localVer');
+                    S3Jsons.query({jsonName: jsonsVersion + '/stores'}, function (storesInfo) {
                         db.transaction(function (tx) {
                             tx.executeSql('DROP TABLE IF EXISTS tbStoresLocation');
                             tx.executeSql('CREATE TABLE IF NOT EXISTS tbStoresLocation (BrandName TEXT, BrandNameHeb TEXT, StoreID TEXT, Lat REAL, Lon REAL, ' +
@@ -261,7 +257,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     var lastCartID = 1;
                     var defer = $q.defer();
 
-                    ReadJson.query({jsonName:'predefined_carts'}, function (predefinedCarts) {
+                    S3Jsons.query({jsonName:'predefined_carts'}, function (predefinedCarts) {
                         var carts = predefinedCarts;
                         var products;
 
@@ -298,7 +294,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     var lastProductGroupID = 1;
                     var defer = $q.defer();
 
-                    ReadJson.query({jsonName:'predefined_products'}, function (predefinedProducts) {
+                    S3Jsons.query({jsonName:'predefined_products'}, function (predefinedProducts) {
                         var productGroups = predefinedProducts;
                         var products;
 
@@ -320,8 +316,6 @@ angular.module('ComparePrices.services', ['ngResource'])
                             defer.resolve();
                         });
                     });
-
-                    localStorage.setItem('initPredefinedProducts', 0);
                     return defer.promise;
                 },
 
@@ -1221,14 +1215,16 @@ angular.module('ComparePrices.services', ['ngResource'])
                     template: '<div class="loader"><svg class="circular"><circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10"/></svg></div>'
                 });
 
-                $q.all([UpdatesFromServer.InitConfigFirstTimeLoad(),
-                    ComparePricesStorage.CreateTbProducts(),
-                    ComparePricesStorage.CreateStoresLocationTable(),
-                    ComparePricesStorage.CreatePredefinedCarts()]).then(function () {
+                UpdatesFromServer.InitConfigFirstTimeLoad().then(function() {
+                    $q.all([ComparePricesStorage.CreateTbProducts(),
+                        ComparePricesStorage.CreateStoresLocationTable(),
+                        ComparePricesStorage.CreatePredefinedProducts(),
+                        ComparePricesStorage.CreatePredefinedCarts()]).then(function () {
                         defer.resolve();
                         localStorage.setItem('firstTimeLoad', 0);
                         $ionicLoading.hide();
                     });
+                });
             } else {
                 defer.resolve();
             }
@@ -1285,26 +1281,14 @@ angular.module('ComparePrices.services', ['ngResource'])
             return defer.promise;
         }
 
-        function InitProductGroupsPrivate(initPredefinedProducts) {
+        function InitProductGroupsPrivate() {
             var defer = $q.defer();
 
-            if (initPredefinedProducts == 1) {
-                ComparePricesStorage.CreatePredefinedProducts().then(function() {
-                    ComparePricesStorage.GetAllProductGroups(function (result) {
-                        _productGroupsInfo = result.rows;
-                        defer.resolve();
-                    });
-                });
-            } else {
-                if (_productGroupsInfo.length == 0) {
-                    ComparePricesStorage.GetAllProductGroups(function (result) {
-                        _productGroupsInfo = result.rows;
-                        defer.resolve();
-                    });
-                } else {
-                    defer.resolve();
-                }
-            }
+            ComparePricesStorage.GetAllProductGroups(function (result) {
+                _productGroupsInfo = result.rows;
+                defer.resolve();
+            });
+
             return defer.promise;
         }
 
@@ -1324,10 +1308,10 @@ angular.module('ComparePrices.services', ['ngResource'])
                 return InitMyCartPrivate(cartID);
             },
 
-            InitProductGroups : function(initPredefinedProducts) {
+            InitProductGroups : function() {
                 var defer = $q.defer();
 
-                $q.all([InitProductGroupsPrivate(initPredefinedProducts), InitInfoForSearchBarPrivate()]).then(function() {
+                $q.all([InitProductGroupsPrivate(), InitInfoForSearchBarPrivate()]).then(function() {
                     defer.resolve();
                 });
 

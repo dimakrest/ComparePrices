@@ -137,8 +137,7 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                     resolve: {
                         "InitPredefinedProducts": function (PrepareInfoForControllers)
                         {
-                            var initPredefinedProducts = localStorage.getItem('initPredefinedProducts') || 1;
-                            return PrepareInfoForControllers.InitProductGroups(initPredefinedProducts);
+                            return PrepareInfoForControllers.InitProductGroups();
                         }}
                 }
             }
