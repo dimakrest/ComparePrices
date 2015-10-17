@@ -9,8 +9,6 @@ angular.module('ComparePrices.services', ['ngResource'])
 
     .factory('ComparePricesStorage', ['S3Jsons', 'MiscFunctions', '$q',
         function (S3Jsons, MiscFunctions, $q) {
-            var createProductGroupsTbQuery              = 'CREATE TABLE IF NOT EXISTS tbProductGroups (ProductGroupID INTEGER PRIMARY KEY, ProductGroupName TEXT, ImageUrl TEXT)';
-            var createProductsInProductGroupsTbQuery    = 'CREATE TABLE IF NOT EXISTS tbProductsInProductGroups (ProductGroupID INTEGER, ItemCode TEXT)';
 
             // TODO: database size + don't want to call init every time
             var db = openDatabase("ComparePricesDB", "1.0", "Global storage", 4 * 1024 * 1024); // TODO: check what happens when we exceed this limit
@@ -294,6 +292,10 @@ angular.module('ComparePrices.services', ['ngResource'])
                         var products;
 
                         db.transaction(function (tx) {
+                            tx.executeSql('DROP TABLE IF EXISTS tbProductGroups');
+                            tx.executeSql('CREATE TABLE IF NOT EXISTS tbProductGroups (ProductGroupID INTEGER PRIMARY KEY, ProductGroupName TEXT, ImageUrl TEXT)');
+                            tx.executeSql('DROP TABLE IF EXISTS tbProductsInProductGroups');
+                            tx.executeSql('CREATE TABLE IF NOT EXISTS tbProductsInProductGroups (ProductGroupID INTEGER, ItemCode TEXT)');
                             productGroups.forEach(function(singleProductGroup) {
                                 tx.executeSql('INSERT INTO tbProductGroups (ProductGroupID, ProductGroupName, ImageUrl)' +
                                     'VALUES (' + lastProductGroupID + ', "' + singleProductGroup['ProductGroupName'] + '", "' + singleProductGroup['ImageUrl'] + '")');
