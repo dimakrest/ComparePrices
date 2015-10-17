@@ -314,25 +314,6 @@ angular.module('ComparePrices.services', ['ngResource'])
                     return defer.promise;
                 },
 
-                // success is a function that is passed here
-                GetAllProducts: function (success) {
-                    var response = {};
-                    response.rows = [];
-                    db.transaction(function (tx) {
-                        tx.executeSql('SELECT * FROM tbProducts;', [], function (tx, rawresults) {
-                            var len = rawresults.rows.length;
-                            for (var i = 0; i < len; i++) {
-                                response.rows.push(rawresults.rows.item(i));
-                            }
-                            // check that success function exists
-                            if (success) {
-                                success(response);
-                            }
-                        });
-                    });
-                    return response;
-                },
-
                 UpdateCart: function (cartID, newCart) {
                     db.transaction(function (tx) {
                         tx.executeSql('DELETE FROM tbUserCarts WHERE CartID = ' + cartID);
@@ -1222,7 +1203,6 @@ angular.module('ComparePrices.services', ['ngResource'])
         var _myCartID           = -1;
         var _myCart             = [];
         var _productGroupsInfo  = [];
-        var _allProducts        = [];
 
         function MyCartsInitFirstTimeLoadPrivate(firstTimeLoad) {
             var defer = $q.defer();
@@ -1269,20 +1249,6 @@ angular.module('ComparePrices.services', ['ngResource'])
             return defer.promise;
         }
 
-        function InitInfoForSearchBarPrivate() {
-            var defer = $q.defer();
-
-            if (_allProducts.length == 0) {
-                ComparePricesStorage.GetAllProducts(function (result) {
-                    _allProducts    = result.rows;
-                    defer.resolve();
-                });
-            } else {
-                defer.resolve();
-            }
-            return defer.promise;
-        }
-
         function InitMyCartPrivate (cartID) {
             var defer = $q.defer();
 
@@ -1314,7 +1280,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 var defer = $q.defer();
 
                 MyCartsInitFirstTimeLoadPrivate(firstTimeLoad).then(function() {
-                    $q.all([MyCartsInitPrivate(), InitInfoForSearchBarPrivate()]).then(function() {
+                    MyCartsInitPrivate().then(function() {
                         defer.resolve();
                     });
                 });
@@ -1326,13 +1292,7 @@ angular.module('ComparePrices.services', ['ngResource'])
             },
 
             InitProductGroups : function() {
-                var defer = $q.defer();
-
-                $q.all([InitProductGroupsPrivate(), InitInfoForSearchBarPrivate()]).then(function() {
-                    defer.resolve();
-                });
-
-                return defer.promise;
+                return InitProductGroupsPrivate()
             },
 
             'GetUserCarts' : function() {
@@ -1349,10 +1309,6 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             GetProductGroups : function() {
                 return _productGroupsInfo;
-            },
-
-            GetAllProducts : function() {
-                return _allProducts;
             }
         }
     }])

@@ -654,9 +654,6 @@ angular.module('ComparePrices.controllers', [])
     })
 
     .controller('SearchBarCtrl', function($scope, $ionicFilterBar, $ionicHistory, PrepareInfoForControllers, ComparePricesStorage) {
-
-        $scope.allProducts      = PrepareInfoForControllers.GetAllProducts();
-        $scope.numOfAllProducts = $scope.allProducts.length;
         $scope.c.filteredProductsToShow = [];
         $scope.showNoResults    = false;
 
@@ -723,39 +720,37 @@ angular.module('ComparePrices.controllers', [])
 
                             if ($scope.c.searchResultsStyle == 'cartDetails')
                             {
-                                    $scope.showNoResults = (foundItems.length == 0);
-                                    $scope.c.filteredProductsToShow = [];
-                                    if (foundItems.length != $scope.numOfAllProducts) {
+                                $scope.showNoResults = (foundItems.length == 0);
+                                $scope.c.filteredProductsToShow = [];
 
-                                        var numOfProductsInCart = $scope.c.myCart.length;
-                                        var numOfFilteredProducts = foundItems.length;
+                                var numOfProductsInCart = $scope.c.myCart.length;
+                                var numOfFilteredProducts = foundItems.length;
 
-                                        // Add products that appear in my cart
-                                        for (var i = 0; i < numOfProductsInCart; i++) {
-                                            for (var j = 0; j < numOfFilteredProducts; j++) {
-                                                if ($scope.c.myCart[i]['ItemCode'] == foundItems[j]['ItemCode']) {
-                                                    $scope.c.filteredProductsToShow.push(angular.copy($scope.c.myCart[i]));
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                        // Now add products that don't exist in the cart
-                                        for (var i = 0; i < numOfFilteredProducts; i++) {
-                                            var singleProduct = foundItems[i];
-                                            var productFound = false;
-
-                                            for (var j = 0; j < numOfProductsInCart; j++) {
-                                                if ($scope.c.myCart[j]['ItemCode'] == singleProduct['ItemCode']) {
-                                                    productFound = true;
-                                                    break;
-                                                }
-                                            }
-                                            if (!productFound) {
-                                                singleProduct['Amount'] = 0;
-                                                $scope.c.filteredProductsToShow.push(singleProduct);
-                                            }
+                                // Add products that appear in my cart
+                                for (var i = 0; i < numOfProductsInCart; i++) {
+                                    for (var j = 0; j < numOfFilteredProducts; j++) {
+                                        if ($scope.c.myCart[i]['ItemCode'] == foundItems[j]['ItemCode']) {
+                                            $scope.c.filteredProductsToShow.push(angular.copy($scope.c.myCart[i]));
+                                            break;
                                         }
                                     }
+                                }
+                                // Now add products that don't exist in the cart
+                                for (var i = 0; i < numOfFilteredProducts; i++) {
+                                    var singleProduct = foundItems[i];
+                                    var productFound = false;
+
+                                    for (var j = 0; j < numOfProductsInCart; j++) {
+                                        if ($scope.c.myCart[j]['ItemCode'] == singleProduct['ItemCode']) {
+                                            productFound = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!productFound) {
+                                        singleProduct['Amount'] = 0;
+                                        $scope.c.filteredProductsToShow.push(singleProduct);
+                                    }
+                                }
                             }
                             else if ($scope.c.searchResultsStyle == 'productGroups')
                             {
