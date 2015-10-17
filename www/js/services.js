@@ -147,17 +147,12 @@ angular.module('ComparePrices.services', ['ngResource'])
             }
 
             return {
-
-                MarkStoresToDownloadNewJsons : function(newStoresInfoExists) {
+                DownloadNewJsons : function(newStoresInfoExists) {
                     var defer = $q.defer();
 
                     if (newStoresInfoExists == 1) {
-                        db.transaction(function (tx) {
-                            var sqlQuery = 'UPDATE tbStoresLocation SET ProductListExists=0';
-                            tx.executeSql(sqlQuery);
-                        }, function () {
-                            defer.resolve();
-                        }, function () {
+                        // TODO: clear here existing tb_brand* tables
+                        $q.all([this.CreateStoresLocationTable(), this.CreateTbProducts()]).then(function() {
                             defer.resolve();
                         });
                     } else {
@@ -1368,7 +1363,7 @@ angular.module('ComparePrices.services', ['ngResource'])
             localStorage.setItem('UpdateStoreInfoCompleted', 0);
 
             var newStoresVersionExists = localStorage.getItem('newStoresVersionExists') || 0;
-            ComparePricesStorage.MarkStoresToDownloadNewJsons(newStoresVersionExists).then(function() {
+            ComparePricesStorage.DownloadNewJsons(newStoresVersionExists).then(function() {
                 // Each time we update user location we have to recalculate distance to
                 // each shop and if needed download/create missing jsons/tables.
                 $q.all([ComparePricesStorage.UpdateStoreRadiusFromLocations(myLat, myLon),
