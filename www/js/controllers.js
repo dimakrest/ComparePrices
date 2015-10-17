@@ -42,7 +42,7 @@ angular.module('ComparePrices.controllers', [])
     })
 
     .controller('RootCtrl', function($scope, $ionicLoading, $timeout, $ionicSideMenuDelegate, PopUpFactory, ComparePricesStorage, ComparePricesConstants, UpdateStores, $cordovaGoogleAnalytics,
-                                     MiscFunctions, SortShops, $ionicPopover, UpdatesFromServer, $cordovaEmailComposer, $ionicScrollDelegate, FindBestShops, ImageCache, ShowModal) {
+                                     MiscFunctions, SortShops, $ionicPopover, UpdatesFromServer, $cordovaEmailComposer, $ionicScrollDelegate, FindBestShops, ImageCache, ShowModal, $ionicTabsDelegate) {
         $scope.c = {};
         $scope.c.searchResultsStyle ='';
         $scope.c.currentCartName = "";
@@ -74,7 +74,15 @@ angular.module('ComparePrices.controllers', [])
         $scope.c.useUsersCurrentLocation = parseInt(localStorage.getItem('UseUsersCurrentLocation')) || 0;
         $scope.c.useUsersCurrentLocation = $scope.c.useUsersCurrentLocation == 1;
 
-        $scope.CancelFilterBar = undefined;
+        $scope.c.CancelFilterBar = undefined;
+
+        $scope.SelectTabWithIndex = function(index) {
+            if (typeof($scope.c.CancelFilterBar) != "undefined") {
+                $scope.c.CancelFilterBar();
+            } else {
+                $ionicTabsDelegate.select(index);
+            }
+        }
 
 
         function generateGuid() {
