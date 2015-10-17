@@ -372,7 +372,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     response.rows = [];
 
                     db.transaction(function (tx) {
-                        tx.executeSql('SELECT ItemCode, ItemName, ImagePath FROM tbProducts WHERE (' + searchField + ' LIKE ?)', ['%'+pattern+'%'], function (tx, rawresults) {
+                        tx.executeSql('SELECT ItemCode, ItemName, ImagePath FROM tbProducts WHERE (' + searchField + ' LIKE ?)', [pattern], function (tx, rawresults) {
                             var len = rawresults.rows.length;
                             for (var i = 0; i < len; i++) {
                                 // Amount is changed in the cart, so I have to make a copy,
@@ -1135,7 +1135,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 property = property.substr(1);
             }
             return function (a,b) {
-                var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+                var result = (parseFloat(a[property]) < parseFloat(b[property])) ? -1 : (parseFloat(a[property]) > parseFloat(b[property])) ? 1 : 0;
                 return result * sortOrder;
             }
         }

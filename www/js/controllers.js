@@ -656,7 +656,6 @@ angular.module('ComparePrices.controllers', [])
             $scope.c.CancelFilterBar = $ionicFilterBar.show({
                 // items gets the array to filter
                 items: [],
-                //items: $scope.allProducts,
 
                 // this function is called when filtering is done
                 // we take filtered items and place items that already in cart in the top of the list
@@ -669,11 +668,54 @@ angular.module('ComparePrices.controllers', [])
                     }
                     else
                     {
-                        ComparePricesStorage.GetProductsBySearchPattern(searchPattern, 0).then(function (results) {
+                        var isItemCode = 0;
+                        if (/^[0-9]{5,}$/.test(searchPattern))
+                        {
+                            isItemCode = 1;
+                        }
+
+                        var firstWord = searchPattern.split(' ')[0];
+                        var firstWordMatcher = new RegExp("/b" + firstWord + "/b");
+
+                        searchPattern = searchPattern.replace(/\s/g, '%'); // replace spaces by wildcards
+                        searchPattern = '%' + searchPattern + '%'; // add wildcards to the beginning and ending
+
+                        ComparePricesStorage.GetProductsBySearchPattern(searchPattern, isItemCode).then(function (results) {
+
+                            var foundItems = results.rows;
+
+                            // sort items by rules, first come whole words and when word appears closer to beginning
+                            foundItems.sort(function(a,b){
+                                if ((firstWordMatcher.test(a.ItemName)) && (!firstWordMatcher.test(b.ItemName))) // A has the whole word while B don't
+                                {
+                                    return -1;
+                                }
+                                if ((firstWordMatcher.test(b.ItemName)) && (!firstWordMatcher.test(a.ItemName))) // B has the whole word while A don't
+                                {
+                                    return 1;
+                                }
+                                if (a.ItemName.indexOf(firstWord) < b.ItemName.indexOf(firstWord)) // in A string appears earlier
+                                {
+                                    return -1;
+                                }
+                                if (b.ItemName.indexOf(firstWord) < a.ItemName.indexOf(firstWord)) // in B string appears earlier
+                                {
+                                    return 1;
+                                }
+                                if (a.ImagePath != "img/no_product_img.jpg" && b.ImagePath == "img/no_product_img.jpg") // A has image, while B doesn't
+                                {
+                                    return -1;
+                                }
+                                if (b.ImagePath != "img/no_product_img.jpg" && a.ImagePath == "img/no_product_img.jpg") // B has image, while A doesn't
+                                {
+                                    return 1;
+                                }
+                                return 0; // in all other cases strings have equal strength
+                            });
+
                             if ($scope.c.searchResultsStyle == 'cartDetails')
                             {
-                                    $scope.showNoResults = (results.rows.length == 0);
-                                    var foundItems = results.rows;
+                                    $scope.showNoResults = (foundItems.length == 0);
                                     $scope.c.filteredProductsToShow = [];
                                     if (foundItems.length != $scope.numOfAllProducts) {
 
@@ -709,53 +751,12 @@ angular.module('ComparePrices.controllers', [])
                             }
                             else if ($scope.c.searchResultsStyle == 'productGroups')
                             {
-                                    $scope.showNoResults = (results.rows.length == 0);
-                                    $scope.c.filteredProductsToShow = results.rows;
+                                    $scope.showNoResults = (foundItems.length == 0);
+                                    $scope.c.filteredProductsToShow = foundItems;
                             }
                         });
                     }
                 },
-
-                //update: function (filteredItems) {
-                //    $scope.showNoResults    = (filteredItems.length == 0);
-                //
-                //    if ($scope.c.searchResultsStyle == 'cartDetails') {
-                //        $scope.c.filteredProductsToShow = [];
-                //        if (filteredItems.length != $scope.numOfAllProducts) {
-                //
-                //            var numOfProductsInCart = $scope.c.myCart.length;
-                //            var numOfFilteredProducts = filteredItems.length;
-                //
-                //            // Add products that appear in my cart
-                //            for (var i = 0; i < numOfProductsInCart; i++) {
-                //                for (var j = 0; j < numOfFilteredProducts; j++) {
-                //                    if ($scope.c.myCart[i]['ItemCode'] == filteredItems[j]['ItemCode']) {
-                //                        $scope.c.filteredProductsToShow.push(angular.copy($scope.c.myCart[i]));
-                //                        break;
-                //                    }
-                //                }
-                //            }
-                //            // Now add products that don't exist in the cart
-                //            for (var i = 0; i < numOfFilteredProducts; i++) {
-                //                var singleProduct = filteredItems[i];
-                //                var productFound = false;
-                //
-                //                for (var j = 0; j < numOfProductsInCart; j++) {
-                //                    if ($scope.c.myCart[j]['ItemCode'] == singleProduct['ItemCode']) {
-                //                        productFound = true;
-                //                        break;
-                //                    }
-                //                }
-                //                if (!productFound) {
-                //                    singleProduct['Amount'] = 0;
-                //                    $scope.c.filteredProductsToShow.push(singleProduct);
-                //                }
-                //            }
-                //        }
-                //    } else if ($scope.c.searchResultsStyle == 'productGroups') {
-                //        $scope.c.filteredProductsToShow = (filteredItems.length == $scope.numOfAllProducts) ? [] : filteredItems;
-                //    }
-                //},
 
                 // Called after the filterBar is removed. This can happen when the cancel button is pressed, the backdrop is tapped
                 // or swiped, or the back button is pressed.
