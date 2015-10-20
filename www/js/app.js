@@ -143,6 +143,32 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
             }
         })
 
+        .state('tabs.subProductGroups', {
+            url: "/productGroups/:productGroupID",
+            cache: false,
+            views: {
+                'tabProducts': {
+                    templateUrl: "templates/sub_product_groups.html",
+                    controller: 'SubProductGroupsCtrl',
+                    resolve: {
+                        "InitPredefinedProducts": function (PrepareInfoForControllers)
+                        {
+                            return PrepareInfoForControllers.InitSubProductGroupsPrivate();
+                        }}
+                }
+            }
+        })
+
+        .state('tabs.products', {
+            url: "/productGroups/:productGroupID/:subProductGroupID",
+            views: {
+                'tabProducts': {
+                    templateUrl: "templates/products.html",
+                    controller: 'ProductsCtrl'
+                }
+            }
+        })
+
         .state('tabs.productGroupsSearchBar', {
             url : "/searchBarProductGroups",
             views : {
@@ -151,18 +177,7 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                     controller: 'SearchBarCtrl'
                 }
             }
-        })
-
-        .state('tabs.products', {
-            url: "/productGroups/products/:productGroupID",
-            views: {
-                'tabProducts': {
-                    templateUrl: "templates/products.html",
-                    controller: 'ProductsCtrl'
-                }
-            }
-        })
-    ;
+        });
 
     // if none of the above states are matched, use this as the fallback
     $urlRouterProvider.otherwise('/tab/myCarts');

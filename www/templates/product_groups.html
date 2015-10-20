@@ -21,7 +21,7 @@
                 {{::c.localize.strings['PredefinedProductGroups']}}
             </h1>
 
-            <a class="item item-avatar-right" ng-click="OpenProductGroupDetails(productGroupInfo['ProductGroupID'])" ng-repeat="productGroupInfo in c.productGroupsInfo" style="height:72px">
+            <a class="item item-avatar-right" ng-click="OpenSubProductGroup(productGroupInfo['ProductGroupID'])" ng-repeat="productGroupInfo in c.productGroupsInfo" style="height:72px">
                 <img ng-src={{productGroupInfo['ImageUrl']}}>
                 <i class="icon ion-chevron-left" style="float:left; padding-top: 10px;"></i>
                 <h2 style="text-align: right; padding-top:10px; white-space: pre-line;">{{productGroupInfo['ProductGroupName']}}</h2>

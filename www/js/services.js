@@ -12,7 +12,6 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             // TODO: database size + don't want to call init every time
             var db = openDatabase("ComparePricesDB", "1.0", "Global storage", 4 * 1024 * 1024); // TODO: check what happens when we exceed this limit
-            db.transaction(initDB, errorCB, successCB); // creates tables for the first time if required
 
             // Function to mark that for this store products json exists
             function SuccessTableCreation(brandName, storeID, defer) {
@@ -82,11 +81,6 @@ angular.module('ComparePrices.services', ['ngResource'])
                         errorCallBack(err)
                 }
 
-            }
-
-            function initDB(tx) {
-                tx.executeSql(createProductGroupsTbQuery);
-                tx.executeSql(createProductsInProductGroupsTbQuery);
             }
 
             // TODO: add flag to mask all prints
@@ -284,27 +278,39 @@ angular.module('ComparePrices.services', ['ngResource'])
 
                 CreatePredefinedProducts: function ()
                 {
-                    var lastProductGroupID = 1;
+                    var lastProductGroupID  = 1;
+                    var lastSubProductID    = 1;
                     var defer = $q.defer();
 
                     S3Jsons.query({jsonName:'predefined_products'}, function (predefinedProducts) {
                         var productGroups = predefinedProducts;
+                        var productSubGroups;
                         var products;
 
                         db.transaction(function (tx) {
                             tx.executeSql('DROP TABLE IF EXISTS tbProductGroups');
                             tx.executeSql('CREATE TABLE IF NOT EXISTS tbProductGroups (ProductGroupID INTEGER PRIMARY KEY, ProductGroupName TEXT, ImageUrl TEXT)');
+
+                            tx.executeSql('DROP TABLE IF EXISTS tbSubProductGroups');
+                            tx.executeSql('CREATE TABLE IF NOT EXISTS tbSubProductGroups (ProductGroupID INTEGER, SubProductGroupID INTEGER, SubProductGroupName TEXT, ImageUrl TEXT,  PRIMARY KEY (ProductGroupID, SubProductGroupID))');
+
                             tx.executeSql('DROP TABLE IF EXISTS tbProductsInProductGroups');
-                            tx.executeSql('CREATE TABLE IF NOT EXISTS tbProductsInProductGroups (ProductGroupID INTEGER, ItemCode TEXT)');
+                            tx.executeSql('CREATE TABLE IF NOT EXISTS tbProductsInProductGroups (ProductGroupID INTEGER, SubProductGroupID INTEGER, ItemCode TEXT)');
                             productGroups.forEach(function(singleProductGroup) {
                                 tx.executeSql('INSERT INTO tbProductGroups (ProductGroupID, ProductGroupName, ImageUrl)' +
                                     'VALUES (' + lastProductGroupID + ', "' + singleProductGroup['ProductGroupName'] + '", "' + singleProductGroup['ImageUrl'] + '")');
 
-                                products = singleProductGroup['Products'];
+                                productSubGroups = singleProductGroup['ProductSubGroups'];
+                                productSubGroups.forEach(function(singleSubProduct) {
+                                    tx.executeSql('INSERT INTO tbSubProductGroups (ProductGroupID, SubProductGroupID, SubProductGroupName, ImageUrl) ' +
+                                        'VALUES (' + lastProductGroupID + ',' + lastSubProductID + ',' + '"' + singleSubProduct['SubGroupName'] + '","' + singleSubProduct['ImageUrl'] + '")');
 
-                                products.forEach(function(singleProductID) {
-                                    tx.executeSql('INSERT INTO tbProductsInProductGroups (ProductGroupID, ItemCode)' +
-                                        'VALUES (' + lastProductGroupID + ', "' + singleProductID + '")');
+                                    products = singleSubProduct['Products'];
+                                    products.forEach(function(singleProductID) {
+                                        tx.executeSql('INSERT INTO tbProductsInProductGroups (ProductGroupID, SubProductGroupID, ItemCode) ' +
+                                            'VALUES (' + lastProductGroupID + ',' + lastSubProductID + ', "' + singleProductID + '")');
+                                    });
+                                    lastSubProductID++;
                                 });
                                 lastProductGroupID++;
                             });
@@ -394,7 +400,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     return response;
                 },
 
-                GetProductGroup: function (productGroupID, success, error) {
+                GetProductGroup: function (productGroupID, subProductGroupID, success, error) {
                     var response = {};
                     response.rows = [];
                     db.transaction(function (tx) {
@@ -402,7 +408,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                             'tbProducts.ItemName AS ItemName,' +
                             'tbProducts.ImagePath AS ImagePath ' +
                             'FROM tbProducts JOIN tbProductsInProductGroups ON tbProducts.ItemCode=tbProductsInProductGroups.ItemCode ' +
-                            'WHERE tbProductsInProductGroups.ProductGroupID = ' + productGroupID, [], function (tx, rawresults) {
+                            'WHERE tbProductsInProductGroups.ProductGroupID = ' + productGroupID + ' AND tbProductsInProductGroups.SubProductGroupID=' + subProductGroupID, [], function (tx, rawresults) {
                             var len = rawresults.rows.length;
                             for (var i = 0; i < len; i++) {
                                 // Amount is changed in the cart, so I have to make a copy,
@@ -476,7 +482,25 @@ angular.module('ComparePrices.services', ['ngResource'])
                             }
                         });
                     });
-                    return response
+                    return response;
+                },
+
+                GetAllSubProductGroups : function(success) {
+                    var sqlQuery = 'SELECT * FROM tbSubProductGroups;';
+                    var response = {};
+                    response.rows = [];
+                    db.transaction(function (tx) {
+                        tx.executeSql(sqlQuery, [], function (tx, rawresults) {
+                            var len = rawresults.rows.length;
+                            for (var i = 0; i < len; i++) {
+                                response.rows.push(rawresults.rows.item(i))
+                            }
+                            if (success) {
+                                success(response)
+                            }
+                        });
+                    });
+                    return response;
                 },
 
                 UpdateCartsList: function (newCart) {
@@ -1205,6 +1229,7 @@ angular.module('ComparePrices.services', ['ngResource'])
         var _myCartID           = -1;
         var _myCart             = [];
         var _productGroupsInfo  = [];
+        var _subProductGroupsInfo = [];
 
         function MyCartsInitFirstTimeLoadPrivate(firstTimeLoad) {
             var defer = $q.defer();
@@ -1277,6 +1302,17 @@ angular.module('ComparePrices.services', ['ngResource'])
             return defer.promise;
         }
 
+        function InitSubProductGroupsPrivate() {
+            var defer = $q.defer();
+
+            ComparePricesStorage.GetAllSubProductGroups(function (result) {
+                _subProductGroupsInfo = result.rows;
+                defer.resolve();
+            });
+
+            return defer.promise;
+        }
+
         return {
             'MyCartsInit': function(firstTimeLoad) {
                 var defer = $q.defer();
@@ -1297,7 +1333,11 @@ angular.module('ComparePrices.services', ['ngResource'])
                 return InitProductGroupsPrivate()
             },
 
-            'GetUserCarts' : function() {
+            InitSubProductGroupsPrivate : function() {
+                return InitSubProductGroupsPrivate();
+            },
+
+            GetUserCarts : function() {
                 return _myCartsInfo;
             },
 
@@ -1311,6 +1351,10 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             GetProductGroups : function() {
                 return _productGroupsInfo;
+            },
+
+            GetSubProductGroups : function() {
+                return _subProductGroupsInfo;
             }
         }
     }])

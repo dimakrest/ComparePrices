@@ -497,7 +497,7 @@ angular.module('ComparePrices.controllers', [])
 
         $scope.c.productGroupsInfo = PrepareInfoForControllers.GetProductGroups();
 
-        $scope.OpenProductGroupDetails = function(productGroupID) {
+        $scope.OpenSubProductGroup = function(productGroupID) {
             setTimeout(function()
             {
                 $scope.c.productGroupsInfo.forEach(function(singleProductGroup) {
@@ -507,7 +507,43 @@ angular.module('ComparePrices.controllers', [])
                     }
                 });
 
-                location.href="#/tab/productGroups/products/" + productGroupID
+                location.href="#/tab/productGroups/" + productGroupID
+            },100);
+        };
+
+        // based on https://github.com/djett41/ionic-filter-bar
+        $scope.ShowFilterBar = function () {
+            $ionicHistory.nextViewOptions({
+                disableAnimate: true
+            });
+            $scope.c.searchResultsStyle = 'productGroups';
+            setTimeout(function() {
+                location.href = '#/tab/searchBarProductGroups';
+            }, 100);
+        };
+
+        $scope.$on('$ionicView.afterEnter', function(){
+            setTimeout(function() {
+                ionicMaterialMotion.blinds();
+            }, 0);
+        });
+    })
+
+    .controller('SubProductGroupsCtrl', function($scope, ComparePricesStorage, PrepareInfoForControllers, ionicMaterialMotion, $ionicHistory) {
+
+        $scope.c.productSubGroupsInfo = PrepareInfoForControllers.GetSubProductGroups();
+
+        $scope.OpenSubProductGroupDetails = function(productGroupID, subProductGroupID) {
+            setTimeout(function()
+            {
+                $scope.c.productGroupsInfo.forEach(function(singleProductGroup) {
+                    if (singleProductGroup['ProductGroupID'] == productGroupID)
+                    {
+                        $scope.c.currentProductGroupName = singleProductGroup['ProductGroupName'];
+                    }
+                });
+
+                location.href="#/tab/productGroups/" + productGroupID + "/" + subProductGroupID;
             },100);
         };
 
@@ -531,10 +567,12 @@ angular.module('ComparePrices.controllers', [])
 
     .controller('ProductsCtrl', function($scope, $stateParams, ComparePricesStorage, FindBestShops) {
 
-        $scope.myProductGroup = [];
-        $scope.productGroupID = $stateParams.productGroupID;
+        $scope.myProductGroup    = [];
+        $scope.productGroupID    = $stateParams.productGroupID;
+        $scope.subProductGroupID = $stateParams.subProductGroupID;
 
-        ComparePricesStorage.GetProductGroup($scope.productGroupID, function(result) {
+        // TODO: make as resolve?
+        ComparePricesStorage.GetProductGroup($scope.productGroupID, $scope.subProductGroupID, function(result) {
             $scope.$apply(function() {
                 $scope.myProductGroup = result.rows;
             });
