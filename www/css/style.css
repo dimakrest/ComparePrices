@@ -86,7 +86,6 @@ table.bottomBorder td { text-align:center; padding:3px;}
     -webkit-justify-content: center;
     width: 50%;
     height: 44px;
-    background-color: #DEDEDE;
 }
 
 .subFooterHalfButton.activated {
