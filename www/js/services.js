@@ -639,31 +639,30 @@ angular.module('ComparePrices.services', ['ngResource'])
                     cssClass: 'non-transparent-pop-up'
                 });
 
-//                $timeout(function() {
-//                    ionicMaterialInk.displayEffect();
-//                }, 0);
-
                 if (callback) {
                     alertPopup.then(callback);
                 }
             },
 
-            ConfirmationPopUp: function($scope, popUpTitle, popUpText) {
-//                $timeout(function() {
-//                    ionicMaterialInk.displayEffect();
-//                }, 0);
+            ConfirmationPopUp: function($scope, popUpTitle, popUpText, noButtonText, yesButtonText) {
 
+                if (typeof(noButtonText) == "undefined") {
+                    noButtonText = $scope.c.localize.strings['NoButton'];
+                }
+                if (typeof(yesButtonText) == "undefined") {
+                    yesButtonText = $scope.c.localize.strings['YesButton']
+                }
                 return $ionicPopup.confirm({
                     title: popUpTitle,
                     template: '<div style="text-align:right">' + popUpText + '</div>',
                     cssClass: 'non-transparent-pop-up',
                     buttons: [
-                        { text: $scope.c.localize.strings['NoButton'],
+                        { text: noButtonText,
                             onTap: function(e) {
                                 return false;
                             }
                         },
-                        { text: '<b>' + $scope.c.localize.strings['YesButton'] + '</b>',
+                        { text: '<b>' + yesButtonText + '</b>',
                             type: 'button-positive',
                             onTap: function(e) {
                                 return true
@@ -671,8 +670,42 @@ angular.module('ComparePrices.services', ['ngResource'])
                         }
                     ]
                 });
-            }
+            },
 
+            ConfirmationPopUpVerticalButtons: function($scope, popUpTitle, popUpText, noButtonText, yesButtonText) {
+
+                if (typeof(noButtonText) == "undefined") {
+                    noButtonText = $scope.c.localize.strings['NoButton'];
+                }
+                if (typeof(yesButtonText) == "undefined") {
+                    yesButtonText = $scope.c.localize.strings['YesButton']
+                }
+                var template;
+                if (popUpText == '') {
+                    template = ''
+                } else {
+                    template = '<div style="text-align:right">' + popUpText + '</div>';
+                }
+                return $ionicPopup.confirm({
+                    title: popUpTitle,
+                    template: template,
+                    cssClass: 'non-transparent-pop-up popup-vertical-buttons',
+                    buttons: [
+                        { text: '<b>' + noButtonText + '<b>',
+                            type: 'button-positive',
+                            onTap: function(e) {
+                                return false;
+                            }
+                        },
+                        { text: yesButtonText,
+
+                            onTap: function(e) {
+                                return true
+                            }
+                        }
+                    ]
+                });
+            }
         }
     }])
 
