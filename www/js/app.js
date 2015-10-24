@@ -57,8 +57,8 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                 }
                 localStorage.setItem('lastAddress', $scope.c.lastAddress);
                 var latLonKeys = Object.keys(place.geometry.location)
-                var myLat = place.geometry.location[latLonKeys[0]];
-                var myLon = place.geometry.location[latLonKeys[1]];
+                var myLat = place.geometry.location.lat();
+                var myLon = place.geometry.location.lng();
                 localStorage.setItem('Lat', myLat);
                 localStorage.setItem('Lon', myLon);
 
@@ -138,22 +138,6 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                         "InitPredefinedProducts": function (PrepareInfoForControllers)
                         {
                             return PrepareInfoForControllers.InitProductGroups();
-                        }}
-                }
-            }
-        })
-
-        .state('tabs.subProductGroups', {
-            url: "/productGroups/:productGroupID",
-            cache: false,
-            views: {
-                'tabProducts': {
-                    templateUrl: "templates/sub_product_groups.html",
-                    controller: 'SubProductGroupsCtrl',
-                    resolve: {
-                        "InitPredefinedProducts": function (PrepareInfoForControllers)
-                        {
-                            return PrepareInfoForControllers.InitSubProductGroupsPrivate();
                         }}
                 }
             }

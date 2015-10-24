@@ -467,7 +467,9 @@ angular.module('ComparePrices.services', ['ngResource'])
                     return response
                 },
 
-                GetAllProductGroups: function (success) {
+                GetAllProductGroups: function () {
+                    var defer = $q.defer();
+
                     var sqlQuery = 'SELECT * FROM tbProductGroups;';
                     var response = {};
                     response.rows = [];
@@ -477,15 +479,15 @@ angular.module('ComparePrices.services', ['ngResource'])
                             for (var i = 0; i < len; i++) {
                                 response.rows.push(rawresults.rows.item(i))
                             }
-                            if (success) {
-                                success(response)
-                            }
+                            defer.resolve(response);
                         });
                     });
-                    return response;
+                    return defer.promise;
                 },
 
                 GetAllSubProductGroups : function(success) {
+                    var defer = $q.defer();
+
                     var sqlQuery = 'SELECT * FROM tbSubProductGroups;';
                     var response = {};
                     response.rows = [];
@@ -495,12 +497,10 @@ angular.module('ComparePrices.services', ['ngResource'])
                             for (var i = 0; i < len; i++) {
                                 response.rows.push(rawresults.rows.item(i))
                             }
-                            if (success) {
-                                success(response)
-                            }
+                            defer.resolve(response);
                         });
                     });
-                    return response;
+                    return defer.promise;
                 },
 
                 UpdateCartsList: function (newCart) {
@@ -1262,7 +1262,6 @@ angular.module('ComparePrices.services', ['ngResource'])
         var _myCartID           = -1;
         var _myCart             = [];
         var _productGroupsInfo  = [];
-        var _subProductGroupsInfo = [];
 
         function MyCartsInitFirstTimeLoadPrivate(firstTimeLoad) {
             var defer = $q.defer();
@@ -1327,19 +1326,18 @@ angular.module('ComparePrices.services', ['ngResource'])
         function InitProductGroupsPrivate() {
             var defer = $q.defer();
 
-            ComparePricesStorage.GetAllProductGroups(function (result) {
-                _productGroupsInfo = result.rows;
-                defer.resolve();
-            });
-
-            return defer.promise;
-        }
-
-        function InitSubProductGroupsPrivate() {
-            var defer = $q.defer();
-
-            ComparePricesStorage.GetAllSubProductGroups(function (result) {
-                _subProductGroupsInfo = result.rows;
+            $q.all([ComparePricesStorage.GetAllProductGroups(), ComparePricesStorage.GetAllSubProductGroups()]).then(function(results) {
+                for (var groupID=0; groupID < results[0].rows.length; groupID++) {
+                    _productGroupsInfo[groupID] = results[0].rows[groupID];
+                    for (var subGroupsID=0; subGroupsID < results[1].rows.length; subGroupsID++) {
+                        if (results[1].rows[subGroupsID]['ProductGroupID'] == results[0].rows[groupID]['ProductGroupID']) {
+                            if (typeof(_productGroupsInfo[groupID]['SubGroups']) == "undefined") {
+                                _productGroupsInfo[groupID]['SubGroups'] = [];
+                            }
+                            _productGroupsInfo[groupID]['SubGroups'].push(results[1].rows[subGroupsID]);
+                        }
+                    }
+                }
                 defer.resolve();
             });
 
@@ -1363,11 +1361,7 @@ angular.module('ComparePrices.services', ['ngResource'])
             },
 
             InitProductGroups : function() {
-                return InitProductGroupsPrivate()
-            },
-
-            InitSubProductGroupsPrivate : function() {
-                return InitSubProductGroupsPrivate();
+                return InitProductGroupsPrivate();
             },
 
             GetUserCarts : function() {
@@ -1384,10 +1378,6 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             GetProductGroups : function() {
                 return _productGroupsInfo;
-            },
-
-            GetSubProductGroups : function() {
-                return _subProductGroupsInfo;
             }
         }
     }])
