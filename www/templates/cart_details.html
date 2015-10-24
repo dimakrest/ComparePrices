@@ -1,10 +1,11 @@
 <ion-view view-title={{::c.currentCartName}}>
-    <div style="justify-content: space-between; -webkit-justify-content: space-between;" class="bar bar-subheader item-input-inset effectSubHeader">
-        <div>
-            <span style="color: #ed474b; margin-left:10px;  padding:10px;"  ng-hide="myCart.length == 0" ng-click="ToggleDeleteValue()">{{::c.localize.strings['RemoveProducts']}}</span>
+    <div style="background-color: #DEDEDE;" class="bar bar-subheader item-input-inset effectSubHeader">
+        <div class="subFooterHalfButton" ng-hide="myCart.length == 0" ng-click="ToggleDeleteValue()">
+            <span style="color: #ed474b; padding:12px;">{{::c.localize.strings['RemoveProducts']}}</span>
         </div>
-        <div>
-            <span style="color: #5593B7; margin-right:10px; padding:10px;" ng-click="ShowFilterBar()">{{::c.localize.strings['AddProduct']}}</span>
+        <div style="height: 100%; border-left: 1px solid #B7B3B3;"></div>
+        <div class="subFooterHalfButton" ng-click="ShowFilterBar()">
+            <span style="color: #5593B7; padding:12px;">{{::c.localize.strings['AddProduct']}}</span>
         </div>
     </div>
 
