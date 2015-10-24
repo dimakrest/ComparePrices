@@ -508,59 +508,39 @@ angular.module('ComparePrices.controllers', [])
         };
     })
 
-    .controller('ProductGroupsCtrl', function($scope, ComparePricesStorage, PrepareInfoForControllers, ionicMaterialMotion, $ionicHistory) {
+    .controller('ProductGroupsCtrl', function($scope, $ionicScrollDelegate, ComparePricesStorage, PrepareInfoForControllers, ionicMaterialMotion, $ionicHistory) {
         $scope.c.showTipInProductGroups = localStorage.getItem('showTipInProductGroups') || 1;
         localStorage.setItem('showTipInProductGroups', 0);
 
-        $scope.c.productGroupsInfo = PrepareInfoForControllers.GetProductGroups();
+        $scope.productGroupsInfo    = PrepareInfoForControllers.GetProductGroups();
+        $scope.showSubPorductGroups = [];
 
-        $scope.OpenSubProductGroup = function(productGroupID) {
-            setTimeout(function()
-            {
-                $scope.c.productGroupsInfo.forEach(function(singleProductGroup) {
-                    if (singleProductGroup['ProductGroupID'] == productGroupID)
-                    {
-                        $scope.c.currentProductGroupName = singleProductGroup['ProductGroupName'];
-                    }
-                });
 
-                location.href="#/tab/productGroups/" + productGroupID
-            },100);
+        // 2 functions for toggling accordion in best_shops.html
+        $scope.ToggleDetails = function(groupID) {
+            if ($scope.IsDetailsShown(groupID)) {
+                $scope.showSubPorductGroups[groupID] = 0;
+            } else {
+                $scope.showSubPorductGroups[groupID] = 1;
+            }
+
+            // to fix the scrolling bug in producg groups modal
+            $ionicScrollDelegate.$getByHandle('productGroupsContent').freezeScroll(true);
+            setTimeout(function() {
+                $ionicScrollDelegate.$getByHandle('productGroupsContent').freezeScroll(false);
+                $ionicScrollDelegate.$getByHandle('productGroupsContent').resize();
+            }, 350);
         };
 
-        // based on https://github.com/djett41/ionic-filter-bar
-        $scope.ShowFilterBar = function () {
-            $ionicHistory.nextViewOptions({
-                disableAnimate: true
-            });
-            $scope.c.searchResultsStyle = 'productGroups';
-            setTimeout(function() {
-                location.href = '#/tab/searchBarProductGroups';
-            }, 100);
+        $scope.IsDetailsShown = function(groupID) {
+            return $scope.showSubPorductGroups[groupID] == 1;
         };
 
-        $scope.$on('$ionicView.afterEnter', function(){
-            setTimeout(function() {
-                ionicMaterialMotion.blinds();
-            }, 0);
-        });
-    })
-
-    .controller('SubProductGroupsCtrl', function($scope, ComparePricesStorage, PrepareInfoForControllers, ionicMaterialMotion, $ionicHistory) {
-
-        $scope.c.productSubGroupsInfo = PrepareInfoForControllers.GetSubProductGroups();
-
-        $scope.OpenSubProductGroupDetails = function(productGroupID, subProductGroupID) {
+        $scope.OpenSubGroupDetails = function(subProductGroup) {
             setTimeout(function()
             {
-                $scope.c.productGroupsInfo.forEach(function(singleProductGroup) {
-                    if (singleProductGroup['ProductGroupID'] == productGroupID)
-                    {
-                        $scope.c.currentProductGroupName = singleProductGroup['ProductGroupName'];
-                    }
-                });
-
-                location.href="#/tab/productGroups/" + productGroupID + "/" + subProductGroupID;
+                $scope.c.currentProductGroupName = subProductGroup['SubProductGroupName'];
+                location.href="#/tab/productGroups/" + subProductGroup['ProductGroupID'] + "/" + subProductGroup['SubProductGroupID'];
             },100);
         };
 

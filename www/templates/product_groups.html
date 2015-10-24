@@ -5,7 +5,7 @@
 </ion-header-bar>
 
 <ion-view view-title={{::c.localize.strings['CompareProductsTitle']}}>
-    <ion-content class="content-bg has-subheader" style="background-image: url('img/bg.png'); background-size: auto; background-repeat: repeat;">
+    <ion-content delegate-handle="productGroupsContent" class="content-bg has-subheader" style="background-image: url('img/bg.png'); background-size: auto; background-repeat: repeat;">
 
         <div ng-if="c.showTipInProductGroups == 1" style="width:94%; margin-left:3%; margin-top:3%; border: 3px dashed #ADADAD; border-radius: 30px; text-align:center; font-family: simpleHebrewFont; font-size: 16pt; color: #A2A2A2">
             <div style="margin-bottom:5px; margin-top:5px;"> {{::c.localize.strings['ProductHint1']}} <br>
@@ -21,12 +21,27 @@
                 {{::c.localize.strings['PredefinedProductGroups']}}
             </h1>
 
-            <a class="item item-avatar-right" ng-click="OpenSubProductGroup(productGroupInfo['ProductGroupID'])" ng-repeat="productGroupInfo in c.productGroupsInfo" style="height:72px">
-                <img ng-src={{productGroupInfo['ImageUrl']}}>
-                <i class="icon ion-chevron-left" style="float:left; padding-top: 10px;"></i>
-                <h2 style="text-align: right; padding-top:10px; white-space: pre-line;">{{productGroupInfo['ProductGroupName']}}</h2>
-            </a>
-        </div>
+            <div ng-repeat="productGroupInfo in productGroupsInfo track by $index" >
+                <a class="item item-avatar-right" ng-click="ToggleDetails(productGroupInfo['ProductGroupID'])" style="height:72px">
+                    <img ng-src={{productGroupInfo['ImageUrl']}}>
+                    <!--<i class="icon ion-chevron-left" style="float:left; padding-top: 10px;"></i>-->
+                    <!--<i class="icon" style="position: absolute; right: 30px; top: 80px;" ng-class="IsDetailsShown($index) ? 'ion-android-arrow-dropup-circle' : 'ion-android-arrow-dropdown-circle'"></i>-->
+                    <i class="icon" style="float:left; padding-top: 10px;" ng-class="IsDetailsShown(productGroupInfo['ProductGroupID']) ? 'ion-android-arrow-dropup-circle' : 'ion-android-arrow-dropdown-circle'"></i>
+                    <h2 style="text-align: right; padding-top:10px; white-space: pre-line;">{{productGroupInfo['ProductGroupName']}}</h2>
+                </a>
 
+                <ion-item class="item-accordion"
+                          ng-repeat="subProductGroup in productGroupInfo['SubGroups']"
+                          style="border-bottom: 2px solid #DDDDDD;"
+                          ng-show="IsDetailsShown(productGroupInfo['ProductGroupID'])"
+                          ng-click="OpenSubGroupDetails(subProductGroup)">
+                    <a class="item item-avatar-right">
+                        <img ng-src={{subProductGroup['ImageUrl']}}>
+                        <i class="icon ion-chevron-left" style="float:left; padding-top: 10px;"></i>
+                        <h2 style="text-align: right; padding-top:10px; white-space: pre-line;">{{subProductGroup['SubProductGroupName']}}</h2>
+                    </a>
+                </ion-item>
+            </div>
+        </div>
     </ion-content>
 </ion-view>
