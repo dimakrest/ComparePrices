@@ -14,9 +14,9 @@ table.bottomBorder td { text-align:center; padding:3px;}
 }
 
 .effectSubHeader{
-    -webkit-box-shadow: 0 4px 6px -3px #777;
-       -moz-box-shadow: 0 4px 6px -3px #777;
-            box-shadow: 0 4px 6px -3px #777;
+    -webkit-box-shadow: 0 4px 6px -3px #B7B3B3;
+       -moz-box-shadow: 0 4px 6px -3px #B7B3B3;
+            box-shadow: 0 4px 6px -3px #B7B3B3;
 }
 
 .effectFooter{
@@ -45,6 +45,28 @@ table.bottomBorder td { text-align:center; padding:3px;}
             box-shadow: 0 -3px 6px -2px #777;
 }
 
+.button.button-fab {
+    -moz-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+    -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+    z-index: 20;
+    border-radius: 50%;
+    border-radius: 50%;
+    overflow: hidden;
+    padding: 0;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+    -webkit-transition: 0.2s linear;
+    transition: 0.2s linear;
+    -webkit-transition-property: -webkit-transform, box-shadow;
+    transition-property: transform, box-shadow;
+    top: 14px;
+    right: auto;
+    bottom: auto;
+    left: 8px;
+    position: absolute;
+}
+
 .button.button-positive {
     border-color: #2F566D;
     background-color: #5593B7;
@@ -56,6 +78,19 @@ table.bottomBorder td { text-align:center; padding:3px;}
     width: 90%;
     margin-top: 5px;
     margin-left: 5%;
+}
+
+.subFooterHalfButton {
+    display: flex;
+    justify-content: center;
+    -webkit-justify-content: center;
+    width: 50%;
+    height: 44px;
+    background-color: #DEDEDE;
+}
+
+.subFooterHalfButton.activated {
+    background-color: #777;
 }
 
 .input-settings-address .item-input-wrapper #searchBar::-webkit-input-placeholder {
@@ -942,7 +977,7 @@ a {
     min-width: 44px;
     max-width: 48px;
     margin-bottom: 0;
-    max-height: 44px;
+    max-height: 48px;
     width: 48px; }
 
 .bar .title + .buttons.buttons-right {
