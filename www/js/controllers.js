@@ -383,8 +383,25 @@ angular.module('ComparePrices.controllers', [])
 
         $scope.c.HandleAddressIsNotSet = function() {
             var text  = $scope.c.localize.strings['ChooseYourAddressInSettings'];
-            PopUpFactory.ErrorPopUp($scope, text, function() {
-                $ionicSideMenuDelegate.toggleRight();
+            var title = $scope.c.localize.strings['ChooseYourAddressInSettings'];
+            var noButtonText    = $scope.c.localize.strings['CurrentLocationText'];
+            var yesButtonText   = $scope.c.localize.strings['AddrManualText'];
+            PopUpFactory.ConfirmationPopUpVerticalButtons($scope, title, '', yesButtonText, noButtonText).then(function(confirmed) {
+                if(confirmed) {
+                    $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
+                    UpdateStores.UpdateStoresInfoIfRequired($scope).then(function (isConnectedToInternet) {
+                        $scope.c.HideLoading();
+                        if (isConnectedToInternet) {
+                            localStorage.setItem('UseUsersCurrentLocation', $scope.c.useUsersCurrentLocation ? 1 : 0);
+                        } else {
+                            $scope.c.useUsersCurrentLocation = false;
+                            var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotFinishDownloadingAllStores'];
+                            PopUpFactory.ErrorPopUp($scope, popUpText);
+                        }
+                    });
+                } else {
+                    $ionicSideMenuDelegate.toggleRight();
+                }
             });
         };
 

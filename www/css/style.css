@@ -263,6 +263,17 @@ ion-popover-view.fit ion-content {
 }
 /* end of classes to implement number picker based on bootstrap css */
 
+
+.popup-vertical-buttons button
+{
+    min-width: 100%;
+    margin-bottom: 5px;
+}
+.popup-vertical-buttons .popup-buttons
+{
+    display: block;
+}
+
 .heb-select
 {
     -webkit-appearance: none;
