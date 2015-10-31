@@ -382,7 +382,6 @@ angular.module('ComparePrices.controllers', [])
         };
 
         $scope.c.HandleAddressIsNotSet = function() {
-            var text  = $scope.c.localize.strings['ChooseYourAddressInSettings'];
             var title = $scope.c.localize.strings['ChooseYourAddressInSettings'];
             var noButtonText    = $scope.c.localize.strings['CurrentLocationText'];
             var yesButtonText   = $scope.c.localize.strings['AddrManualText'];

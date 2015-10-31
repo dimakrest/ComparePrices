@@ -31,10 +31,11 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
             var autocomplete = new google.maps.places.Autocomplete(input);
             google.maps.event.addListener(autocomplete, 'place_changed', function () {
                 var place = autocomplete.getPlace();
+                // clear address field
+                document.getElementById('searchBar').value = '';
 
                 if (!place.geometry) {
-                    // TODO: chamge error message
-                    window.alert("Autocomplete's returned place contains no geometry");
+                    window.alert($scope.c.localize.strings['ErrorEnterAddressAgain']);
                     return;
                 }
 
@@ -56,7 +57,6 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                     $cordovaGoogleAnalytics.trackEvent('Settings', 'Change address', $scope.c.lastAddress, $scope.c.rangeForShops);
                 }
                 localStorage.setItem('lastAddress', $scope.c.lastAddress);
-                var latLonKeys = Object.keys(place.geometry.location)
                 var myLat = place.geometry.location.lat();
                 var myLon = place.geometry.location.lng();
                 localStorage.setItem('Lat', myLat);

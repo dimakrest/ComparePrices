@@ -34,7 +34,7 @@
         'Kilometer': "ק''מ",
         'BestShopsHeader': 'מחיר ל: ',
         'FindBestShop': 'לבדוק מחירים',
-        'ChooseYourAddressInSettings': 'קודם תבחר מיקומך',
+        'ChooseYourAddressInSettings': 'סביב איזה מיקום לחפש?',
         'Properties': 'מאפיינים',
         'Or': 'או',
         'CurrentAddress': 'כתובת נוכחית',
@@ -84,7 +84,8 @@
         'HowWeDoThisText5': '3. תבדקו את המחיר לפני כל יציאה לקניות, המחירים והמבצעים מתעדכנים ע"י הרשתות כל הזמן',
         'HowWeDoThisText6': '4. קבלו ניווט ע"י וייז לסופר שבחרתם',
         'HowWeDoThisText7': 'אפשר לבחור מקום שמסביבו אתם רוצים לבדוק את המחירים או פשוט להשתמש במיקום שלכם!',
-        'CurrentLocationText': 'השתמש במיקום הנוכחי',
+        'CurrentLocationText': 'מיקום הנוכחי',
+        'ErrorEnterAddressAgain': 'כתובת שגויה, נסה שנית',
         'AddrManualText': 'הכנס כתובת ידנית'
     }
 
