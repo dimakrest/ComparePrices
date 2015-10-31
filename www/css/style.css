@@ -2323,6 +2323,7 @@ tbody.collapse.in {
     -o-transition-property: height, visibility;
     transition-property: height, visibility;
 }
+/********************* Accordion CSSs *********************/
 
 
 @-webkit-keyframes rotate {
