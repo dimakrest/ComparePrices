@@ -21,7 +21,7 @@
             {{::c.localize.strings['PredefinedProductGroups']}}
         </h1>
 
-        <uib-accordion close-others="oneAtATime" ng-repeat="singleProductGroupInfo in tmpProductGroupInfo track by $index" ng-click="TestFunction($index)">
+        <uib-accordion close-others="oneAtATime" ng-repeat="singleProductGroupInfo in productGroupsInfo track by $index" ng-click="GroupWasClicked($index)">
             <uib-accordion-group heading={{singleProductGroupInfo['ProductGroupName']}} is-open="status.isFirstOpen" is-disabled="status.isFirstDisabled">
                 <uib-accordion close-others="oneAtATime">
                     <uib-accordion-group ng-repeat="singleSubGroup in singleProductGroupInfo['SubGroups']" heading={{singleSubGroup['SubProductGroupName']}}>
