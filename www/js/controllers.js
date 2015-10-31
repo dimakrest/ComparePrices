@@ -541,10 +541,10 @@ angular.module('ComparePrices.controllers', [])
                 }
             }
 
-            setTimeout(function() {
-                $ionicScrollDelegate.$getByHandle('productGroupsContent').freezeScroll(false);
-                $ionicScrollDelegate.$getByHandle('productGroupsContent').resize();
-            }, 350);
+//            setTimeout(function() {
+//                $ionicScrollDelegate.$getByHandle('productGroupsContent').freezeScroll(false);
+//                $ionicScrollDelegate.$getByHandle('productGroupsContent').resize();
+//            }, 350);
         };
 
         $scope.FindBestShop = function(productInfo) {

@@ -21,14 +21,15 @@
             {{::c.localize.strings['PredefinedProductGroups']}}
         </h1>
 
-        <uib-accordion close-others="oneAtATime" ng-repeat="singleProductGroupInfo in productGroupsInfo track by $index" ng-click="GroupWasClicked($index)">
-            <uib-accordion-group heading={{singleProductGroupInfo['ProductGroupName']}} is-open="status.isFirstOpen" is-disabled="status.isFirstDisabled">
-                <uib-accordion close-others="oneAtATime">
-                    <uib-accordion-group ng-repeat="singleSubGroup in singleProductGroupInfo['SubGroups']" heading={{singleSubGroup['SubProductGroupName']}}>
+        <uib-accordion ng-repeat="singleProductGroupInfo in productGroupsInfo track by $index" ng-click="GroupWasClicked($index)">
+            <uib-accordion-group image-url={{singleProductGroupInfo['ImageUrl']}} heading={{singleProductGroupInfo['ProductGroupName']}} is-open="status.isFirstOpen" is-disabled="status.isFirstDisabled">
+                <uib-accordion>
+                    <uib-accordion-group ng-repeat="singleSubGroup in singleProductGroupInfo['SubGroups']"
+                                         heading={{singleSubGroup['SubProductGroupName']}}
+                                         image-url={{singleSubGroup['ImageUrl']}}>
                         <div ng-repeat="singleProduct in singleSubGroup['Products']" class="card" ng-click="FindBestShop(singleProduct)">
                             <a class="item item-avatar-right">
                                 <img style="width: auto;" ng-src={{singleProduct['ImagePath']}}>
-                                <i class="icon ion-chevron-left" style="float:left; padding-top: 10px; padding-right: 10px;"></i>
                                 <h2  ng-style="{ 'padding-top': singleProduct.ItemName.length < 35 ? '10px' : '0px' }" style="text-align: right; white-space: pre-line;">{{singleProduct.ItemName}}</h2>
                             </a>
                         </div>
