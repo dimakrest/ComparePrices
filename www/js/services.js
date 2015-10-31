@@ -1259,7 +1259,9 @@ angular.module('ComparePrices.services', ['ngResource'])
         var _myCartsInfo        = [];
         var _myCartID           = -1;
         var _myCart             = [];
-        var _productGroupsInfo  = [];
+        var _productGroups       = [];
+        var _productSubGroups    = [];
+        var _productsInSubGroups = [];
 
         function MyCartsInitFirstTimeLoadPrivate(firstTimeLoad) {
             var defer = $q.defer();
@@ -1325,30 +1327,10 @@ angular.module('ComparePrices.services', ['ngResource'])
             var defer = $q.defer();
 
             $q.all([ComparePricesStorage.GetAllProductGroups(), ComparePricesStorage.GetAllSubProductGroups(), ComparePricesStorage.GetProductsInSubGroups()]).then(function(results) {
-                var groups              = results[0].rows;
-                var subGroups           = results[1].rows;
-                var productsInSubGroups = results[2].rows;
+                _productGroups       = results[0].rows;
+                _productSubGroups    = results[1].rows;
+                _productsInSubGroups = results[2].rows;
 
-                // TODO: some data rearagements, need to try to do this in SQL
-                for (var groupID=0; groupID < groups.length; groupID++) {
-                    _productGroupsInfo[groupID] = groups[groupID];
-                    for (var subGroupsID=0; subGroupsID < subGroups.length; subGroupsID++) {
-                        if (subGroups[subGroupsID]['ProductGroupID'] == groups[groupID]['ProductGroupID']) {
-                            if (typeof(_productGroupsInfo[groupID]['SubGroups']) == "undefined") {
-                                _productGroupsInfo[groupID]['SubGroups'] = [];
-                            }
-                            // found sub group, need to copy products
-                            subGroups[subGroupsID]['Products'] = [];
-                            for (var i=0; i < productsInSubGroups.length; i++) {
-                                if ((productsInSubGroups[i]['ProductGroupID'] == subGroups[subGroupsID]['ProductGroupID']) &&
-                                    (productsInSubGroups[i]['SubProductGroupID'] == subGroups[subGroupsID]['SubProductGroupID'])) {
-                                    subGroups[subGroupsID]['Products'].push(productsInSubGroups[i]);
-                                }
-                            }
-                            _productGroupsInfo[groupID]['SubGroups'].push(subGroups[subGroupsID]);
-                        }
-                    }
-                }
                 defer.resolve();
             });
 
@@ -1388,7 +1370,15 @@ angular.module('ComparePrices.services', ['ngResource'])
             },
 
             GetProductGroups : function() {
-                return _productGroupsInfo;
+                return _productGroups;
+            },
+
+            GetProductSubGroups : function() {
+                return _productSubGroups;
+            },
+
+            GetProductsInSubGroups : function() {
+                return _productsInSubGroups;
             }
         }
     }])

@@ -511,24 +511,40 @@ angular.module('ComparePrices.controllers', [])
         $scope.c.showTipInProductGroups = localStorage.getItem('showTipInProductGroups') || 1;
         localStorage.setItem('showTipInProductGroups', 0);
 
-
-        $scope.TestFunction = function(groupIndex) {
-            console.log("In test function " + groupIndex);
-            $scope.tmpProductGroupInfo[groupIndex]['SubGroups'] = $scope.productGroupsInfo[groupIndex]['SubGroups'];
-            setTimeout(function() {
-                $ionicScrollDelegate.$getByHandle('productGroupsContent').freezeScroll(false);
-                $ionicScrollDelegate.$getByHandle('productGroupsContent').resize();
-            }, 350);
-        }
-
         $scope.productGroupsInfo    = PrepareInfoForControllers.GetProductGroups();
-        $scope.tmpProductGroupInfo  = [];
-        for (var i=0; i < $scope.productGroupsInfo.length; i++) {
-            var productGroup = {ImageUrl : $scope.productGroupsInfo[i]['ImageUrl'],
-                                ProductGroupID : $scope.productGroupsInfo[i]['ProductGroupID'],
-                                ProductGroupName: $scope.productGroupsInfo[i]['ProductGroupName']};
-            $scope.tmpProductGroupInfo.push(productGroup);
-        }
+        // Add sub groups to groups, if I do it without timeout it takes a lot of time to load the page
+        setTimeout(function() {
+            var productSubGroups = PrepareInfoForControllers.GetProductSubGroups();
+            for (var groupID=0; groupID < $scope.productGroupsInfo.length; groupID++) {
+                $scope.productGroupsInfo[groupID]['SubGroups'] = [];
+                for (var subGroupsID=0; subGroupsID < productSubGroups.length; subGroupsID++) {
+                    if (productSubGroups[subGroupsID]['ProductGroupID'] == $scope.productGroupsInfo[groupID]['ProductGroupID']) {
+                        $scope.productGroupsInfo[groupID]['SubGroups'].push(productSubGroups[subGroupsID]);
+                    }
+                }
+            }
+        }, 100);
+
+        // if group is clicked. need to add all products to sub groups
+        $scope.GroupWasClicked = function(groupIndex) {
+            var productsInSubGroups = PrepareInfoForControllers.GetProductsInSubGroups();
+            var numOfSubGroups = $scope.productGroupsInfo[groupIndex]['SubGroups'].length;
+            for (var subGroupsID=0; subGroupsID < numOfSubGroups; subGroupsID++) {
+                // found sub group, need to copy products
+                $scope.productGroupsInfo[groupIndex]['SubGroups'][subGroupsID]['Products'] = [];
+                for (var i=0; i < productsInSubGroups.length; i++) {
+                    if ((productsInSubGroups[i]['ProductGroupID'] == $scope.productGroupsInfo[groupIndex]['ProductGroupID']) &&
+                        (productsInSubGroups[i]['SubProductGroupID'] == $scope.productGroupsInfo[groupIndex]['SubGroups'][subGroupsID]['SubProductGroupID'])) {
+                        $scope.productGroupsInfo[groupIndex]['SubGroups'][subGroupsID]['Products'].push(productsInSubGroups[i]);
+                    }
+                }
+            }
+
+//            setTimeout(function() {
+//                $ionicScrollDelegate.$getByHandle('productGroupsContent').freezeScroll(false);
+//                $ionicScrollDelegate.$getByHandle('productGroupsContent').resize();
+//            }, 350);
+        };
 
         $scope.FindBestShop = function(productInfo) {
             if ($scope.c.lastAddress == '')

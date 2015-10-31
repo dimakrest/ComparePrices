@@ -51,9 +51,7 @@ angular.module('ui.bootstrap.accordion', ['ui.bootstrap.collapse'])
             controller: 'UibAccordionController',
             controllerAs: 'accordion',
             transclude: true,
-            templateUrl: function(element, attrs) {
-                return attrs.templateUrl || 'templates/accordion/accordion.html';
-            }
+            templateUrl: 'templates/accordion/accordion.html'
         };
     })
 
@@ -63,11 +61,10 @@ angular.module('ui.bootstrap.accordion', ['ui.bootstrap.collapse'])
             require: '^uibAccordion',         // We need this directive to be inside an accordion
             transclude: true,              // It transcludes the contents of the directive into the template
             replace: true,                // The element containing the directive will be replaced with the template
-            templateUrl: function(element, attrs) {
-                return attrs.templateUrl || 'templates/accordion/accordion-group.html';
-            },
+            templateUrl: 'templates/accordion/accordion-group.html',
             scope: {
                 heading: '@',               // Interpolate the heading attribute onto this scope
+                imageUrl: '@',
                 isOpen: '=?',
                 isDisabled: '=?'
             },
