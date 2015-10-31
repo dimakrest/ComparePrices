@@ -400,27 +400,25 @@ angular.module('ComparePrices.services', ['ngResource'])
                     return response;
                 },
 
-                GetProductGroup: function (productGroupID, subProductGroupID, success, error) {
+                GetProductsInSubGroups: function () {
+                    var defer = $q.defer();
+
                     var response = {};
                     response.rows = [];
                     db.transaction(function (tx) {
-                        tx.executeSql('SELECT tbProducts.ItemCode AS ItemCode, ' +
-                            'tbProducts.ItemName AS ItemName,' +
-                            'tbProducts.ImagePath AS ImagePath ' +
-                            'FROM tbProducts JOIN tbProductsInProductGroups ON tbProducts.ItemCode=tbProductsInProductGroups.ItemCode ' +
-                            'WHERE tbProductsInProductGroups.ProductGroupID = ' + productGroupID + ' AND tbProductsInProductGroups.SubProductGroupID=' + subProductGroupID, [], function (tx, rawresults) {
+                        tx.executeSql('SELECT tbProducts.ItemCode AS ItemCode, tbProducts.ItemName AS ItemName, tbProducts.ImagePath AS ImagePath, ' +
+                            'tbProductsInProductGroups.ProductGroupID AS ProductGroupID, tbProductsInProductGroups.SubProductGroupID AS SubProductGroupID ' +
+                            'FROM tbProducts JOIN tbProductsInProductGroups ON tbProducts.ItemCode=tbProductsInProductGroups.ItemCode', [], function (tx, rawresults) {
                             var len = rawresults.rows.length;
                             for (var i = 0; i < len; i++) {
                                 // Amount is changed in the cart, so I have to make a copy,
                                 // otherwise it doesn't work in Safari. The properties are immutable.
                                 response.rows.push(angular.copy(rawresults.rows.item(i)));
                             }
-                            if (success) {
-                                success(response);
-                            }
+                            defer.resolve(response)
                         });
                     }, errorCB, successCB);
-                    return response;
+                    return defer.promise;
                 },
 
                 // 1) get all shops in radius
@@ -1326,15 +1324,28 @@ angular.module('ComparePrices.services', ['ngResource'])
         function InitProductGroupsPrivate() {
             var defer = $q.defer();
 
-            $q.all([ComparePricesStorage.GetAllProductGroups(), ComparePricesStorage.GetAllSubProductGroups()]).then(function(results) {
-                for (var groupID=0; groupID < results[0].rows.length; groupID++) {
-                    _productGroupsInfo[groupID] = results[0].rows[groupID];
-                    for (var subGroupsID=0; subGroupsID < results[1].rows.length; subGroupsID++) {
-                        if (results[1].rows[subGroupsID]['ProductGroupID'] == results[0].rows[groupID]['ProductGroupID']) {
+            $q.all([ComparePricesStorage.GetAllProductGroups(), ComparePricesStorage.GetAllSubProductGroups(), ComparePricesStorage.GetProductsInSubGroups()]).then(function(results) {
+                var groups              = results[0].rows;
+                var subGroups           = results[1].rows;
+                var productsInSubGroups = results[2].rows;
+
+                // TODO: some data rearagements, need to try to do this in SQL
+                for (var groupID=0; groupID < groups.length; groupID++) {
+                    _productGroupsInfo[groupID] = groups[groupID];
+                    for (var subGroupsID=0; subGroupsID < subGroups.length; subGroupsID++) {
+                        if (subGroups[subGroupsID]['ProductGroupID'] == groups[groupID]['ProductGroupID']) {
                             if (typeof(_productGroupsInfo[groupID]['SubGroups']) == "undefined") {
                                 _productGroupsInfo[groupID]['SubGroups'] = [];
                             }
-                            _productGroupsInfo[groupID]['SubGroups'].push(results[1].rows[subGroupsID]);
+                            // found sub group, need to copy products
+                            subGroups[subGroupsID]['Products'] = [];
+                            for (var i=0; i < productsInSubGroups.length; i++) {
+                                if ((productsInSubGroups[i]['ProductGroupID'] == subGroups[subGroupsID]['ProductGroupID']) &&
+                                    (productsInSubGroups[i]['SubProductGroupID'] == subGroups[subGroupsID]['SubProductGroupID'])) {
+                                    subGroups[subGroupsID]['Products'].push(productsInSubGroups[i]);
+                                }
+                            }
+                            _productGroupsInfo[groupID]['SubGroups'].push(subGroups[subGroupsID]);
                         }
                     }
                 }

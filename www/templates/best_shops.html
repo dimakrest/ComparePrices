@@ -11,7 +11,7 @@
         <!--<button class="button button-icon icon ion-ios-upload-outline light" ng-click="c.ShareCartAndShopDetails()"></button>-->
     </ion-header-bar>
 
-    <ion-content class="content-bg" delegate-handle="modalContent" style="background-image: url('img/bg.png'); background-size: auto; background-repeat: repeat;">
+    <ion-content has-bouncing="true" class="content-bg" delegate-handle="modalContent" style="background-image: url('img/bg.png'); background-size: auto; background-repeat: repeat;">
 
         <ion-item style="text-align:right; background-color: #f9ffde;" ng-show="c.missingProducts.length > 0" ng-click="openPopover($event)">
             <i class="icon ion-information-circled" style="position: absolute; left: 20px;"></i>

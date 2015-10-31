@@ -508,40 +508,39 @@ angular.module('ComparePrices.controllers', [])
         };
     })
 
-    .controller('ProductGroupsCtrl', function($scope, $ionicScrollDelegate, ComparePricesStorage, PrepareInfoForControllers, ionicMaterialMotion, $ionicHistory) {
+    .controller('ProductGroupsCtrl', function($scope, $ionicScrollDelegate, ComparePricesStorage, FindBestShops, PrepareInfoForControllers, ionicMaterialMotion, $ionicHistory) {
         $scope.c.showTipInProductGroups = localStorage.getItem('showTipInProductGroups') || 1;
         localStorage.setItem('showTipInProductGroups', 0);
 
-        $scope.productGroupsInfo    = PrepareInfoForControllers.GetProductGroups();
-        $scope.showSubPorductGroups = [];
 
-
-        // 2 functions for toggling accordion in best_shops.html
-        $scope.ToggleDetails = function(groupID) {
-            if ($scope.IsDetailsShown(groupID)) {
-                $scope.showSubPorductGroups[groupID] = 0;
-            } else {
-                $scope.showSubPorductGroups[groupID] = 1;
-            }
-
-            // to fix the scrolling bug in producg groups modal
-            $ionicScrollDelegate.$getByHandle('productGroupsContent').freezeScroll(true);
+        $scope.TestFunction = function(groupIndex) {
+            console.log("In test function " + groupIndex);
+            $scope.tmpProductGroupInfo[groupIndex]['SubGroups'] = $scope.productGroupsInfo[groupIndex]['SubGroups'];
             setTimeout(function() {
                 $ionicScrollDelegate.$getByHandle('productGroupsContent').freezeScroll(false);
                 $ionicScrollDelegate.$getByHandle('productGroupsContent').resize();
             }, 350);
-        };
+        }
 
-        $scope.IsDetailsShown = function(groupID) {
-            return $scope.showSubPorductGroups[groupID] == 1;
-        };
+        $scope.productGroupsInfo    = PrepareInfoForControllers.GetProductGroups();
+        $scope.tmpProductGroupInfo  = [];
+        for (var i=0; i < $scope.productGroupsInfo.length; i++) {
+            var productGroup = {ImageUrl : $scope.productGroupsInfo[i]['ImageUrl'],
+                                ProductGroupID : $scope.productGroupsInfo[i]['ProductGroupID'],
+                                ProductGroupName: $scope.productGroupsInfo[i]['ProductGroupName']};
+            $scope.tmpProductGroupInfo.push(productGroup);
+        }
 
-        $scope.OpenSubGroupDetails = function(subProductGroup) {
-            setTimeout(function()
+        $scope.FindBestShop = function(productInfo) {
+            if ($scope.c.lastAddress == '')
             {
-                $scope.c.currentProductGroupName = subProductGroup['SubProductGroupName'];
-                location.href="#/tab/productGroups/" + subProductGroup['ProductGroupID'] + "/" + subProductGroup['SubProductGroupID'];
-            },100);
+                $scope.c.HandleAddressIsNotSet();
+            }
+            else
+            {
+                productInfo['Amount'] = 1;
+                FindBestShops($scope, [productInfo]);
+            }
         };
 
         // based on https://github.com/djett41/ionic-filter-bar
@@ -560,41 +559,6 @@ angular.module('ComparePrices.controllers', [])
                 ionicMaterialMotion.blinds();
             }, 0);
         });
-    })
-
-    .controller('ProductsCtrl', function($scope, $stateParams, ComparePricesStorage, FindBestShops) {
-
-        $scope.myProductGroup    = [];
-        $scope.productGroupID    = $stateParams.productGroupID;
-        $scope.subProductGroupID = $stateParams.subProductGroupID;
-
-        // TODO: make as resolve?
-        ComparePricesStorage.GetProductGroup($scope.productGroupID, $scope.subProductGroupID, function(result) {
-            $scope.$apply(function() {
-                $scope.myProductGroup = result.rows;
-            });
-        });
-
-        $scope.FindBestShop = function(productID) {
-            if ($scope.c.lastAddress == '')
-            {
-                $scope.c.HandleAddressIsNotSet();
-            }
-            else
-            {
-                var structForFindBestShop = [];
-                for (var i=0; i < $scope.myProductGroup.length; i++) {
-                    if ($scope.myProductGroup[i]['ItemCode'] == productID) {
-                        structForFindBestShop['ItemCode'] = $scope.myProductGroup[i]['ItemCode'];
-                        structForFindBestShop['ItemName'] = $scope.myProductGroup[i]['ItemName'];
-                        structForFindBestShop['ImagePath'] = $scope.myProductGroup[i]['ImagePath'];
-                        structForFindBestShop['Amount'] = 1;
-                        break;
-                    }
-                }
-                FindBestShops($scope, [structForFindBestShop]);
-            }
-        };
     })
 
     .controller('MyCartsCtrl', function($scope, $timeout, $ionicPopup, PopUpFactory, ComparePricesStorage, ComparePricesConstants, PrepareInfoForControllers, ionicMaterialMotion) {
