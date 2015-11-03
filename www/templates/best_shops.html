@@ -3,7 +3,7 @@
         <button class="button button-icon icon ion-ios-close-empty light" ng-click="modal.close()"></button>
         <div style="text-align:right; white-space: normal;" class="h1 title light">
             {{::c.localize.strings['BestShopsHeader']}}
-            <span ng-show="(c.shopsNearThatHaveNeededProducts[0].Products.length == 1)">{{c.comparedProducts[c.shopsNearThatHaveNeededProducts[0].Products[0].ItemCode].Name}}</span>
+            <span ng-show="(c.shopsNearThatHaveNeededProducts[0].Products.length == 1)">{{::c.comparedProducts[c.shopsNearThatHaveNeededProducts[0].Products[0].ItemCode].Name}}</span>
             <span ng-show="(c.shopsNearThatHaveNeededProducts[0].Products.length > 1)">{{::c.currentCartName}}</span>
 
         </div>
@@ -28,11 +28,11 @@
 
         <div ng-repeat="shop in c.shopsNearThatHaveNeededProducts track by $index" ng-init="parentIndex = $index">
             <div class="item item-avatar-right"
-                      ng-click="(shop.Products.length == 1) || ToggleDetails($index)"
+                      ng-click="(shop.ProductsToShowInAccordion.length == 1) || ToggleDetails($index)"
                       ng-class="{active: IsDetailsShown($index)}"
                       style="padding-top: 10px; padding-bottom: 10px; background-color: white; border-bottom-width: 2px;"> <!-- display: flex; justify-content: space-between; -webkit-justify-content: space-between;  -->
                 <img ng-src={{shop['BrandImage']}}>
-                <i ng-show="shop.Products.length > 1" class="icon" style="position: absolute; right: 30px; top: 80px;" ng-class="IsDetailsShown($index) ? 'ion-android-arrow-dropup-circle' : 'ion-android-arrow-dropdown-circle'"></i>
+                <i ng-show="shop.ProductsToShowInAccordion.length > 1" class="icon" style="position: absolute; right: 30px; top: 80px;" ng-class="IsDetailsShown($index) ? 'ion-android-arrow-dropup-circle' : 'ion-android-arrow-dropdown-circle'"></i>
 
                 <div ng-show="shop['Distance'] != 0" style="margin-left: -10px; margin-right: 5px; max-width: 104px; float:left">
                     <div style="width: 104px; height: 47px" ng-click="c.OpenWaze(shop['Lat'], shop['Lon']); $event.stopPropagation()">
@@ -48,7 +48,7 @@
                             </td>
                             <td style="text-align:right;">
                                 <h4>
-                                    {{c.localize.strings['Kilometer']}}
+                                    {{::c.localize.strings['Kilometer']}}
                                 </h4>
                             </td>
                             <td style="text-align:left;">
@@ -61,17 +61,17 @@
                 </div>
                 <div ng-show="shop['Distance'] == 0" style="margin-left: 10px; margin-right: 5px; max-width: 104px; float:left">
                     <h3>
-                        {{c.localize.strings['OnlineShop']}}
+                        {{::c.localize.strings['OnlineShop']}}
                     </h3>
                 </div>
 
                 <div style="text-align:right; margin-top:20px; float:right; max-width:120px;">
                     <div>
                         <h3>{{shop["BrandNameHeb"]}}</h3>
-                        <h2 style="white-space: pre-line; color: {{shop['PriceColor']}}">{{c.localize.strings['CurrencySign']}}{{c.localize.strings['PriceInStore']}} {{shop["CartPrice"]}}</h2>
+                        <h2 style="white-space: pre-line; color: {{shop['PriceColor']}}">{{::c.localize.strings['CurrencySign']}}{{::c.localize.strings['PriceInStore']}} {{shop["CartPrice"]}}</h2>
                         <h2 style="white-space: pre-line; color: {{shop['PriceColor']}}">{{shop["PercentsToShowNearPrice"]}}</h2>
-                        <h4 ng-show="shop['Distance'] != 0" style="white-space: pre-line;">{{c.localize.strings['StoreAddress']}} {{shop["City"]}}, {{shop["Address"]}}</h4>
-                        <h4 ng-show="shop['Distance'] == 0" style="white-space: pre-line;">{{c.localize.strings['StoreAddress']}} {{shop["Address"]}}</h4>
+                        <h4 ng-show="shop['Distance'] != 0" style="white-space: pre-line;">{{::c.localize.strings['StoreAddress']}} {{shop["City"]}}, {{shop["Address"]}}</h4>
+                        <h4 ng-show="shop['Distance'] == 0" style="white-space: pre-line;">{{::c.localize.strings['StoreAddress']}} {{shop["Address"]}}</h4>
                     </div>
                 </div>
             </div>
@@ -81,35 +81,35 @@
                       style="border-bottom: 2px solid #DDDDDD"
                       ng-style="{'background-color': product.Type == 'Regular' ? 'white' : (product.Type == 'DiscountS' || product.Type == 'DiscountM' ? '#E1FFE0' : '#FFD7DA')}"
                       ng-show="(shop.ProductsToShowInAccordion.length > 1) && IsDetailsShown(parentIndex)">
-                <div ng-show="product.Type == 'Regular'">
-                    <h2 style="text-align:right">{{c.comparedProducts[product.ItemCode].Name}}</h2>
+                <div ng-show="::product.Type == 'Regular'">
+                    <h2 style="text-align:right">{{::c.comparedProducts[product.ItemCode].Name}}</h2>
                     <h2 style="text-align:left; color:green; padding-top: 6px;">
                         {{::c.localize.strings['CurrencySign']}}{{product.Amount * product.ItemPrice | number : 2}}
-                        <span ng-hide="product.Amount == 1"> = {{product.Amount}} * {{::c.localize.strings['CurrencySign']}}{{product.ItemPrice * 1 | number : 2}}</span>
+                        <span ng-hide="product.Amount == 1"> = {{::product.Amount}} * {{::c.localize.strings['CurrencySign']}}{{product.ItemPrice * 1 | number : 2}}</span>
                     </h2>
                 </div>
-                <div ng-show="product.Type == 'DiscountS'">
-                    <h2 style="text-align:right">{{c.comparedProducts[product.ItemCode].Name}}</h2>
+                <div ng-show="::product.Type == 'DiscountS'">
+                    <h2 style="text-align:right">{{::c.comparedProducts[product.ItemCode].Name}}</h2>
                     <h2 style="padding-top: 6px;">
                         <span style="text-align:left; color:green;">{{::c.localize.strings['CurrencySign']}}{{product.Amount * product.ItemPrice | number : 2}}
-                        <span ng-hide="product.Amount == 1"> = {{product.Amount}} * {{::c.localize.strings['CurrencySign']}}{{product.ItemPrice * 1 | number : 2}}</span></span>
-                        <span style="float: right; font-style: italic;">{{product.DiscountText}}</span>
+                        <span ng-hide="product.Amount == 1"> = {{::product.Amount}} * {{::c.localize.strings['CurrencySign']}}{{product.ItemPrice * 1 | number : 2}}</span></span>
+                        <span style="float: right; font-style: italic;">{{::product.DiscountText}}</span>
                     </h2>
                 </div>
-                <div ng-show="product.Type == 'DiscountM'">
-                    <h2 style="text-align:right">{{c.comparedProducts[product.ItemCode].Name}}</h2>
+                <div ng-show="::product.Type == 'DiscountM'">
+                    <h2 style="text-align:right">{{::c.comparedProducts[product.ItemCode].Name}}</h2>
                     <h2 style="padding-top: 6px;">
                         <span style="text-align:left; color:green;">{{::c.localize.strings['CurrencySign']}}{{product.Amount * product.ItemPrice | number : 2}}</span>
-                        <span style="text-align:left; color:green;"> = {{product.DiscountAmount}} * {{::c.localize.strings['CurrencySign']}}{{product.Amount * product.ItemPrice / product.DiscountAmount | number : 2}}</span></span>
-                        <span style="float: right; font-style: italic;">{{product.DiscountText}}</span>
+                        <span style="text-align:left; color:green;"> = {{::product.DiscountAmount}} * {{::c.localize.strings['CurrencySign']}}{{product.Amount * product.ItemPrice / product.DiscountAmount | number : 2}}</span></span>
+                        <span style="float: right; font-style: italic;">{{::product.DiscountText}}</span>
                     </h2>
                 </div>
-                <div ng-show="product.Type == 'NotEnoughForDiscount'">
-                    <h2 style="text-align:right">{{c.comparedProducts[product.ItemCode].Name}}</h2>
+                <div ng-show="::product.Type == 'NotEnoughForDiscount'">
+                    <h2 style="text-align:right">{{::c.comparedProducts[product.ItemCode].Name}}</h2>
                     <h2 style="padding-top: 6px;">
                         <span style="text-align:left; color:green;">{{::c.localize.strings['CurrencySign']}}{{product.Amount * product.ItemPrice | number : 2}}
-                        <span ng-hide="product.Amount == 1"> = {{product.Amount}} * {{::c.localize.strings['CurrencySign']}}{{product.ItemPrice * 1 | number : 2}}</span></span>
-                        <span style="float: right; font-style: italic;">{{product.DiscountText}}</span>
+                        <span ng-hide="product.Amount == 1"> = {{::product.Amount}} * {{::c.localize.strings['CurrencySign']}}{{product.ItemPrice * 1 | number : 2}}</span></span>
+                        <span style="float: right; font-style: italic;">{{::product.DiscountText}}</span>
                     </h2>
                 </div>
             </div>
