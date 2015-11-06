@@ -19,13 +19,12 @@
                 </a>
             </div>
 
-            <div ng-if=!c.hasUserCarts style="width:94%; margin-left:3%; margin-top:3%; border: 3px dashed #ADADAD; border-radius: 30px; text-align:center; font-family: simpleHebrewFont; font-size: 16pt; color: #A2A2A2">
-                    <div style="margin-bottom:5px; margin-top:5px;"> {{::c.localize.strings['CartHint1']}} <br>
-                        {{::c.localize.strings['CartHint2']}} <br>
-                        {{::c.localize.strings['CartHint3']}} <br>
+            <div ng-if=!c.hasUserCarts style="width:94%; margin-left:3%; margin-top:3%; border: 3px dashed #ADADAD; border-radius: 20px; text-align:center; font-family: simpleHebrewFont; font-size: 16pt; color: #A2A2A2">
+                    <div style="margin-bottom:5px; margin-top:5px;">
+                        <i class="icon ion-plus-circled" style="color:#D87477;"></i>
+                        {{::c.localize.strings['CartHint1']}} <br>
                         {{::c.localize.strings['Or']}} <br>
-                        {{::c.localize.strings['CartHint4']}} <br>
-                        {{::c.localize.strings['CartHint5']}}
+                        {{::c.localize.strings['CartHint2']}}
                     </div>
             </div>
 

@@ -6,15 +6,10 @@
     document.localize = {};
 
     var heb = {
-        'CartHint1': 'לבדיקת המחיר',
-        'CartHint2': 'תיצור סל חדש',
-        'CartHint3': '(+ לחץ על)',
-        'CartHint4': 'תבחר מתוך',
-        'CartHint5': 'סלים לדוגמא',
-        'ProductHint1': 'לבדיקת המחיר',
-        'ProductHint2': 'חפש מוצר',
-        'ProductHint3': 'תבחר מתוך',
-        'ProductHint4': 'מוצרים הפופולריים',
+        'CartHint1': 'צור סל ',
+        'CartHint2': 'בחר מתוך סלים לדוגמא',
+        'ProductHint1': 'חיפוש לפי שם ',
+        'ProductHint2': 'חיפוש במוצרים פופולריים',
         'Amount': 'כמות:',
         'AddressPlaceHolder': 'הכנס כתובת',
         'SearchQueryCartDetailsPlaceholder': "הקלד שם מוצר או מק''ט",
