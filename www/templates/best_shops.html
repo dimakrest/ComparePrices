@@ -13,9 +13,9 @@
 
     <ion-content has-bouncing="true" class="content-bg" delegate-handle="modalContent" style="background-image: url('img/bg.png'); background-size: auto; background-repeat: repeat;">
 
-        <ion-item style="text-align:right; background-color: #f9ffde;" ng-show="c.missingProducts.length > 0" ng-click="openPopover($event)">
-            <i class="icon ion-information-circled" style="position: absolute; left: 20px;"></i>
+        <ion-item style="direction: rtl; text-align:left; background-color: #FF8C83;" ng-show="c.missingProducts.length > 0" ng-click="openPopover($event)">
             {{::c.localize.strings['DontHaveAllProducts']}}
+            <i class="icon ion-information-circled" style="position: absolute; right: 20px;"></i>
         </ion-item>
 
         <div style="display: flex; margin-top: 7px; margin-bottom: 7px; flex-direction: row-reverse;">
