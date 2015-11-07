@@ -8,7 +8,7 @@
 <ion-view view-title={{::c.localize.strings['CompareProductsTitle']}}>
     <ion-content delegate-handle="productGroupsContent" has-bouncing="true" class="content-bg has-subheader" style="background-image: url('img/bg.png'); background-size: auto; background-repeat: repeat">
 
-        <div ng-if="c.showTipInProductGroups != 1" style="width:94%; margin-left:3%; margin-top:3%; border: 3px dashed #ADADAD; border-radius: 20px; text-align:center; font-family: simpleHebrewFont; margin-bottom: 8px; font-size: 16pt; color: #A2A2A2">
+        <div ng-if="c.showTipInProductGroups == 1" style="width:94%; margin-left:3%; margin-top:3%; border: 3px dashed #ADADAD; border-radius: 20px; text-align:center; font-family: simpleHebrewFont; margin-bottom: 8px; font-size: 16pt; color: #A2A2A2">
             <div style="margin-bottom:5px; margin-top:5px;">
             <i class="icon ion-arrow-up-c" style="color:#ADADAD;"></i> {{::c.localize.strings['ProductHint1']}} <br>
             {{::c.localize.strings['Or']}} <br>
