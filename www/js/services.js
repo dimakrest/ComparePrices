@@ -1006,7 +1006,17 @@ angular.module('ComparePrices.services', ['ngResource'])
             });
         }
 
-        return function($scope, productsToCalculatePrice) {
+        return function($scope, fullProductsToCalculatePrice) {
+            var productsToCalculatePrice = [];
+            // need to remove products with 0 amount
+            var numOfProducts = fullProductsToCalculatePrice.length;
+            for (var i=0; i < numOfProducts; i++) {
+                if (fullProductsToCalculatePrice[i]['Amount'] == 0) {
+                    continue;
+                }
+                productsToCalculatePrice.push(fullProductsToCalculatePrice[i]);
+            }
+            
             $scope.c.shopsNearThatHaveNeededProducts = [];
             // user closed the app before all tables were created
             var updateStoreInfoCompleted = localStorage.getItem('UpdateStoreInfoCompleted');
@@ -1165,7 +1175,7 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
     }])
 
-    .factory('SortShops', [ function() {
+    .factory('SortShops', ['ComparePricesConstants', function(ComparePricesConstants) {
         function dynamicSort(property) {
             var sortOrder = 1;
             if(property[0] === "-") {
@@ -1239,7 +1249,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                             totalShops++;
                         }
                         else {
-                            if (shopsOfSpecificBrand[brandName] < $scope.c.maxShopsOfTheSameBrand) {
+                            if (shopsOfSpecificBrand[brandName] < ComparePricesConstants.DEFAULT_MAX_SHOPS_OF_THE_SAME_BRAND) {
                                 shopsOfSpecificBrand[brandName]++;
                                 $scope.c.shopsNearThatHaveNeededProducts.push(suitableShops[i]);
                                 totalShops++;

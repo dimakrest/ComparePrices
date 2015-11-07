@@ -39,7 +39,6 @@
         'UpdatingListOfStores': '... מעדכן את רשימת החנויות',
         'LookingForBestShop': 'מחפש את החנות הזולה',
         'MaxShopsToShow': 'כמה חנויות להציג בהשוואה: ',
-        'MaxShopsOfTheSameBrand': 'כמה חנויות מכל רשת להציג בהשוואה: ',
         'ToggleMyLocation': 'שימוש במיקום הנוכחי',
         'DistanceToShop': 'חפש חנויות במרחק: ',
         'CancelSearch': 'ביטול',
