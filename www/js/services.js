@@ -1015,39 +1015,44 @@ angular.module('ComparePrices.services', ['ngResource'])
                 productsToCalculatePrice.push(fullProductsToCalculatePrice[i]);
             }
 
-            $scope.c.shopsNearThatHaveNeededProducts = [];
-            // user closed the app before all tables were created
-            var updateStoreInfoCompleted = localStorage.getItem('UpdateStoreInfoCompleted');
-            if (updateStoreInfoCompleted == "0") {
-                // Need to check for internet connection
-                if (!MiscFunctions.IsConnectedToInternet()) {
-                    var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotUpdateStoresInRange'];
-                    PopUpFactory.ErrorPopUp($scope, popUpText);
-                } else {
-                    $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
-                    var myLat = localStorage.getItem('Lat');
-                    var myLon = localStorage.getItem('Lon');
-                    UpdateStores.UpdateStoresInfo($scope, myLat, myLon, $scope.c.rangeForShops).then(function () {
-                        $scope.c.HideLoading();
-                        FindBestShopPrivate($scope, productsToCalculatePrice);
-                    });
-                }
+            if (productsToCalculatePrice.length == 0) {
+                var popUpText = $scope.c.localize.strings['NoProductsInCart'];
+                PopUpFactory.ErrorPopUp($scope, popUpText);
             } else {
-                // if user wants to use his current location, need to check if his location changed
-                var newStoresVersionExists = localStorage.getItem('newStoresVersionExists') || 0;
-                if ($scope.c.useUsersCurrentLocation && newStoresVersionExists == 1) {
-                    $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
-                    UpdateStores.UpdateStoresInfoIfRequired($scope).then(function(isConnectedToInternet) {
-                        $scope.c.HideLoading();
-                        if (isConnectedToInternet) {
+                $scope.c.shopsNearThatHaveNeededProducts = [];
+                // user closed the app before all tables were created
+                var updateStoreInfoCompleted = localStorage.getItem('UpdateStoreInfoCompleted');
+                if (updateStoreInfoCompleted == "0") {
+                    // Need to check for internet connection
+                    if (!MiscFunctions.IsConnectedToInternet()) {
+                        var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotUpdateStoresInRange'];
+                        PopUpFactory.ErrorPopUp($scope, popUpText);
+                    } else {
+                        $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
+                        var myLat = localStorage.getItem('Lat');
+                        var myLon = localStorage.getItem('Lon');
+                        UpdateStores.UpdateStoresInfo($scope, myLat, myLon, $scope.c.rangeForShops).then(function () {
+                            $scope.c.HideLoading();
                             FindBestShopPrivate($scope, productsToCalculatePrice);
-                        } else {
-                            var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotUpdateStoresInRange'];
-                            PopUpFactory.ErrorPopUp($scope, popUpText);
-                        }
-                    });
+                        });
+                    }
                 } else {
-                    FindBestShopPrivate($scope, productsToCalculatePrice);
+                    // if user wants to use his current location, need to check if his location changed
+                    var newStoresVersionExists = localStorage.getItem('newStoresVersionExists') || 0;
+                    if ($scope.c.useUsersCurrentLocation || newStoresVersionExists == 1) {
+                        $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
+                        UpdateStores.UpdateStoresInfoIfRequired($scope).then(function (isConnectedToInternet) {
+                            $scope.c.HideLoading();
+                            if (isConnectedToInternet) {
+                                FindBestShopPrivate($scope, productsToCalculatePrice);
+                            } else {
+                                var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotUpdateStoresInRange'];
+                                PopUpFactory.ErrorPopUp($scope, popUpText);
+                            }
+                        });
+                    } else {
+                        FindBestShopPrivate($scope, productsToCalculatePrice);
+                    }
                 }
             }
         }

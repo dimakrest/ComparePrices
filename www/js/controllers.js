@@ -204,7 +204,9 @@ angular.module('ComparePrices.controllers', [])
                 }
 
                 // get maximum radius value
-                var maxRangeForShops = parseInt(localStorage.getItem('MaxRangeForShops') || ComparePricesConstants.DEFAULT_SHOPS_RANGE);
+                // has to use minimal value as a default, because if user changes to 1 and then downloads stores and after this changes value to
+                // 2 or three, new stores are not downloaded if DEFAULT_SHOPS_RANGE is used
+                var maxRangeForShops = parseInt(localStorage.getItem('MaxRangeForShops') || 1);
                 if (parseInt($scope.c.rangeForShops) > maxRangeForShops) {
                     // Check for internet connection
                     if (MiscFunctions.IsConnectedToInternet()) {
