@@ -171,8 +171,12 @@ angular.module('ComparePrices.services', ['ngResource'])
                                     imagePath = 'https://s3.eu-central-1.amazonaws.com/compare.prices.frankfurt/product_images/product_' + singleProduct['C'] + '.jpg';
                                 } else if (singleProduct['T'] == '2') {
                                     imagePath = 'https://s3.eu-central-1.amazonaws.com/compare.prices.frankfurt/product_images/product_' + singleProduct['C'] + '.png';
-                                } else {
+                                } else if (singleProduct['T'] == '3') {
                                     imagePath = 'img/no_product_img.jpg';
+                                } else if (singleProduct['T'] == '4') {
+                                    imagePath = 'img/products_in_sub_groups/product_' + singleProduct['C'] + '.png';
+                                } else if (singleProduct['T'] == '5') {
+                                    imagePath = 'img/products_in_sub_groups/product_' + singleProduct['C'] + '.jpg';
                                 }
 
                                 var sqlQuery = 'INSERT INTO tbProducts VALUES ("' +
