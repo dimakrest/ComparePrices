@@ -689,14 +689,12 @@ angular.module('ComparePrices.services', ['ngResource'])
                     template: template,
                     cssClass: 'non-transparent-pop-up popup-vertical-buttons',
                     buttons: [
-                        { text: '<b>' + noButtonText + '<b>',
-                            type: 'button-positive',
+                        { text: '<span>' + noButtonText + ' &nbsp;</span>' + '<i class="ion-edit align-right-text"></i>',
                             onTap: function(e) {
                                 return false;
                             }
                         },
-                        { text: yesButtonText,
-
+                        { text: '<span>' + yesButtonText + ' &nbsp;</span>' + '<i class="ion-location align-right-text"></i>',
                             onTap: function(e) {
                                 return true
                             }
@@ -1016,14 +1014,14 @@ angular.module('ComparePrices.services', ['ngResource'])
                 }
                 productsToCalculatePrice.push(fullProductsToCalculatePrice[i]);
             }
-            
+
             $scope.c.shopsNearThatHaveNeededProducts = [];
             // user closed the app before all tables were created
             var updateStoreInfoCompleted = localStorage.getItem('UpdateStoreInfoCompleted');
             if (updateStoreInfoCompleted == "0") {
                 // Need to check for internet connection
                 if (!MiscFunctions.IsConnectedToInternet()) {
-                    var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotFinishDownloadingAllStores'];
+                    var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotUpdateStoresInRange'];
                     PopUpFactory.ErrorPopUp($scope, popUpText);
                 } else {
                     $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
@@ -1044,7 +1042,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                         if (isConnectedToInternet) {
                             FindBestShopPrivate($scope, productsToCalculatePrice);
                         } else {
-                            var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotFinishDownloadingAllStores'];
+                            var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotUpdateStoresInRange'];
                             PopUpFactory.ErrorPopUp($scope, popUpText);
                         }
                     });

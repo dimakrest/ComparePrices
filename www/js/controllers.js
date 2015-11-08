@@ -145,7 +145,7 @@ angular.module('ComparePrices.controllers', [])
                 var popUpText = '';
                 if (userClickedSettingsLocation) {
                     $scope.c.useUsersCurrentLocation = false;
-                    popUpText = $scope.c.localize.strings['NoInternetConnectionCannotFinishDownloadingAllStores'];
+                    popUpText = $scope.c.localize.strings['NoInternetConnectionCannotUpdateStoresInRange'];
                 } else {
                     popUpText = $scope.c.localize.strings['NoInternetConnection'];
                 }
@@ -282,7 +282,7 @@ angular.module('ComparePrices.controllers', [])
                         localStorage.setItem('UseUsersCurrentLocation', $scope.c.useUsersCurrentLocation ? 1 : 0);
                     } else {
                         $scope.c.useUsersCurrentLocation = false;
-                        var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotFinishDownloadingAllStores'];
+                        var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotUpdateStoresInRange'];
                         PopUpFactory.ErrorPopUp($scope, popUpText);
                     }
                 });
@@ -380,10 +380,11 @@ angular.module('ComparePrices.controllers', [])
                     UpdateStores.UpdateStoresInfoIfRequired($scope).then(function (isConnectedToInternet) {
                         $scope.c.HideLoading();
                         if (isConnectedToInternet) {
+                            $scope.c.useUsersCurrentLocation = true;
                             localStorage.setItem('UseUsersCurrentLocation', $scope.c.useUsersCurrentLocation ? 1 : 0);
                         } else {
                             $scope.c.useUsersCurrentLocation = false;
-                            var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotFinishDownloadingAllStores'];
+                            var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotUpdateStoresInRange'];
                             PopUpFactory.ErrorPopUp($scope, popUpText);
                         }
                     });
@@ -574,7 +575,7 @@ angular.module('ComparePrices.controllers', [])
             // An elaborate, custom popup
             $scope.popupData = {};
             $scope.popupData.newCartName = "";
-            var placeHolder = ($scope.lastCartID == 100) ? $scope.c.localize.strings['Cart'] : $scope.c.localize.strings['Cart'] + ' ' + ($scope.lastCartID - 99);
+            var placeHolder = $scope.c.localize.strings['Cart'] + ' ' + ($scope.lastCartID - 99);
             var myPopup = $ionicPopup.show({
                 template: '<label class="item item-input"><input style="text-align:right; padding-right: 10px;" type="text" ng-model="popupData.newCartName", placeholder="' + placeHolder + '"></label>',
                 cssClass: 'non-transparent-pop-up',
