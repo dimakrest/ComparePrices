@@ -1248,7 +1248,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 $scope.c.shopsNearThatHaveNeededProducts = [];
 
                 for (var i = 0; i < suitableShops.length; i++) {
-                    if (totalShops < $scope.c.maxShopsToShow) {
+                    if (totalShops < ComparePricesConstants.DEFAULT_MAX_SHOPS_TO_SHOW) {
                         var brandName = suitableShops[i]['BrandName'];
                         if (typeof (shopsOfSpecificBrand[brandName]) == "undefined") {
                             shopsOfSpecificBrand[brandName] = 1;
