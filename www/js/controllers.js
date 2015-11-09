@@ -53,7 +53,6 @@ angular.module('ComparePrices.controllers', [])
         $scope.c.currentlyShopsDownloaded = 0;
         $scope.c.currentlyShopsDownloadedPercentage = 0;
         $scope.c.globalProgressLoadingPointer = "";
-        $scope.c.maxShopsToShow         = localStorage.getItem('MaxShopsToShow') || ComparePricesConstants.DEFAULT_MAX_SHOPS_TO_SHOW;
 
         $scope.c.shopsNearThatHaveNeededProducts = [];
         $scope.c.allShopsNearThatHaveNeededProducts = [];
@@ -227,16 +226,6 @@ angular.module('ComparePrices.controllers', [])
             },500);
         };
 
-        var updateMaxShopsToShowPromise;
-        $scope.c.UpdateMaxShopsToShow = function() {
-            if(updateMaxShopsToShowPromise){
-                $timeout.cancel(rangeForShopsChangedPromise);
-            }
-            updateMaxShopsToShowPromise = $timeout(function() {
-                localStorage.setItem('MaxShopsToShow', $scope.c.maxShopsToShow);
-            },500);
-        };
-
         // Popover for missing products in best_shops window
         $scope.openPopover = function($event) {
             var template = '<ion-popover-view class="fit"><ion-content scroll="false"> ' +
@@ -269,7 +258,7 @@ angular.module('ComparePrices.controllers', [])
         });
 
         $scope.c.ClearShowPriceDetailsForShop = function(){
-            for (var i=0; i<$scope.c.maxShopsToShow; i++) {
+            for (var i=0; i < ComparePricesConstants.DEFAULT_MAX_SHOPS_TO_SHOW; i++) {
                 $scope.c.showPriceDetailsForShop[i] = 0;
             }
         };
