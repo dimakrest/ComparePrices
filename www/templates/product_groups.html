@@ -21,11 +21,13 @@
         </h1>
 
         <uib-accordion ng-repeat="singleProductGroupInfo in productGroupsInfo track by $index" ng-click="GroupWasClicked($index)">
-            <uib-accordion-group image-url={{::singleProductGroupInfo['ImageUrl']}} heading={{::singleProductGroupInfo['ProductGroupName']}} is-group="1" is-open="status.isFirstOpen" is-disabled="status.isFirstDisabled">
+            <uib-accordion-group image-url={{::singleProductGroupInfo['ImageUrl']}} heading={{::singleProductGroupInfo['ProductGroupName']}} is-group="1" is-open="isGroupOpen[$index]" is-disabled="status.isFirstDisabled">
                 <uib-accordion>
-                    <uib-accordion-group ng-repeat="singleSubGroup in singleProductGroupInfo['SubGroups']"
+                    <uib-accordion-group ng-repeat="singleSubGroup in singleProductGroupInfo['SubGroups'] track by $index"
                                          heading={{::singleSubGroup['SubProductGroupName']}}
-                                         image-url={{::singleSubGroup['ImageUrl']}}>
+                                         image-url={{::singleSubGroup['ImageUrl']}}
+                                         ng-click="SubGroupWasClicked($index)"
+                                         is-open="isSubGroupOpen[$index]">
                         <div style="margin: 0px;" ng-repeat="singleProduct in singleSubGroup['Products']" class="card" ng-click="FindBestShop(singleProduct)">
                             <a class="item item-avatar-right">
                                 <img style="width: auto;" ng-src={{::singleProduct['ImagePath']}}>

@@ -463,6 +463,8 @@ angular.module('ComparePrices.controllers', [])
     })
 
     .controller('ProductGroupsCtrl', function($scope, $ionicScrollDelegate, ComparePricesStorage, FindBestShops, PrepareInfoForControllers, ionicMaterialMotion, $ionicHistory) {
+        $scope.isGroupOpen      = [];
+        $scope.isSubGroupOpen   = [];
         $scope.c.showTipInProductGroups = localStorage.getItem('showTipInProductGroups') || 1;
         localStorage.setItem('showTipInProductGroups', 0);
 
@@ -495,10 +497,20 @@ angular.module('ComparePrices.controllers', [])
                 }
             }
 
-//            setTimeout(function() {
-//                $ionicScrollDelegate.$getByHandle('productGroupsContent').freezeScroll(false);
-//                $ionicScrollDelegate.$getByHandle('productGroupsContent').resize();
-//            }, 350);
+            setTimeout(function() {
+                $ionicScrollDelegate.$getByHandle('productGroupsContent').freezeScroll(false);
+                $ionicScrollDelegate.$getByHandle('productGroupsContent').resize();
+            }, 350);
+        };
+
+        $scope.SubGroupWasClicked = function($index) {
+            console.log($scope.isGroupOpen);
+            console.log($scope.isSubGroupOpen);
+            
+            setTimeout(function() {
+                $ionicScrollDelegate.$getByHandle('productGroupsContent').freezeScroll(false);
+                $ionicScrollDelegate.$getByHandle('productGroupsContent').resize();
+            }, 350);
         };
 
         $scope.FindBestShop = function(productInfo) {
