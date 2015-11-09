@@ -54,7 +54,6 @@ angular.module('ComparePrices.controllers', [])
         $scope.c.currentlyShopsDownloadedPercentage = 0;
         $scope.c.globalProgressLoadingPointer = "";
         $scope.c.maxShopsToShow         = localStorage.getItem('MaxShopsToShow') || ComparePricesConstants.DEFAULT_MAX_SHOPS_TO_SHOW;
-        $scope.c.maxShopsOfTheSameBrand = localStorage.getItem('MaxShopsToShowOfTheSameBrand') ||ComparePricesConstants.DEFAULT_MAX_SHOPS_OF_THE_SAME_BRAND;
 
         $scope.c.shopsNearThatHaveNeededProducts = [];
         $scope.c.allShopsNearThatHaveNeededProducts = [];
@@ -146,7 +145,7 @@ angular.module('ComparePrices.controllers', [])
                 var popUpText = '';
                 if (userClickedSettingsLocation) {
                     $scope.c.useUsersCurrentLocation = false;
-                    popUpText = $scope.c.localize.strings['NoInternetConnectionCannotFinishDownloadingAllStores'];
+                    popUpText = $scope.c.localize.strings['NoInternetConnectionCannotUpdateStoresInRange'];
                 } else {
                     popUpText = $scope.c.localize.strings['NoInternetConnection'];
                 }
@@ -205,7 +204,9 @@ angular.module('ComparePrices.controllers', [])
                 }
 
                 // get maximum radius value
-                var maxRangeForShops = parseInt(localStorage.getItem('MaxRangeForShops') || ComparePricesConstants.DEFAULT_SHOPS_RANGE);
+                // has to use minimal value as a default, because if user changes to 1 and then downloads stores and after this changes value to
+                // 2 or three, new stores are not downloaded if DEFAULT_SHOPS_RANGE is used
+                var maxRangeForShops = parseInt(localStorage.getItem('MaxRangeForShops') || 1);
                 if (parseInt($scope.c.rangeForShops) > maxRangeForShops) {
                     // Check for internet connection
                     if (MiscFunctions.IsConnectedToInternet()) {
@@ -233,16 +234,6 @@ angular.module('ComparePrices.controllers', [])
             }
             updateMaxShopsToShowPromise = $timeout(function() {
                 localStorage.setItem('MaxShopsToShow', $scope.c.maxShopsToShow);
-            },500);
-        };
-
-        var updateMaxShopsToShowOfTheSameBrandPromise;
-        $scope.c.UpdateMaxShopsOfTheSameBrand = function() {
-            if(updateMaxShopsToShowOfTheSameBrandPromise){
-                $timeout.cancel(updateMaxShopsToShowOfTheSameBrandPromise);
-            }
-            updateMaxShopsToShowOfTheSameBrandPromise = $timeout(function() {
-                localStorage.setItem('MaxShopsToShowOfTheSameBrand', $scope.c.maxShopsOfTheSameBrand);
             },500);
         };
 
@@ -293,7 +284,7 @@ angular.module('ComparePrices.controllers', [])
                         localStorage.setItem('UseUsersCurrentLocation', $scope.c.useUsersCurrentLocation ? 1 : 0);
                     } else {
                         $scope.c.useUsersCurrentLocation = false;
-                        var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotFinishDownloadingAllStores'];
+                        var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotUpdateStoresInRange'];
                         PopUpFactory.ErrorPopUp($scope, popUpText);
                     }
                 });
@@ -391,10 +382,11 @@ angular.module('ComparePrices.controllers', [])
                     UpdateStores.UpdateStoresInfoIfRequired($scope).then(function (isConnectedToInternet) {
                         $scope.c.HideLoading();
                         if (isConnectedToInternet) {
+                            $scope.c.useUsersCurrentLocation = true;
                             localStorage.setItem('UseUsersCurrentLocation', $scope.c.useUsersCurrentLocation ? 1 : 0);
                         } else {
                             $scope.c.useUsersCurrentLocation = false;
-                            var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotFinishDownloadingAllStores'];
+                            var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotUpdateStoresInRange'];
                             PopUpFactory.ErrorPopUp($scope, popUpText);
                         }
                     });
@@ -439,9 +431,9 @@ angular.module('ComparePrices.controllers', [])
         };
 
         // this function called also from cartDetails list, and also in search
-        $scope.c.UpdateProductAmount = function(itemInfo, amountToAdd, showConfirmationPopUp) {
+        $scope.c.UpdateProductAmount = function(itemInfo, amountToAdd) {
 
-            $scope.c.UpdateProductAmountInMyCart(itemInfo, amountToAdd, showConfirmationPopUp);
+            $scope.c.UpdateProductAmountInMyCart(itemInfo, amountToAdd);
 
             // when this is called from cartDetails list, and not search, length will be zero, so below code is not relevant
             // TODO: is there a better way?
@@ -455,7 +447,7 @@ angular.module('ComparePrices.controllers', [])
             }
         };
 
-        $scope.c.UpdateProductAmountInMyCart = function(itemInfo, amountToAdd, showConfirmationPopUp) {
+        $scope.c.UpdateProductAmountInMyCart = function(itemInfo, amountToAdd) {
             var numOfProductsInCart = $scope.c.myCart.length;
             var productIndex        = -1;
             for (var i=0; i < numOfProductsInCart; i++) {
@@ -475,34 +467,8 @@ angular.module('ComparePrices.controllers', [])
                 ImageCache.CacheImage(itemInfo['ItemCode'], itemInfo['ImagePath']);
                 ComparePricesStorage.UpdateCart($scope.c.cartID, $scope.c.myCart);
             } else {
-                // if amount is 0, delete the product
-                var newAmount = $scope.c.myCart[productIndex]['Amount'] + parseInt(amountToAdd);
-                if (newAmount == 0) {
-                    if (showConfirmationPopUp) {
-                        var title = $scope.c.localize.strings['AreYouSureWantToDeleteProductTitle'];
-                        var text  = $scope.c.localize.strings['AreYouSureWantToDeleteProductText'];
-                        PopUpFactory.ConfirmationPopUp($scope, title, text).then(function(confirmed) {
-                            if(confirmed) {
-                                $scope.c.myCart.splice(productIndex, 1);
-                                ComparePricesStorage.UpdateCart($scope.c.cartID, $scope.c.myCart);
-                            }
-                        });
-                    }
-                    else
-                    {
-                        $scope.c.myCart.splice(productIndex, 1);
-                        ComparePricesStorage.UpdateCart($scope.c.cartID, $scope.c.myCart);
-                        // we come here in case we remove items from search. It can be done when ion-minus-circled delete buttons
-                        // Need to turn off ion-minus-circled delete buttons in case we don't have more products
-                        if ($scope.c.myCart.length == 0)
-                        {
-                            $scope.shouldShowDelete = false;
-                        }
-                    }
-                } else {
-                    $scope.c.myCart[productIndex]['Amount'] = newAmount;
-                    ComparePricesStorage.UpdateCart($scope.c.cartID, $scope.c.myCart);
-                }
+                $scope.c.myCart[productIndex]['Amount'] += parseInt(amountToAdd);
+                ComparePricesStorage.UpdateCart($scope.c.cartID, $scope.c.myCart);
             }
         };
     })
@@ -611,7 +577,7 @@ angular.module('ComparePrices.controllers', [])
             // An elaborate, custom popup
             $scope.popupData = {};
             $scope.popupData.newCartName = "";
-            var placeHolder = ($scope.lastCartID == 100) ? $scope.c.localize.strings['Cart'] : $scope.c.localize.strings['Cart'] + ' ' + ($scope.lastCartID - 99);
+            var placeHolder = $scope.c.localize.strings['Cart'] + ' ' + ($scope.lastCartID - 99);
             var myPopup = $ionicPopup.show({
                 template: '<label class="item item-input"><input style="text-align:right; padding-right: 10px;" type="text" ng-model="popupData.newCartName", placeholder="' + placeHolder + '"></label>',
                 cssClass: 'non-transparent-pop-up',

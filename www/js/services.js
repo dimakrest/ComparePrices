@@ -171,8 +171,12 @@ angular.module('ComparePrices.services', ['ngResource'])
                                     imagePath = 'https://s3.eu-central-1.amazonaws.com/compare.prices.frankfurt/product_images/product_' + singleProduct['C'] + '.jpg';
                                 } else if (singleProduct['T'] == '2') {
                                     imagePath = 'https://s3.eu-central-1.amazonaws.com/compare.prices.frankfurt/product_images/product_' + singleProduct['C'] + '.png';
-                                } else {
+                                } else if (singleProduct['T'] == '3') {
                                     imagePath = 'img/no_product_img.jpg';
+                                } else if (singleProduct['T'] == '4') {
+                                    imagePath = 'img/products_in_sub_groups/product_' + singleProduct['C'] + '.png';
+                                } else if (singleProduct['T'] == '5') {
+                                    imagePath = 'img/products_in_sub_groups/product_' + singleProduct['C'] + '.jpg';
                                 }
 
                                 var sqlQuery = 'INSERT INTO tbProducts VALUES ("' +
@@ -689,14 +693,12 @@ angular.module('ComparePrices.services', ['ngResource'])
                     template: template,
                     cssClass: 'non-transparent-pop-up popup-vertical-buttons',
                     buttons: [
-                        { text: '<b>' + noButtonText + '<b>',
-                            type: 'button-positive',
+                        { text: '<span>' + noButtonText + ' &nbsp;</span>' + '<i class="ion-edit align-right-text"></i>',
                             onTap: function(e) {
                                 return false;
                             }
                         },
-                        { text: yesButtonText,
-
+                        { text: '<span>' + yesButtonText + ' &nbsp;</span>' + '<i class="ion-location align-right-text"></i>',
                             onTap: function(e) {
                                 return true
                             }
@@ -1006,40 +1008,55 @@ angular.module('ComparePrices.services', ['ngResource'])
             });
         }
 
-        return function($scope, productsToCalculatePrice) {
-            $scope.c.shopsNearThatHaveNeededProducts = [];
-            // user closed the app before all tables were created
-            var updateStoreInfoCompleted = localStorage.getItem('UpdateStoreInfoCompleted');
-            if (updateStoreInfoCompleted == "0") {
-                // Need to check for internet connection
-                if (!MiscFunctions.IsConnectedToInternet()) {
-                    var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotFinishDownloadingAllStores'];
-                    PopUpFactory.ErrorPopUp($scope, popUpText);
-                } else {
-                    $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
-                    var myLat = localStorage.getItem('Lat');
-                    var myLon = localStorage.getItem('Lon');
-                    UpdateStores.UpdateStoresInfo($scope, myLat, myLon, $scope.c.rangeForShops).then(function () {
-                        $scope.c.HideLoading();
-                        FindBestShopPrivate($scope, productsToCalculatePrice);
-                    });
+        return function($scope, fullProductsToCalculatePrice) {
+            var productsToCalculatePrice = [];
+            // need to remove products with 0 amount
+            var numOfProducts = fullProductsToCalculatePrice.length;
+            for (var i=0; i < numOfProducts; i++) {
+                if (fullProductsToCalculatePrice[i]['Amount'] == 0) {
+                    continue;
                 }
+                productsToCalculatePrice.push(fullProductsToCalculatePrice[i]);
+            }
+
+            if (productsToCalculatePrice.length == 0) {
+                var popUpText = $scope.c.localize.strings['NoProductsInCart'];
+                PopUpFactory.ErrorPopUp($scope, popUpText);
             } else {
-                // if user wants to use his current location, need to check if his location changed
-                var newStoresVersionExists = localStorage.getItem('newStoresVersionExists') || 0;
-                if ($scope.c.useUsersCurrentLocation && newStoresVersionExists == 1) {
-                    $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
-                    UpdateStores.UpdateStoresInfoIfRequired($scope).then(function(isConnectedToInternet) {
-                        $scope.c.HideLoading();
-                        if (isConnectedToInternet) {
+                $scope.c.shopsNearThatHaveNeededProducts = [];
+                // user closed the app before all tables were created
+                var updateStoreInfoCompleted = localStorage.getItem('UpdateStoreInfoCompleted');
+                if (updateStoreInfoCompleted == "0") {
+                    // Need to check for internet connection
+                    if (!MiscFunctions.IsConnectedToInternet()) {
+                        var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotUpdateStoresInRange'];
+                        PopUpFactory.ErrorPopUp($scope, popUpText);
+                    } else {
+                        $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
+                        var myLat = localStorage.getItem('Lat');
+                        var myLon = localStorage.getItem('Lon');
+                        UpdateStores.UpdateStoresInfo($scope, myLat, myLon, $scope.c.rangeForShops).then(function () {
+                            $scope.c.HideLoading();
                             FindBestShopPrivate($scope, productsToCalculatePrice);
-                        } else {
-                            var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotFinishDownloadingAllStores'];
-                            PopUpFactory.ErrorPopUp($scope, popUpText);
-                        }
-                    });
+                        });
+                    }
                 } else {
-                    FindBestShopPrivate($scope, productsToCalculatePrice);
+                    // if user wants to use his current location, need to check if his location changed
+                    var newStoresVersionExists = localStorage.getItem('newStoresVersionExists') || 0;
+                    if ($scope.c.useUsersCurrentLocation || newStoresVersionExists == 1) {
+                        $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
+                        UpdateStores.UpdateStoresInfoIfRequired($scope).then(function (isConnectedToInternet) {
+                            $scope.c.HideLoading();
+                            if (isConnectedToInternet) {
+                                FindBestShopPrivate($scope, productsToCalculatePrice);
+                            } else {
+                                var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotUpdateStoresInRange'];
+                                PopUpFactory.ErrorPopUp($scope, popUpText);
+                            }
+                        });
+                    } else {
+                        FindBestShopPrivate($scope, productsToCalculatePrice);
+                    }
                 }
             }
         }
@@ -1165,7 +1182,7 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
     }])
 
-    .factory('SortShops', [ function() {
+    .factory('SortShops', ['ComparePricesConstants', function(ComparePricesConstants) {
         function dynamicSort(property) {
             var sortOrder = 1;
             if(property[0] === "-") {
@@ -1239,7 +1256,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                             totalShops++;
                         }
                         else {
-                            if (shopsOfSpecificBrand[brandName] < $scope.c.maxShopsOfTheSameBrand) {
+                            if (shopsOfSpecificBrand[brandName] < ComparePricesConstants.DEFAULT_MAX_SHOPS_OF_THE_SAME_BRAND) {
                                 shopsOfSpecificBrand[brandName]++;
                                 $scope.c.shopsNearThatHaveNeededProducts.push(suitableShops[i]);
                                 totalShops++;

@@ -21,9 +21,9 @@
                         <img style="width: auto;" ng-src={{product['ImagePath']}}>
 
                         <div class="ionic-input-group" style="float:left; margin-left: -10px;">
-                            <span class="ionic-input-group-addon-left" ng-click="c.UpdateProductAmount(product, -1, true); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
+                            <span class="ionic-input-group-addon-left" ng-disabled="product['Amount'] == 0" ng-click="c.UpdateProductAmount(product, -1); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
                             <label class="ionic-form-control">{{product["Amount"]}}</label>
-                            <span class="ionic-input-group-addon-right" ng-click="c.UpdateProductAmount(product, +1, true); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
+                            <span class="ionic-input-group-addon-right" ng-click="c.UpdateProductAmount(product, +1); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
                         </div>
                         <h2 ng-style="{'padding-top': product.ItemName.length < 15 ? '7px' : '0px' }" style="text-align: right; white-space: pre-line;">{{product.ItemName}}</h2>
 
@@ -34,7 +34,7 @@
                 </ion-item>
 
             </div>
-            <div ng-if="myCart.length == 0" class="no-results">
+            <div ng-if="c.myCart.length == 0" class="no-results">
                 <p>{{::c.localize.strings['NoProductsInCart']}}</p>
             </div>
 

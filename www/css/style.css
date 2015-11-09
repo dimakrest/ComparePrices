@@ -2335,6 +2335,9 @@ tbody.collapse.in {
 }
 /********************* Accordion CSSs *********************/
 
+.align-right-text {
+    float: right
+}
 
 @-webkit-keyframes rotate {
     100% {

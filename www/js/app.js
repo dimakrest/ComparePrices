@@ -21,7 +21,7 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
 })
 
     //////////////// Location calculation + auto complete /////////////////
-.directive('googleAutocomplete', ['$rootScope', 'UpdateStores', '$cordovaGoogleAnalytics', function($rootScope, UpdateStores, $cordovaGoogleAnalytics) {
+.directive('googleAutocomplete', ['$rootScope', 'UpdateStores', 'PopUpFactory', '$cordovaGoogleAnalytics', function($rootScope, UpdateStores, PopUpFactory, $cordovaGoogleAnalytics) {
     return {
         restrict: 'E',
         replace: 'false',
@@ -35,7 +35,7 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                 document.getElementById('searchBar').value = '';
 
                 if (!place.geometry) {
-                    window.alert($scope.c.localize.strings['ErrorEnterAddressAgain']);
+                    PopUpFactory.ErrorPopUp($scope, $scope.c.localize.strings['ErrorEnterAddressAgain']);
                     return;
                 }
 
