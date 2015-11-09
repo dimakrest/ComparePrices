@@ -1,6 +1,7 @@
 <div class="panel panel-default">
-    <a class="item item-avatar-right" ng-click="toggleOpen()" uib-accordion-transclude="heading" href tabindex="0">
+    <a class="item item-avatar-right" ng-click="toggleOpen()" uib-accordion-transclude="heading" href tabindex="0" ng-class="{effectSubHeader: isOpen}">
         <img ng-src={{::imageUrl}}>
+        <i ng-if=isGroup class="icon products-list ion-chevron-down" ng-class="{open: isOpen}"></i>
         <h2 style="text-align: right; padding-top:10px; white-space: pre-line;">{{::heading}}</h2>
     </a>
 

@@ -21,7 +21,7 @@
         </h1>
 
         <uib-accordion ng-repeat="singleProductGroupInfo in productGroupsInfo track by $index" ng-click="GroupWasClicked($index)">
-            <uib-accordion-group image-url={{::singleProductGroupInfo['ImageUrl']}} heading={{::singleProductGroupInfo['ProductGroupName']}} is-open="status.isFirstOpen" is-disabled="status.isFirstDisabled">
+            <uib-accordion-group image-url={{::singleProductGroupInfo['ImageUrl']}} heading={{::singleProductGroupInfo['ProductGroupName']}} is-group="1" is-open="status.isFirstOpen" is-disabled="status.isFirstDisabled">
                 <uib-accordion>
                     <uib-accordion-group ng-repeat="singleSubGroup in singleProductGroupInfo['SubGroups']"
                                          heading={{::singleSubGroup['SubProductGroupName']}}

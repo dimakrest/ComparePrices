@@ -66,6 +66,7 @@ angular.module('ui.bootstrap.accordion', ['ui.bootstrap.collapse'])
                 heading: '@',               // Interpolate the heading attribute onto this scope
                 imageUrl: '@',
                 isOpen: '=?',
+                isGroup: '=?',
                 isDisabled: '=?'
             },
             controller: function() {
