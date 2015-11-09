@@ -9,7 +9,7 @@
         'CartHint1': 'צור סל ',
         'CartHint2': 'בחר מתוך סלים לדוגמא',
         'ProductHint1': 'חיפוש לפי שם ',
-        'ProductHint2': 'חיפוש במוצרים פופולריים',
+        'ProductHint2': 'חיפוש מוצר לפי מחלקה',
         'Amount': 'כמות:',
         'AddressPlaceHolder': 'הכנס כתובת',
         'SearchQueryCartDetailsPlaceholder': "הקלד שם מוצר או מק''ט",
