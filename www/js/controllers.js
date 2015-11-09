@@ -463,8 +463,9 @@ angular.module('ComparePrices.controllers', [])
     })
 
     .controller('ProductGroupsCtrl', function($scope, $ionicScrollDelegate, ComparePricesStorage, FindBestShops, PrepareInfoForControllers, ionicMaterialMotion, $ionicHistory) {
-        $scope.isGroupOpen      = [];
-        $scope.isSubGroupOpen   = [];
+        $scope.isGroupOpen      = {};
+        $scope.isSubGroupOpen   = {};
+        $scope.openGroupID      = -1;
         $scope.c.showTipInProductGroups = localStorage.getItem('showTipInProductGroups') || 1;
         localStorage.setItem('showTipInProductGroups', 0);
 
@@ -482,8 +483,24 @@ angular.module('ComparePrices.controllers', [])
             }
         }, 100);
 
+        // IMPORTANT!!!!: open sub groups are closed automatically and event is propagated to this function, so no need to take care of
+        // scrolling issue
         // if group is clicked. need to add all products to sub groups
         $scope.GroupWasClicked = function(groupIndex) {
+            // came for the first time => nothing to close
+            if (($scope.openGroupID != -1) && ($scope.openGroupID != groupIndex)) {
+                // force to close open groups
+                $scope.isGroupOpen[$scope.openGroupID] = false;
+                // force to close sub groups
+                for (var key in $scope.isSubGroupOpen[$scope.openGroupID]) {
+                    if ($scope.isSubGroupOpen[$scope.openGroupID].hasOwnProperty(key)) {
+                        $scope.isSubGroupOpen[$scope.openGroupID][key] = false;
+                    }
+                }
+                $scope.openGroupID = groupIndex;
+            } else if ($scope.openGroupID == -1) {
+                $scope.openGroupID = groupIndex;
+            }
             var productsInSubGroups = PrepareInfoForControllers.GetProductsInSubGroups();
             var numOfSubGroups = $scope.productGroupsInfo[groupIndex]['SubGroups'].length;
             for (var subGroupsID=0; subGroupsID < numOfSubGroups; subGroupsID++) {
@@ -497,16 +514,6 @@ angular.module('ComparePrices.controllers', [])
                 }
             }
 
-            setTimeout(function() {
-                $ionicScrollDelegate.$getByHandle('productGroupsContent').freezeScroll(false);
-                $ionicScrollDelegate.$getByHandle('productGroupsContent').resize();
-            }, 350);
-        };
-
-        $scope.SubGroupWasClicked = function($index) {
-            console.log($scope.isGroupOpen);
-            console.log($scope.isSubGroupOpen);
-            
             setTimeout(function() {
                 $ionicScrollDelegate.$getByHandle('productGroupsContent').freezeScroll(false);
                 $ionicScrollDelegate.$getByHandle('productGroupsContent').resize();
