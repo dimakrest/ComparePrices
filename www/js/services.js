@@ -1598,4 +1598,95 @@ angular.module('ComparePrices.services', ['ngResource'])
                 return defer.promise;
             }
         }
+    }])
+
+    .factory('GroupsAndSubGroups', ['PrepareInfoForControllers', function(PrepareInfoForControllers) {
+
+        return {
+            'InitProductGroupsAndSubGroups' : function($scope) {
+                $scope.productGroupsInfo = PrepareInfoForControllers.GetProductGroups();
+                // Add sub groups to groups, if I do it without timeout it takes a lot of time to load the page
+                setTimeout(function() {
+                    var productSubGroups = PrepareInfoForControllers.GetProductSubGroups();
+                    for (var groupID=0; groupID < $scope.productGroupsInfo.length; groupID++) {
+                        $scope.productGroupsInfo[groupID]['SubGroups'] = [];
+                        for (var subGroupsID=0; subGroupsID < productSubGroups.length; subGroupsID++) {
+                            if (productSubGroups[subGroupsID]['ProductGroupID'] == $scope.productGroupsInfo[groupID]['ProductGroupID']) {
+                                $scope.productGroupsInfo[groupID]['SubGroups'].push(productSubGroups[subGroupsID]);
+                            }
+                        }
+                    }
+                }, 200);
+            },
+
+            // IMPORTANT!!!!: open sub groups are closed automatically and event is propagated to this function, so no need to take care of
+            // scrolling issue
+            'AddProductsAndCloseAccordions' : function($scope, groupIndex, ionicScrollDelegate, offsetToScroll) {
+                var needToScroll        = false;
+                var useOldScrollValues  = false;
+                // came for the first time => nothing to close
+                if (($scope.openGroupID != -1) && ($scope.openGroupID != groupIndex)) {
+                    needToScroll = true;
+                    // force to close open groups
+                    $scope.isGroupOpen[$scope.openGroupID] = false;
+                    // force to close sub groups
+                    for (var key in $scope.isSubGroupOpen[$scope.openGroupID]) {
+                        if ($scope.isSubGroupOpen[$scope.openGroupID].hasOwnProperty(key)) {
+                            $scope.isSubGroupOpen[$scope.openGroupID][key] = false;
+                        }
+                    }
+                    $scope.openSubGroupID = 0;
+                    // change the value of open subgroupIndex
+                    for (var key in $scope.isSubGroupOpen[groupIndex]) {
+                        if (($scope.isSubGroupOpen[groupIndex].hasOwnProperty(key)) && ($scope.isSubGroupOpen[groupIndex][key])) {
+                            $scope.openSubGroupID = parseInt(key) + 1;
+                            break;
+                        }
+                    }
+                    $scope.openGroupID = groupIndex;
+                } else if ($scope.openGroupID == -1) {
+                    $scope.openGroupID = groupIndex;
+                } else if ($scope.openGroupID == groupIndex) {
+                    useOldScrollValues = true;
+                }
+
+                // we get here also in case that user clicked on sub group, in this case we need index of this sub group
+                for (var key in $scope.isSubGroupOpen[groupIndex]) {
+                    if (($scope.isSubGroupOpen[groupIndex].hasOwnProperty(key)) && ($scope.isSubGroupOpen[$scope.openGroupID][key])) {
+                        if ((parseInt(key) + 1) != $scope.openSubGroupID) {
+                            needToScroll = true;
+                            $scope.openSubGroupID = (parseInt(key) + 1);
+                        }
+                        break;
+                    }
+                }
+
+                // if group is clicked. need to add all products to sub groups
+                var productsInSubGroups = PrepareInfoForControllers.GetProductsInSubGroups();
+                var numOfSubGroups = $scope.productGroupsInfo[groupIndex]['SubGroups'].length;
+                for (var subGroupsID=0; subGroupsID < numOfSubGroups; subGroupsID++) {
+                    // found sub group, need to copy products
+                    $scope.productGroupsInfo[groupIndex]['SubGroups'][subGroupsID]['Products'] = [];
+                    for (var i=0; i < productsInSubGroups.length; i++) {
+                        if ((productsInSubGroups[i]['ProductGroupID'] == $scope.productGroupsInfo[groupIndex]['ProductGroupID']) &&
+                            (productsInSubGroups[i]['SubProductGroupID'] == $scope.productGroupsInfo[groupIndex]['SubGroups'][subGroupsID]['SubProductGroupID'])) {
+                            $scope.productGroupsInfo[groupIndex]['SubGroups'][subGroupsID]['Products'].push(productsInSubGroups[i]);
+                        }
+                    }
+                }
+
+                var scrollTo = (74 * groupIndex + 74 * $scope.openSubGroupID) + offsetToScroll;
+                ionicScrollDelegate.freezeScroll(true);
+                var scrollPosition = ionicScrollDelegate.getScrollPosition();
+                setTimeout(function() {
+                    ionicScrollDelegate.freezeScroll(false);
+                    ionicScrollDelegate.resize();
+                    if (needToScroll) {
+                        ionicScrollDelegate.scrollTo(0, scrollTo, true);
+                    } else if (useOldScrollValues) {
+                        ionicScrollDelegate.scrollTo(0, scrollPosition.top, true);
+                    }
+                }, 350);
+            }
+        }
     }]);

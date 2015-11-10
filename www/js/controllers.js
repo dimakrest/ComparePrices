@@ -44,7 +44,6 @@ angular.module('ComparePrices.controllers', [])
     .controller('RootCtrl', function($scope, $ionicLoading, $timeout, $ionicSideMenuDelegate, PopUpFactory, ComparePricesStorage, ComparePricesConstants, UpdateStores, $cordovaGoogleAnalytics,
                                      MiscFunctions, SortShops, $ionicPopover, UpdatesFromServer, $cordovaEmailComposer, $ionicScrollDelegate, FindBestShops, ImageCache, ShowModal, $ionicTabsDelegate) {
         $scope.c = {};
-        $scope.c.searchResultsStyle ='';
         $scope.c.currentCartName = "";
         $scope.c.currentProductGroupName = "";
         $scope.c.isCurrentCartPredefined    = 0;
@@ -80,7 +79,7 @@ angular.module('ComparePrices.controllers', [])
             } else {
                 $ionicTabsDelegate.select(index);
             }
-        }
+        };
 
 
         function generateGuid() {
@@ -419,23 +418,6 @@ angular.module('ComparePrices.controllers', [])
             }
         };
 
-        // this function called also from cartDetails list, and also in search
-        $scope.c.UpdateProductAmount = function(itemInfo, amountToAdd) {
-
-            $scope.c.UpdateProductAmountInMyCart(itemInfo, amountToAdd);
-
-            // when this is called from cartDetails list, and not search, length will be zero, so below code is not relevant
-            // TODO: is there a better way?
-
-            var numOfFilteredProducts = $scope.c.filteredProductsToShow.length;
-            for (var i=0; i < numOfFilteredProducts; i++) {
-                if ($scope.c.filteredProductsToShow[i]['ItemCode'] == itemInfo['ItemCode']) {
-                    $scope.c.filteredProductsToShow[i]['Amount'] += parseInt(amountToAdd);
-                    break;
-                }
-            }
-        };
-
         $scope.c.UpdateProductAmountInMyCart = function(itemInfo, amountToAdd) {
             var numOfProductsInCart = $scope.c.myCart.length;
             var productIndex        = -1;
@@ -462,7 +444,7 @@ angular.module('ComparePrices.controllers', [])
         };
     })
 
-    .controller('ProductGroupsCtrl', function($scope, $ionicScrollDelegate, ComparePricesStorage, FindBestShops, PrepareInfoForControllers, ionicMaterialMotion, $ionicHistory) {
+    .controller('ProductGroupsCtrl', function($scope, $ionicScrollDelegate, FindBestShops, GroupsAndSubGroups, ionicMaterialMotion, $ionicHistory) {
         $scope.isGroupOpen      = {};
         $scope.isSubGroupOpen   = {};
         $scope.openGroupID      = -1;
@@ -470,87 +452,14 @@ angular.module('ComparePrices.controllers', [])
         $scope.c.showTipInProductGroups = localStorage.getItem('showTipInProductGroups') || 1;
         localStorage.setItem('showTipInProductGroups', 0);
 
-        $scope.productGroupsInfo    = PrepareInfoForControllers.GetProductGroups();
-        // Add sub groups to groups, if I do it without timeout it takes a lot of time to load the page
-        setTimeout(function() {
-            var productSubGroups = PrepareInfoForControllers.GetProductSubGroups();
-            for (var groupID=0; groupID < $scope.productGroupsInfo.length; groupID++) {
-                $scope.productGroupsInfo[groupID]['SubGroups'] = [];
-                for (var subGroupsID=0; subGroupsID < productSubGroups.length; subGroupsID++) {
-                    if (productSubGroups[subGroupsID]['ProductGroupID'] == $scope.productGroupsInfo[groupID]['ProductGroupID']) {
-                        $scope.productGroupsInfo[groupID]['SubGroups'].push(productSubGroups[subGroupsID]);
-                    }
-                }
-            }
-        }, 100);
 
-        // IMPORTANT!!!!: open sub groups are closed automatically and event is propagated to this function, so no need to take care of
-        // scrolling issue
-        // if group is clicked. need to add all products to sub groups
+        $scope.productGroupsInfo    = [];
+        GroupsAndSubGroups.InitProductGroupsAndSubGroups($scope);
+
         $scope.GroupWasClicked = function(groupIndex) {
-            var needToScroll        = false;
-            var useOldScrollValues  = false;
-            // came for the first time => nothing to close
-            if (($scope.openGroupID != -1) && ($scope.openGroupID != groupIndex)) {
-                needToScroll = true;
-                // force to close open groups
-                $scope.isGroupOpen[$scope.openGroupID] = false;
-                // force to close sub groups
-                for (var key in $scope.isSubGroupOpen[$scope.openGroupID]) {
-                    if ($scope.isSubGroupOpen[$scope.openGroupID].hasOwnProperty(key)) {
-                        $scope.isSubGroupOpen[$scope.openGroupID][key] = false;
-                    }
-                }
-                $scope.openSubGroupID = 0;
-                // change the value of open subgroupIndex
-                for (var key in $scope.isSubGroupOpen[groupIndex]) {
-                    if (($scope.isSubGroupOpen[groupIndex].hasOwnProperty(key)) && ($scope.isSubGroupOpen[groupIndex][key])) {
-                        $scope.openSubGroupID = parseInt(key) + 1;
-                        break;
-                    }
-                }
-                $scope.openGroupID = groupIndex;
-            } else if ($scope.openGroupID == -1) {
-                $scope.openGroupID = groupIndex;
-            } else if ($scope.openGroupID == groupIndex) {
-                useOldScrollValues = true;
-            }
-
-            // we get here also in case that user clicked on sub group, in this case we need index of this sub group
-            for (var key in $scope.isSubGroupOpen[groupIndex]) {
-                if (($scope.isSubGroupOpen[groupIndex].hasOwnProperty(key)) && ($scope.isSubGroupOpen[$scope.openGroupID][key])) {
-                    if ((parseInt(key) + 1) != $scope.openSubGroupID) {
-                        needToScroll = true;
-                        $scope.openSubGroupID = (parseInt(key) + 1);
-                    }
-                    break;
-                }
-            }
-
-            var productsInSubGroups = PrepareInfoForControllers.GetProductsInSubGroups();
-            var numOfSubGroups = $scope.productGroupsInfo[groupIndex]['SubGroups'].length;
-            for (var subGroupsID=0; subGroupsID < numOfSubGroups; subGroupsID++) {
-                // found sub group, need to copy products
-                $scope.productGroupsInfo[groupIndex]['SubGroups'][subGroupsID]['Products'] = [];
-                for (var i=0; i < productsInSubGroups.length; i++) {
-                    if ((productsInSubGroups[i]['ProductGroupID'] == $scope.productGroupsInfo[groupIndex]['ProductGroupID']) &&
-                        (productsInSubGroups[i]['SubProductGroupID'] == $scope.productGroupsInfo[groupIndex]['SubGroups'][subGroupsID]['SubProductGroupID'])) {
-                        $scope.productGroupsInfo[groupIndex]['SubGroups'][subGroupsID]['Products'].push(productsInSubGroups[i]);
-                    }
-                }
-            }
-
-            $ionicScrollDelegate.$getByHandle('productGroupsContent').freezeScroll(true);
-            var scrollPosition = $ionicScrollDelegate.$getByHandle('productGroupsContent').getScrollPosition();
-            setTimeout(function() {
-                $ionicScrollDelegate.$getByHandle('productGroupsContent').freezeScroll(false);
-                $ionicScrollDelegate.$getByHandle('productGroupsContent').resize();
-                if (needToScroll) {
-                    $ionicScrollDelegate.$getByHandle('productGroupsContent').scrollTo(0, (74 * groupIndex + 74 * $scope.openSubGroupID), true);
-                } else if (useOldScrollValues) {
-                    $ionicScrollDelegate.$getByHandle('productGroupsContent').scrollTo(0, scrollPosition.top, true);
-                }
-            }, 350);
+            var offsetToScroll = 0;
+            var ionicScrollDelegate = $ionicScrollDelegate.$getByHandle('productGroupsContent');
+            GroupsAndSubGroups.AddProductsAndCloseAccordions($scope, groupIndex, ionicScrollDelegate, offsetToScroll);
         };
 
         $scope.FindBestShop = function(productInfo) {
@@ -570,7 +479,6 @@ angular.module('ComparePrices.controllers', [])
             $ionicHistory.nextViewOptions({
                 disableAnimate: true
             });
-            $scope.c.searchResultsStyle = 'productGroups';
             setTimeout(function() {
                 location.href = '#/tab/searchBarProductGroups';
             }, 100);
@@ -674,7 +582,7 @@ angular.module('ComparePrices.controllers', [])
         });
     })
 
-    .controller('SearchBarCtrl', function($scope, $ionicFilterBar, $ionicHistory, PrepareInfoForControllers, ComparePricesStorage) {
+    .controller('SearchBarGroupsCtrl', function($scope, $ionicFilterBar, $ionicHistory, ComparePricesStorage) {
         $scope.c.filteredProductsToShow = [];
         $scope.showNoResults    = false;
 
@@ -739,44 +647,167 @@ angular.module('ComparePrices.controllers', [])
                                 return 0; // in all other cases strings have equal strength
                             });
 
-                            if ($scope.c.searchResultsStyle == 'cartDetails')
-                            {
-                                $scope.showNoResults = (foundItems.length == 0);
-                                $scope.c.filteredProductsToShow = [];
+                            $scope.showNoResults = (foundItems.length == 0);
+                            $scope.c.filteredProductsToShow = foundItems;
+                        });
+                    }
+                },
 
-                                var numOfProductsInCart = $scope.c.myCart.length;
-                                var numOfFilteredProducts = foundItems.length;
+                // Called after the filterBar is removed. This can happen when the cancel button is pressed, the backdrop is tapped
+                // or swiped, or the back button is pressed.
+                cancel: function () {
+                    $scope.c.CancelFilterBar = undefined;
+                    $scope.showNoResults     = false;
+                    $scope.c.filteredProductsToShow   = [];
+                    setTimeout(function() {
+                        $ionicHistory.goBack();
+                    }, 0);
+                },
+                debounce: true,
+                cancelText: $scope.c.localize.strings['CancelSearch'],
+                delay: 500,
+                keyPressed: function () {
+                },
+                filterProperties: 'ItemName',
+                backdrop : true
+            });
+        })
+    })
 
-                                // Add products that appear in my cart
-                                for (var i = 0; i < numOfProductsInCart; i++) {
-                                    for (var j = 0; j < numOfFilteredProducts; j++) {
-                                        if ($scope.c.myCart[i]['ItemCode'] == foundItems[j]['ItemCode']) {
-                                            $scope.c.filteredProductsToShow.push(angular.copy($scope.c.myCart[i]));
-                                            break;
-                                        }
-                                    }
+    // TODO: merge common functions like update or something ...
+    .controller('SearchBarCartDetailsCtrl', function($scope, $ionicFilterBar, $ionicHistory, $ionicScrollDelegate, GroupsAndSubGroups, ComparePricesStorage) {
+        $scope.c.filteredProductsToShow = [];
+        $scope.showNoResults    = false;
+
+        // Products group info for search:
+        $scope.isGroupOpen      = {};
+        $scope.isSubGroupOpen   = {};
+        $scope.openGroupID      = -1;
+        $scope.openSubGroupID   = 0;
+
+        $scope.productGroupsInfo    = [];
+        GroupsAndSubGroups.InitProductGroupsAndSubGroups($scope);
+
+        $scope.GroupWasClicked = function(groupIndex) {
+            var ionicScrollDelegate = $ionicScrollDelegate.$getByHandle('searchBarCartsContent');
+            var offsetToScroll = -36;
+            GroupsAndSubGroups.AddProductsAndCloseAccordions($scope, groupIndex, ionicScrollDelegate, offsetToScroll);
+
+            // need to go through products and check if they exist in cart
+            var numOfProductsInCart = $scope.c.myCart.length;
+            var numOfSubGroups      = $scope.productGroupsInfo[groupIndex]['SubGroups'].length;
+
+            // Add products that appear in my cart
+            for (var subGroupIndex = 0; subGroupIndex < numOfSubGroups; subGroupIndex++) {
+                var productsInSubGroup = $scope.productGroupsInfo[groupIndex]['SubGroups'][subGroupIndex]['Products'];
+                var numOfProductsInSubGroup = productsInSubGroup.length;
+                for (var i = 0; i < numOfProductsInSubGroup; i++) {
+                    var productFound = false;
+                    for (var j=0; j < numOfProductsInCart; j++) {
+                        if ($scope.c.myCart[j]['ItemCode'] == productsInSubGroup[i]['ItemCode']) {
+                            productsInSubGroup[i]['Amount'] = $scope.c.myCart[j]['Amount'];
+                            productFound = true;
+                            break;
+                        }
+                    }
+                    if (!productFound) {
+                        productsInSubGroup[i]['Amount'] = 0;
+                    }
+                }
+            }
+        };
+
+        $scope.$on('$ionicView.afterEnter', function () {
+            $scope.c.CancelFilterBar = $ionicFilterBar.show({
+                // items gets the array to filter
+                items: [],
+
+                // this function is called when filtering is done
+                // we take filtered items and place items that already in cart in the top of the list
+                update: function (filteredItems, searchPattern) {
+
+                    if (searchPattern == "" || searchPattern == undefined) // when we press in X in search bar
+                    {
+                        $scope.c.filteredProductsToShow = [];
+                        $scope.showNoResults = false;
+                    }
+                    else
+                    {
+                        var isItemCode = 0;
+                        if (/^[0-9]{5,}$/.test(searchPattern))
+                        {
+                            isItemCode = 1;
+                        }
+
+                        var firstWord = searchPattern.split(' ')[0];
+                        var firstWordMatcher = new RegExp("/b" + firstWord + "/b");
+
+                        searchPattern = searchPattern.replace(/\s/g, '%'); // replace spaces by wildcards
+                        searchPattern = '%' + searchPattern + '%'; // add wildcards to the beginning and ending
+
+                        ComparePricesStorage.GetProductsBySearchPattern(searchPattern, isItemCode).then(function (results) {
+
+                            var foundItems = results.rows;
+
+                            // sort items by rules, first come whole words and when word appears closer to beginning
+                            foundItems.sort(function(a,b){
+                                if ((firstWordMatcher.test(a.ItemName)) && (!firstWordMatcher.test(b.ItemName))) // A has the whole word while B don't
+                                {
+                                    return -1;
                                 }
-                                // Now add products that don't exist in the cart
-                                for (var i = 0; i < numOfFilteredProducts; i++) {
-                                    var singleProduct = foundItems[i];
-                                    var productFound = false;
+                                if ((firstWordMatcher.test(b.ItemName)) && (!firstWordMatcher.test(a.ItemName))) // B has the whole word while A don't
+                                {
+                                    return 1;
+                                }
+                                if (a.ItemName.indexOf(firstWord) < b.ItemName.indexOf(firstWord)) // in A string appears earlier
+                                {
+                                    return -1;
+                                }
+                                if (b.ItemName.indexOf(firstWord) < a.ItemName.indexOf(firstWord)) // in B string appears earlier
+                                {
+                                    return 1;
+                                }
+                                if (a.ImagePath != "img/no_product_img.jpg" && b.ImagePath == "img/no_product_img.jpg") // A has image, while B doesn't
+                                {
+                                    return -1;
+                                }
+                                if (b.ImagePath != "img/no_product_img.jpg" && a.ImagePath == "img/no_product_img.jpg") // B has image, while A doesn't
+                                {
+                                    return 1;
+                                }
+                                return 0; // in all other cases strings have equal strength
+                            });
 
-                                    for (var j = 0; j < numOfProductsInCart; j++) {
-                                        if ($scope.c.myCart[j]['ItemCode'] == singleProduct['ItemCode']) {
-                                            productFound = true;
-                                            break;
-                                        }
-                                    }
-                                    if (!productFound) {
-                                        singleProduct['Amount'] = 0;
-                                        $scope.c.filteredProductsToShow.push(singleProduct);
+                            $scope.showNoResults = (foundItems.length == 0);
+                            $scope.c.filteredProductsToShow = [];
+
+                            var numOfProductsInCart = $scope.c.myCart.length;
+                            var numOfFilteredProducts = foundItems.length;
+
+                            // Add products that appear in my cart
+                            for (var i = 0; i < numOfProductsInCart; i++) {
+                                for (var j = 0; j < numOfFilteredProducts; j++) {
+                                    if ($scope.c.myCart[i]['ItemCode'] == foundItems[j]['ItemCode']) {
+                                        $scope.c.filteredProductsToShow.push(angular.copy($scope.c.myCart[i]));
+                                        break;
                                     }
                                 }
                             }
-                            else if ($scope.c.searchResultsStyle == 'productGroups')
-                            {
-                                    $scope.showNoResults = (foundItems.length == 0);
-                                    $scope.c.filteredProductsToShow = foundItems;
+                            // Now add products that don't exist in the cart
+                            for (var i = 0; i < numOfFilteredProducts; i++) {
+                                var singleProduct = foundItems[i];
+                                var productFound = false;
+
+                                for (var j = 0; j < numOfProductsInCart; j++) {
+                                    if ($scope.c.myCart[j]['ItemCode'] == singleProduct['ItemCode']) {
+                                        productFound = true;
+                                        break;
+                                    }
+                                }
+                                if (!productFound) {
+                                    singleProduct['Amount'] = 0;
+                                    $scope.c.filteredProductsToShow.push(singleProduct);
+                                }
                             }
                         });
                     }
@@ -797,9 +828,26 @@ angular.module('ComparePrices.controllers', [])
                 delay: 500,
                 keyPressed: function () {
                 },
-                filterProperties: 'ItemName'
+                filterProperties: 'ItemName',
+                backdrop : false
             });
-        })
+        });
+
+        $scope.UpdateProductAmountFromGroups = function(product, amount) {
+            product['Amount'] += parseInt(amount);
+            $scope.c.UpdateProductAmountInMyCart(product, amount);
+        };
+
+        $scope.UpdateProductAmountFromSearch = function(product, amount) {
+            var numOfFilteredProducts = $scope.c.filteredProductsToShow.length;
+            for (var i=0; i < numOfFilteredProducts; i++) {
+                if ($scope.c.filteredProductsToShow[i]['ItemCode'] == product['ItemCode']) {
+                    $scope.c.filteredProductsToShow[i]['Amount'] += parseInt(amount);
+                    break;
+                }
+            }
+            $scope.c.UpdateProductAmountInMyCart(product, amount);
+        };
     })
 
     .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicHistory, PrepareInfoForControllers, ComparePricesStorage, FindBestShops, PopUpFactory) {
@@ -876,7 +924,6 @@ angular.module('ComparePrices.controllers', [])
 
         // based on https://github.com/djett41/ionic-filter-bar
         $scope.ShowFilterBar = function () {
-            $scope.c.searchResultsStyle = 'cartDetails';
             $ionicHistory.nextViewOptions({
                 disableAnimate: true
             });

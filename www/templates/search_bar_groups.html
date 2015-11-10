@@ -1,0 +1,17 @@
+<ion-view hide-nav-bar="true">
+    <!-- top 44px is the height of search bar -->
+    <ion-content style="top: 44px;" has-bouncing="true">
+
+        <div class="list" collection-repeat="singleProduct in c.filteredProductsToShow" item-height="72px" divider-collection-repeat>
+            <a class="item item-avatar-right" ng-click="c.FindBestShopProductGroups(singleProduct['ItemCode'], singleProduct['ItemName'], singleProduct['ImagePath'])" style="background-color: white">
+                <img style="width: auto;" ng-src={{singleProduct['ImagePath']}}>
+                <i class="icon ion-chevron-left" style="float:left; padding-top: 10px; padding-right: 10px;"></i>
+                <h2 ng-style="{ 'padding-top': singleProduct.ItemName.length < 35 ? '10px' : '0px' }" style="text-align: right; padding-top:10px;">{{singleProduct['ItemName']}}</h2>
+            </a>
+        </div>
+
+        <div ng-if="showNoResults" class="no-results">
+            <p>{{::c.localize.strings['NoResults']}}</p>
+        </div>
+    </ion-content>
+</ion-view>

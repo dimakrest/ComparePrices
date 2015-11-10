@@ -1,0 +1,50 @@
+<ion-view hide-nav-bar="true">
+    <!-- top 44px is the height of search bar -->
+    <ion-content style="top: 44px;" has-bouncing="true" delegate-handle="searchBarCartsContent">
+
+        <uib-accordion ng-repeat="singleProductGroupInfo in productGroupsInfo track by $index" ng-init="groupIndex = $index" ng-click="GroupWasClicked($index)" ng-if="c.filteredProductsToShow.length == 0">
+            <uib-accordion-group image-url={{::singleProductGroupInfo['ImageUrl']}} heading={{::singleProductGroupInfo['ProductGroupName']}} is-group="1" is-open="isGroupOpen[groupIndex]">
+                <uib-accordion>
+                    <uib-accordion-group ng-repeat="singleSubGroup in singleProductGroupInfo['SubGroups'] track by $index"
+                                         heading={{::singleSubGroup['SubProductGroupName']}}
+                                         image-url={{::singleSubGroup['ImageUrl']}}
+                                         is-open="isSubGroupOpen[groupIndex][$index]">
+
+                        <div ng-repeat="singleProduct in singleSubGroup['Products']" item-height="72px" divider-collection-repeat>
+                            <div class="item item-avatar-right" style="height:72px; background-color: white">
+                                <img style="width: auto;" ng-src={{::singleProduct['ImagePath']}}>
+
+                                <div class="ionic-input-group" style="float:left; margin-left: -10px;">
+                                    <span ng-hide="singleProduct.Amount == 0" class="ionic-input-group-addon-left" ng-click="UpdateProductAmountFromGroups(singleProduct, -1); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
+                                    <span ng-hide="singleProduct.Amount == 0"><label class="ionic-form-control">{{singleProduct["Amount"]}}</label></span>
+                                    <span ng-class="{'ionic-input-group-addon-right': singleProduct.Amount != 0, 'ionic-input-group-addon-center': singleProduct.Amount == 0}" ng-click="UpdateProductAmountFromGroups(singleProduct, +1); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
+                                </div>
+                                <h2 ng-style="{'padding-top': product.ItemName.length < 15 ? '7px' : '0px' }" style="text-align: right; white-space: pre-line;">{{::singleProduct.ItemName}}</h2>
+                            </div>
+                        </div>
+
+                    </uib-accordion-group>
+                </uib-accordion>
+            </uib-accordion-group>
+        </uib-accordion>
+
+        <ion-list class="list" ng-if="c.filteredProductsToShow.length != 0">
+            <div collection-repeat="singleProduct in c.filteredProductsToShow" item-height="72px" divider-collection-repeat>
+                <div class="item item-avatar-right" style="height:72px; background-color: white">
+                    <img style="width: auto;" ng-src={{singleProduct['ImagePath']}}>
+
+                    <div class="ionic-input-group" style="float:left; margin-left: -10px;">
+                        <span ng-hide="singleProduct.Amount == 0" class="ionic-input-group-addon-left" ng-click="UpdateProductAmountFromSearch(singleProduct, -1); $event.stopPropagation()">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
+                        <span ng-hide="singleProduct.Amount == 0"><label class="ionic-form-control">{{singleProduct["Amount"]}}</label></span>
+                        <span ng-class="{'ionic-input-group-addon-right': singleProduct.Amount != 0, 'ionic-input-group-addon-center': singleProduct.Amount == 0}" ng-click="UpdateProductAmountFromSearch(singleProduct, +1); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
+                    </div>
+                    <h2 ng-style="{'padding-top': product.ItemName.length < 15 ? '7px' : '0px' }" style="text-align: right; white-space: pre-line;">{{singleProduct.ItemName}}</h2>
+                </div>
+            </div>
+        </ion-list>
+
+        <div ng-if="showNoResults" class="no-results">
+            <p>{{::c.localize.strings['NoResults']}}</p>
+        </div>
+    </ion-content>
+</ion-view>

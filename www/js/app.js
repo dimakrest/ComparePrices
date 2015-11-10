@@ -121,8 +121,14 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
             url : "/searchBarCartDetails",
             views : {
                 'tabMyCarts' : {
-                    templateUrl: "templates/search_bar.html",
-                    controller: 'SearchBarCtrl'
+                    templateUrl: "templates/search_bar_carts.html",
+                    controller: 'SearchBarCartDetailsCtrl'
+                }
+            },
+            resolve: {
+                "InitPredefinedProducts": function (PrepareInfoForControllers)
+                {
+                    return PrepareInfoForControllers.InitProductGroups();
                 }
             }
         })
@@ -138,7 +144,8 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                         "InitPredefinedProducts": function (PrepareInfoForControllers)
                         {
                             return PrepareInfoForControllers.InitProductGroups();
-                        }}
+                        }
+                    }
                 }
             }
         })
@@ -147,8 +154,8 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
             url : "/searchBarProductGroups",
             views : {
                 'tabProducts' : {
-                    templateUrl: "templates/search_bar.html",
-                    controller: 'SearchBarCtrl'
+                    templateUrl: "templates/search_bar_groups.html",
+                    controller: 'SearchBarGroupsCtrl'
                 }
             }
         });

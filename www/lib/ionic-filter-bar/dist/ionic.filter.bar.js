@@ -61,9 +61,7 @@ angular.module('jett.ionic.filter.bar', ['ionic']);
             cancelEl.bind('click', cancelFilterBar);
 
             // If backdrop is enabled, create and append it to filter, then add click/swipe listeners to cancel filter
-            // on android by default backdrop is disabled. Din't find param in ionicConfigProvider, so doing this in a very
-            // ugly way
-            if ($scope.config.backdrop || 1) {
+            if ($scope.backdrop) {
               backdrop = angular.element('<div class="filter-bar-backdrop"></div>');
               $element.append(backdrop);
 
@@ -183,7 +181,6 @@ angular.module('jett.ionic.filter.bar', ['ionic']);
         theme: PLATFORM,
         clear: PLATFORM,
         search: PLATFORM,
-        backdrop: PLATFORM,
         transition: PLATFORM,
         platform: {},
         placeholder: PLATFORM
@@ -196,7 +193,6 @@ angular.module('jett.ionic.filter.bar', ['ionic']);
       setPlatformConfig('default', {
         clear: 'ion-ios-close',
         search: 'ion-ios-search-strong',
-        backdrop: true,
         transition: 'vertical',
         placeholder: 'Search'
       });
@@ -210,7 +206,6 @@ angular.module('jett.ionic.filter.bar', ['ionic']);
       setPlatformConfig('android', {
         clear: 'ion-android-close',
         search: false,
-        backdrop: false,
         transition: 'horizontal'
       });
 
@@ -341,7 +336,6 @@ angular.module('jett.ionic.filter.bar', ['ionic']);
           back: $ionicConfig.backButton.icon(),
           clear: $ionicFilterBarConfig.clear(),
           search: $ionicFilterBarConfig.search(),
-          backdrop: $ionicFilterBarConfig.backdrop(),
           placeholder: $ionicFilterBarConfig.placeholder()
         };
 
@@ -386,6 +380,7 @@ angular.module('jett.ionic.filter.bar', ['ionic']);
             filter: $filter('filter'),
             filterProperties: null,
             debounce: true,
+            backdrop: true,
             delay: 300,
             cancelText: 'Cancel',
             cancelOnStateChange: true,
