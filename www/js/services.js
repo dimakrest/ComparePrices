@@ -55,21 +55,26 @@ angular.module('ComparePrices.services', ['ngResource'])
                 }, function() { // error cb
                         $scope.c.currentlyShopsDownloaded++;
                         $scope.c.currentlyShopsDownloadedPercentage = Math.max(1, Math.round($scope.c.currentlyShopsDownloaded / numOfShops * 100));
-                        $scope.c.globalProgressLoadingPointer.update($scope.c.currentlyShopsDownloadedPercentage);
-
                         defer.resolve();
+
+                        if ($scope.c.globalProgressLoadingPointer != "" || typeof ($scope.c.globalProgressLoadingPointer) != "undefined") {
+                            $scope.c.globalProgressLoadingPointer.update($scope.c.currentlyShopsDownloadedPercentage);
+                        }
                     }, function() { // transaction success cb
                         $scope.c.currentlyShopsDownloaded++;
                         $scope.c.currentlyShopsDownloadedPercentage = Math.max(1, Math.round($scope.c.currentlyShopsDownloaded / numOfShops * 100));
-                        $scope.c.globalProgressLoadingPointer.update($scope.c.currentlyShopsDownloadedPercentage);
-                        SuccessTableCreation(brandName, storeID, defer)
+                        SuccessTableCreation(brandName, storeID, defer);
+                        if ($scope.c.globalProgressLoadingPointer != "" || typeof ($scope.c.globalProgressLoadingPointer) != "undefined") {
+                            $scope.c.globalProgressLoadingPointer.update($scope.c.currentlyShopsDownloadedPercentage);
+                        }
                     });
                 }, function() { // storeJson error cb
                     $scope.c.currentlyShopsDownloaded++;
                     $scope.c.currentlyShopsDownloadedPercentage = Math.max(1, Math.round($scope.c.currentlyShopsDownloaded / numOfShops * 100));
-                    $scope.c.globalProgressLoadingPointer.update($scope.c.currentlyShopsDownloadedPercentage);
-
                     defer.resolve();
+                    if ($scope.c.globalProgressLoadingPointer != "" || typeof ($scope.c.globalProgressLoadingPointer) != "undefined") {
+                        $scope.c.globalProgressLoadingPointer.update($scope.c.currentlyShopsDownloadedPercentage);
+                    }
                 });
                 return defer.promise;
             }

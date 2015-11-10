@@ -466,6 +466,7 @@ angular.module('ComparePrices.controllers', [])
         $scope.isGroupOpen      = {};
         $scope.isSubGroupOpen   = {};
         $scope.openGroupID      = -1;
+        $scope.openSubGroupID   = 0;
         $scope.c.showTipInProductGroups = localStorage.getItem('showTipInProductGroups') || 1;
         localStorage.setItem('showTipInProductGroups', 0);
 
@@ -491,6 +492,7 @@ angular.module('ComparePrices.controllers', [])
             var useOldScrollValues  = false;
             // came for the first time => nothing to close
             if (($scope.openGroupID != -1) && ($scope.openGroupID != groupIndex)) {
+                needToScroll = true;
                 // force to close open groups
                 $scope.isGroupOpen[$scope.openGroupID] = false;
                 // force to close sub groups
@@ -499,13 +501,32 @@ angular.module('ComparePrices.controllers', [])
                         $scope.isSubGroupOpen[$scope.openGroupID][key] = false;
                     }
                 }
+                $scope.openSubGroupID = 0;
+                // change the value of open subgroupIndex
+                for (var key in $scope.isSubGroupOpen[groupIndex]) {
+                    if (($scope.isSubGroupOpen[groupIndex].hasOwnProperty(key)) && ($scope.isSubGroupOpen[groupIndex][key])) {
+                        $scope.openSubGroupID = parseInt(key) + 1;
+                        break;
+                    }
+                }
                 $scope.openGroupID = groupIndex;
-                needToScroll = true;
             } else if ($scope.openGroupID == -1) {
                 $scope.openGroupID = groupIndex;
             } else if ($scope.openGroupID == groupIndex) {
                 useOldScrollValues = true;
             }
+
+            // we get here also in case that user clicked on sub group, in this case we need index of this sub group
+            for (var key in $scope.isSubGroupOpen[groupIndex]) {
+                if (($scope.isSubGroupOpen[groupIndex].hasOwnProperty(key)) && ($scope.isSubGroupOpen[$scope.openGroupID][key])) {
+                    if ((parseInt(key) + 1) != $scope.openSubGroupID) {
+                        needToScroll = true;
+                        $scope.openSubGroupID = (parseInt(key) + 1);
+                    }
+                    break;
+                }
+            }
+
             var productsInSubGroups = PrepareInfoForControllers.GetProductsInSubGroups();
             var numOfSubGroups = $scope.productGroupsInfo[groupIndex]['SubGroups'].length;
             for (var subGroupsID=0; subGroupsID < numOfSubGroups; subGroupsID++) {
@@ -525,7 +546,7 @@ angular.module('ComparePrices.controllers', [])
                 $ionicScrollDelegate.$getByHandle('productGroupsContent').freezeScroll(false);
                 $ionicScrollDelegate.$getByHandle('productGroupsContent').resize();
                 if (needToScroll) {
-                    $ionicScrollDelegate.$getByHandle('productGroupsContent').scrollTo(0, (74 * groupIndex), true);
+                    $ionicScrollDelegate.$getByHandle('productGroupsContent').scrollTo(0, (74 * groupIndex + 74 * $scope.openSubGroupID), true);
                 } else if (useOldScrollValues) {
                     $ionicScrollDelegate.$getByHandle('productGroupsContent').scrollTo(0, scrollPosition.top, true);
                 }
