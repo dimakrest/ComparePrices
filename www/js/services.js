@@ -691,7 +691,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 if (popUpText == '') {
                     template = ''
                 } else {
-                    template = '<div style="text-align:right">' + popUpText + '</div>';
+                    template = '<div style="text-align:right; direction:rtl">' + popUpText + '</div>';
                 }
                 return $ionicPopup.confirm({
                     title: popUpTitle,

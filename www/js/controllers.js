@@ -360,7 +360,7 @@ angular.module('ComparePrices.controllers', [])
             });
         };
 
-        $scope.c.HandleAddressIsNotSet = function() {
+        $scope.c.HandleAddressIsNotSet = function($scope, cartToCheck) {
             var title = $scope.c.localize.strings['ChooseYourAddressInSettings'];
             var noButtonText    = $scope.c.localize.strings['CurrentLocationText'];
             var yesButtonText   = $scope.c.localize.strings['AddrManualText'];
@@ -372,6 +372,7 @@ angular.module('ComparePrices.controllers', [])
                         if (isConnectedToInternet) {
                             $scope.c.useUsersCurrentLocation = true;
                             localStorage.setItem('UseUsersCurrentLocation', $scope.c.useUsersCurrentLocation ? 1 : 0);
+                            FindBestShops($scope, cartToCheck);
                         } else {
                             $scope.c.useUsersCurrentLocation = false;
                             var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotUpdateStoresInRange'];
@@ -398,22 +399,23 @@ angular.module('ComparePrices.controllers', [])
             ShowModal($scope, 'templates/how_we_do_this.html');
         };
 
+        // this function is called from search bar in product groups
         $scope.c.FindBestShopProductGroups = function(productID, productName, productImage) {
+            var structForFindBestShop = [];
+            structForFindBestShop['ItemCode'] = productID;
+            structForFindBestShop['ItemName'] = productName;
+            structForFindBestShop['ImagePath'] = productImage;
+            structForFindBestShop['Amount'] = 1;
+
             if ($scope.c.lastAddress == '')
             {
                 if (typeof ($scope.c.CancelFilterBar) != "undefined") {
-                    $scope.c.CancelFilterBar();
+                    $scope.c.CancelFilterBar($scope, [structForFindBestShop]);
                 }
-                $scope.c.HandleAddressIsNotSet();
+                $scope.c.HandleAddressIsNotSet($scope, [structForFindBestShop]);
             }
             else
             {
-                var structForFindBestShop = [];
-                structForFindBestShop['ItemCode'] = productID;
-                structForFindBestShop['ItemName'] = productName;
-                structForFindBestShop['ImagePath'] = productImage;
-                structForFindBestShop['Amount'] = 1;
-
                 FindBestShops($scope, [structForFindBestShop]);
             }
         };
@@ -463,13 +465,13 @@ angular.module('ComparePrices.controllers', [])
         };
 
         $scope.FindBestShop = function(productInfo) {
+            productInfo['Amount'] = 1;
             if ($scope.c.lastAddress == '')
             {
-                $scope.c.HandleAddressIsNotSet();
+                $scope.c.HandleAddressIsNotSet($scope, [productInfo]);
             }
             else
             {
-                productInfo['Amount'] = 1;
                 FindBestShops($scope, [productInfo]);
             }
         };
@@ -860,7 +862,7 @@ angular.module('ComparePrices.controllers', [])
         $scope.FindBestShop = function() {
             if ($scope.c.lastAddress == '')
             {
-                $scope.c.HandleAddressIsNotSet();
+                $scope.c.HandleAddressIsNotSet($scope, $scope.c.myCart);
             }
             else
             {
