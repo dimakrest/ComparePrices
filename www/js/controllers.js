@@ -487,6 +487,8 @@ angular.module('ComparePrices.controllers', [])
         // scrolling issue
         // if group is clicked. need to add all products to sub groups
         $scope.GroupWasClicked = function(groupIndex) {
+            var needToScroll        = false;
+            var useOldScrollValues  = false;
             // came for the first time => nothing to close
             if (($scope.openGroupID != -1) && ($scope.openGroupID != groupIndex)) {
                 // force to close open groups
@@ -498,8 +500,11 @@ angular.module('ComparePrices.controllers', [])
                     }
                 }
                 $scope.openGroupID = groupIndex;
+                needToScroll = true;
             } else if ($scope.openGroupID == -1) {
                 $scope.openGroupID = groupIndex;
+            } else if ($scope.openGroupID == groupIndex) {
+                useOldScrollValues = true;
             }
             var productsInSubGroups = PrepareInfoForControllers.GetProductsInSubGroups();
             var numOfSubGroups = $scope.productGroupsInfo[groupIndex]['SubGroups'].length;
@@ -514,9 +519,16 @@ angular.module('ComparePrices.controllers', [])
                 }
             }
 
+            $ionicScrollDelegate.$getByHandle('productGroupsContent').freezeScroll(true);
+            var scrollPosition = $ionicScrollDelegate.$getByHandle('productGroupsContent').getScrollPosition();
             setTimeout(function() {
                 $ionicScrollDelegate.$getByHandle('productGroupsContent').freezeScroll(false);
                 $ionicScrollDelegate.$getByHandle('productGroupsContent').resize();
+                if (needToScroll) {
+                    $ionicScrollDelegate.$getByHandle('productGroupsContent').scrollTo(0, (74 * groupIndex), true);
+                } else if (useOldScrollValues) {
+                    $ionicScrollDelegate.$getByHandle('productGroupsContent').scrollTo(0, scrollPosition.top, true);
+                }
             }, 350);
         };
 
