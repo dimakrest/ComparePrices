@@ -1,11 +1,11 @@
 <ion-tabs class="tabs-icon-top tabs-dark">
 
-    <ion-tab title={{::c.localize.strings['CompareCartsTitle']}} icon-off="ion-ios-cart-outline" icon-on="ion-ios-cart" href="#/tab/myCarts" ng-click="SelectTabWithIndex(0)">
-        <ion-nav-view name="tabMyCarts" ></ion-nav-view>
+    <ion-tab title={{::c.localize.strings['CompareProductsTitle']}} icon-off="ion-ios-nutrition-outline" icon-on="ion-ios-nutrition" href="#/tab/productGroups" ng-click="SelectTabWithIndex(0)">
+        <ion-nav-view name="tabProducts" ></ion-nav-view>
     </ion-tab>
 
-    <ion-tab title={{::c.localize.strings['CompareProductsTitle']}} icon-off="ion-ios-nutrition-outline" icon-on="ion-ios-nutrition" href="#/tab/productGroups" ng-click="SelectTabWithIndex(1)">
-        <ion-nav-view name="tabProducts" ></ion-nav-view>
+    <ion-tab title={{::c.localize.strings['CompareCartsTitle']}} icon-off="ion-ios-cart-outline" icon-on="ion-ios-cart" href="#/tab/myCarts" ng-click="SelectTabWithIndex(1)">
+        <ion-nav-view name="tabMyCarts" ></ion-nav-view>
     </ion-tab>
 
 </ion-tabs>

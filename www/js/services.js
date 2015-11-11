@@ -1285,7 +1285,7 @@ angular.module('ComparePrices.services', ['ngResource'])
         var _productSubGroups    = [];
         var _productsInSubGroups = [];
 
-        function MyCartsInitFirstTimeLoadPrivate(firstTimeLoad) {
+        function FirstTimeLoadInits(firstTimeLoad) {
             var defer = $q.defer();
 
             if (firstTimeLoad == 1) {
@@ -1365,7 +1365,7 @@ angular.module('ComparePrices.services', ['ngResource'])
             'MyCartsInit': function(firstTimeLoad) {
                 var defer = $q.defer();
 
-                MyCartsInitFirstTimeLoadPrivate(firstTimeLoad).then(function() {
+                FirstTimeLoadInits(firstTimeLoad).then(function() {
                     MyCartsInitPrivate().then(function() {
                         defer.resolve();
                     });
@@ -1377,8 +1377,14 @@ angular.module('ComparePrices.services', ['ngResource'])
                 return InitMyCartPrivate(cartID);
             },
 
-            InitProductGroups : function() {
-                return InitProductGroupsPrivate();
+            InitProductGroups : function(firstTimeLoad) {
+                var defer = $q.defer();
+                FirstTimeLoadInits(firstTimeLoad).then(function() {
+                    InitProductGroupsPrivate().then(function() {
+                        defer.resolve();
+                    });
+                });
+                return defer.promise;
             },
 
             GetUserCarts : function() {

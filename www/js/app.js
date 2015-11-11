@@ -109,6 +109,8 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                     templateUrl: "templates/cart_details.html",
                     controller: 'CartDetailsCtrl',
                     resolve: {
+                        // basically only in one tab the first time load is need, we changed from carts to
+                        // groups and it's possible that will change it back, so doing the necessary inits in both cases
                         "InitMyCart" : function(PrepareInfoForControllers, $stateParams) {
                             return PrepareInfoForControllers.InitMyCart($stateParams.cartID);
                         }
@@ -141,9 +143,12 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                     templateUrl: "templates/product_groups.html",
                     controller: 'ProductGroupsCtrl',
                     resolve: {
+                        // basically only in one tab the first time load is need, we changed from carts to
+                        // groups and it's possible that will change it back, so doing the necessary inits in both cases
                         "InitPredefinedProducts": function (PrepareInfoForControllers)
                         {
-                            return PrepareInfoForControllers.InitProductGroups();
+                            var firstTimeLoad = localStorage.getItem('firstTimeLoad') || 1;
+                            return PrepareInfoForControllers.InitProductGroups(firstTimeLoad);
                         }
                     }
                 }
@@ -161,7 +166,7 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
         });
 
     // if none of the above states are matched, use this as the fallback
-    $urlRouterProvider.otherwise('/tab/myCarts');
+    $urlRouterProvider.otherwise('/tab/productGroups');
 
     // placeholder for a search bar
     $ionicFilterBarConfigProvider.placeholder(document.localize.strings['SearchQueryCartDetailsPlaceholder']);
