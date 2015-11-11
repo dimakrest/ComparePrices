@@ -1532,7 +1532,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     } , function (error) { // error callback
                             $scope.c.HideLoading();
 
-                            if (error.code == 1) {
+                            if ((error.code == error.PERMISSION_DENIED) || (error.code == error.TIMEOUT)) {
                                 defer.resolve(true);
 
                                 var title = $scope.c.localize.strings['NavigateToSettings'];
@@ -1555,7 +1555,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                             } else {
                                 defer.resolve(false);
                             }
-                        }
+                        }, { maximumAge: 3000, timeout: 5000, enableHighAccuracy: true}
                 );
                 return defer.promise;
             }
