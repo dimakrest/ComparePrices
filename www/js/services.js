@@ -1606,17 +1606,19 @@ angular.module('ComparePrices.services', ['ngResource'])
             'InitProductGroupsAndSubGroups' : function($scope) {
                 $scope.productGroupsInfo = PrepareInfoForControllers.GetProductGroups();
                 // Add sub groups to groups, if I do it without timeout it takes a lot of time to load the page
-                setTimeout(function() {
-                    var productSubGroups = PrepareInfoForControllers.GetProductSubGroups();
-                    for (var groupID=0; groupID < $scope.productGroupsInfo.length; groupID++) {
-                        $scope.productGroupsInfo[groupID]['SubGroups'] = [];
-                        for (var subGroupsID=0; subGroupsID < productSubGroups.length; subGroupsID++) {
-                            if (productSubGroups[subGroupsID]['ProductGroupID'] == $scope.productGroupsInfo[groupID]['ProductGroupID']) {
-                                $scope.productGroupsInfo[groupID]['SubGroups'].push(productSubGroups[subGroupsID]);
+                $scope.$on('$ionicView.afterEnter', function () {
+                    setTimeout(function () {
+                        var productSubGroups = PrepareInfoForControllers.GetProductSubGroups();
+                        for (var groupID = 0; groupID < $scope.productGroupsInfo.length; groupID++) {
+                            $scope.productGroupsInfo[groupID]['SubGroups'] = [];
+                            for (var subGroupsID = 0; subGroupsID < productSubGroups.length; subGroupsID++) {
+                                if (productSubGroups[subGroupsID]['ProductGroupID'] == $scope.productGroupsInfo[groupID]['ProductGroupID']) {
+                                    $scope.productGroupsInfo[groupID]['SubGroups'].push(productSubGroups[subGroupsID]);
+                                }
                             }
                         }
-                    }
-                }, 200);
+                    }, 50);
+                })
             },
 
             // IMPORTANT!!!!: open sub groups are closed automatically and event is propagated to this function, so no need to take care of
@@ -1646,6 +1648,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     $scope.openGroupID = groupIndex;
                 } else if ($scope.openGroupID == -1) {
                     $scope.openGroupID = groupIndex;
+                    needToScroll = true;
                 } else if ($scope.openGroupID == groupIndex) {
                     useOldScrollValues = true;
                 }

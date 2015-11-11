@@ -460,6 +460,16 @@ angular.module('ComparePrices.controllers', [])
 
         $scope.GroupWasClicked = function(groupIndex) {
             var offsetToScroll = 0;
+            if ($scope.c.showTipInProductGroups == 1) {
+                var tipInProductGroups = document.getElementById('tipInProductGroups');
+                offsetToScroll = parseInt(tipInProductGroups.offsetHeight);
+                if (typeof (tipInProductGroups.style['margin-top']) != "undefined") {
+                    offsetToScroll += parseInt(tipInProductGroups.style['margin-top']);
+                }
+                if (typeof (tipInProductGroups.style['margin-bottom']) != "undefined") {
+                    offsetToScroll += parseInt(tipInProductGroups.style['margin-bottom']);
+                }
+            }
             var ionicScrollDelegate = $ionicScrollDelegate.$getByHandle('productGroupsContent');
             GroupsAndSubGroups.AddProductsAndCloseAccordions($scope, groupIndex, ionicScrollDelegate, offsetToScroll);
         };
@@ -486,11 +496,11 @@ angular.module('ComparePrices.controllers', [])
             }, 100);
         };
 
-        $scope.$on('$ionicView.afterEnter', function(){
-            setTimeout(function() {
-                ionicMaterialMotion.blinds();
-            }, 0);
-        });
+//        $scope.$on('$ionicView.afterEnter', function(){
+//            setTimeout(function() {
+//                ionicMaterialMotion.blinds();
+//            }, 0);
+//        });
     })
 
     .controller('MyCartsCtrl', function($scope, $timeout, $ionicPopup, PopUpFactory, ComparePricesStorage, ComparePricesConstants, PrepareInfoForControllers, ionicMaterialMotion) {
