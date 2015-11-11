@@ -1226,9 +1226,9 @@ angular.module('ComparePrices.services', ['ngResource'])
                 suitableShops.sort(dynamicSortMultiple("CartPrice", "Distance"));
 
                 var minimalPrice = suitableShops[0]['CartPrice'];
-
+                
                 for (var i = 0; i < suitableShops.length; i++) {
-                    if (suitableShops[i]['CartPrice'] > minimalPrice) {
+                    if (parseFloat(suitableShops[i]['CartPrice']) > parseFloat(minimalPrice)) {
                         var percentsToShowNearPrice = Math.round((suitableShops[i]['CartPrice'] / minimalPrice - 1) * 100);
                         suitableShops[i]['PercentsToShowNearPrice'] = (percentsToShowNearPrice == 0) ? "" : ' (+' + percentsToShowNearPrice + '%) ';
                         suitableShops[i]['PriceColor'] = (percentsToShowNearPrice == 0) ? "green" : (percentsToShowNearPrice < 30) ? "orange" : "red";
