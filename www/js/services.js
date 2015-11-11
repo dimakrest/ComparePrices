@@ -1300,7 +1300,9 @@ angular.module('ComparePrices.services', ['ngResource'])
                         ComparePricesStorage.CreatePredefinedCarts()]).then(function () {
                         defer.resolve();
                         localStorage.setItem('firstTimeLoad', 0);
-                        $ionicLoading.hide();
+                        setTimeout(function() {
+                            $ionicLoading.hide();
+                        }, 0);
                     });
                 });
             } else {

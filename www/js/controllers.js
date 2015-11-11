@@ -327,7 +327,9 @@ angular.module('ComparePrices.controllers', [])
         };
 
         $scope.c.HideLoading = function() {
-            $ionicLoading.hide();
+            setTimeout(function() {
+                $ionicLoading.hide();
+            }, 0);
         };
 
         // 2 functions for toggling accordion in best_shops.html
