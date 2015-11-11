@@ -114,16 +114,9 @@ table.bottomBorder td { text-align:center; padding:3px;}
 }
 
 .subFooterHalfButton {
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: -moz-box;
-    display: -moz-flex;
-    display: -ms-flexbox;
-    display: flex;
-    justify-content: center;
-    -webkit-justify-content: center;
     width: 50%;
     height: 44px;
+    text-align: center;
 }
 
 .subFooterHalfButton.activated {

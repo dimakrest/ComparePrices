@@ -1,13 +1,13 @@
 <ion-view view-title={{::c.currentCartName}}>
     <div class="bar bar-subheader item-input-inset effectSubHeader">
         <div style="background-color: #FBF3F4;" class="subFooterHalfButton" ng-hide="myCart.length == 0" ng-click="ToggleDeleteValue()">
-            <span style="color: #ed474b; padding:12px; font-size: 17px;">{{::c.localize.strings['RemoveProducts']}}&nbsp;&nbsp;&nbsp;</span>
-            <span style="color: #ed474b; padding-top:4px; font-size: 25px;">_</span>
+            <span style="color: #ed474b; padding:12px; font-size: 17px; display: inline-block;">{{::c.localize.strings['RemoveProducts']}}&nbsp;&nbsp;&nbsp;</span>
+            <span style="color: #ed474b; padding-top:4px; font-size: 25px; position: absolute;">_</span>
         </div>
         <div style="height: 100%; border-left: 1px solid #B7B3B3;"></div>
         <div style="background-color: #EBF5FB;" class="subFooterHalfButton" ng-click="ShowFilterBar()">
-            <span style="color: #5593B7; padding:12px; font-size: 17px;">{{::c.localize.strings['AddProduct']}}&nbsp;&nbsp;&nbsp;</span>
-            <span style="color: #5593B7; padding-top:13px; font-size: 25px;">+</span>
+            <span style="color: #5593B7; padding:12px; font-size: 17px; display: inline-block;">{{::c.localize.strings['AddProduct']}}&nbsp;&nbsp;&nbsp;</span>
+            <span style="color: #5593B7; padding-top:13px; font-size: 25px; position: absolute;">+</span>
         </div>
     </div>
 
@@ -46,7 +46,7 @@
         <div ng-click="DeleteCart()" class="box effect1 button-fab" style="background-color: #D05558">
             {{::c.localize.strings['DeleteCartTitle']}}
         </div>
-        <div ng-click="FindBestShop()" class="box effect1 button-fab" style="background-color: #5593B7; position: absolute; right: 1px;">
+        <div ng-click="FindBestShop()" class="box effect1 button-fab" style="background-color: #5593B7; position: absolute; right: 0px;">
             {{::c.localize.strings['FindBestShop']}}
         </div>
     </ion-footer-bar>
