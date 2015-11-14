@@ -1130,6 +1130,8 @@ angular.module('ComparePrices.services', ['ngResource'])
         return function(lat, lon) {
             var defer = $q.defer();
 
+            lat = 32.7918679;
+            lon = 34.983740499999996;
             var googleReverseGeocoding = $resource('https://maps.googleapis.com/maps/api/geocode/json',  {latlng:lat + ',' + lon, key:'AIzaSyBkW_9B1eMOoHIIkJ17PSQ8_yQ9ZJjPwME',
                 'language':'iw'});
             googleReverseGeocoding.get(function(result) {
@@ -1156,6 +1158,21 @@ angular.module('ComparePrices.services', ['ngResource'])
                         defer.resolve(fullAddress);
                         break;
                     }
+                }
+                // TODO: in this case need to try and set more accurate location
+                // if for some reason the address is not full, take the most parts
+                if (numOfFieldsInFullAddress != 3) {
+                    var fullAddressString = '';
+                    if (typeof(fullAddress['route']) != "undefined") {
+                        fullAddressString += fullAddress['route'] + ' ';
+                    }
+                    if (typeof(fullAddress['streetNumber']) != "undefined") {
+                        fullAddressString += fullAddress['streetNumber']  + ' ';
+                    }
+                    if (typeof(fullAddress['locality']) != "undefined") {
+                        fullAddressString += fullAddress['locality'] + ' ';
+                    }
+                    defer.resolve(fullAddressString);
                 }
             });
             return defer.promise;
