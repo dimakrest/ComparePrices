@@ -13,14 +13,14 @@
 
     <ion-content has-bouncing="true" class="content-bg" delegate-handle="modalContent" style="background-image: url('img/bg.png'); background-size: auto; background-repeat: repeat;">
 
-        <ion-item style="direction: rtl; text-align:left; background-color: #FF8C83;" ng-show="c.missingProducts.length > 0" ng-click="openPopover($event)">
+        <ion-item style="direction: rtl; padding-right: 42px; background-color: #FF8C83;" ng-show="c.missingProducts.length > 0" ng-click="openPopover($event)">
             {{::c.localize.strings['DontHaveAllProducts']}}
             <i class="icon ion-information-circled" style="position: absolute; right: 20px;"></i>
         </ion-item>
 
-        <div style="display: flex; margin-top: 7px; margin-bottom: 7px; flex-direction: row-reverse;">
-            <span style="direction: rtl; margin-right: 60px; margin-top: 4px;">{{::c.localize.strings['SortBy']}}</span>
-            <span class="circled-button-group" style="margin-right: 10px">
+        <div style="margin-top: 7px; margin-bottom: 7px;">
+            <span style="direction: rtl; margin-right: 20%; margin-top: 4px; float: right;">{{::c.localize.strings['SortBy']}}</span>
+            <span class="circled-button-group" style="margin-left: 30%;">
                 <span class="circled-button-left" ng-click="c.SortShopsBy('price')" ng-style="{'background-color': c.SortShopsByDistance == 1 ? 'white' : '#8FB5CC'}">{{::c.localize.strings['Price']}}</span>
                 <span class="circled-button-right" ng-click="c.SortShopsBy('distance')" ng-style="{'background-color': c.SortShopsByDistance == 1 ? '#8FB5CC' : 'white'}">{{::c.localize.strings['Distance']}}</span>
             </span>
