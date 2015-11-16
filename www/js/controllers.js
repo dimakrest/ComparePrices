@@ -268,9 +268,9 @@ angular.module('ComparePrices.controllers', [])
                 $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
                 UpdateStores.UpdateStoresInfoIfRequired($scope).then(function (isConnectedToInternet) {
                     $scope.c.HideLoading();
-                    if (isConnectedToInternet) {
+                    if (isConnectedToInternet == 1) {
                         localStorage.setItem('UseUsersCurrentLocation', $scope.c.useUsersCurrentLocation ? 1 : 0);
-                    } else {
+                    } else if (isConnectedToInternet == 0) {
                         $scope.c.useUsersCurrentLocation = false;
                         var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotUpdateStoresInRange'];
                         PopUpFactory.ErrorPopUp($scope, popUpText);
@@ -371,11 +371,11 @@ angular.module('ComparePrices.controllers', [])
                     $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
                     UpdateStores.UpdateStoresInfoIfRequired($scope).then(function (isConnectedToInternet) {
                         $scope.c.HideLoading();
-                        if (isConnectedToInternet) {
+                        if (isConnectedToInternet == 1) {
                             $scope.c.useUsersCurrentLocation = true;
                             localStorage.setItem('UseUsersCurrentLocation', $scope.c.useUsersCurrentLocation ? 1 : 0);
                             FindBestShops($scope, cartToCheck);
-                        } else {
+                        } else if (isConnectedToInternet == 0) {
                             $scope.c.useUsersCurrentLocation = false;
                             var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotUpdateStoresInRange'];
                             PopUpFactory.ErrorPopUp($scope, popUpText);

@@ -1129,9 +1129,6 @@ angular.module('ComparePrices.services', ['ngResource'])
     .factory('GoogleReverseGeocoding', ['$q', '$resource', function($q, $resource) {
         return function(lat, lon) {
             var defer = $q.defer();
-
-            lat = 32.7918679;
-            lon = 34.983740499999996;
             var googleReverseGeocoding = $resource('https://maps.googleapis.com/maps/api/geocode/json',  {latlng:lat + ',' + lon, key:'AIzaSyBkW_9B1eMOoHIIkJ17PSQ8_yQ9ZJjPwME',
                 'language':'iw'});
             googleReverseGeocoding.get(function(result) {
@@ -1499,10 +1496,10 @@ angular.module('ComparePrices.services', ['ngResource'])
                         if (addressAlreadySet && (distanceBetweenTwoLocations < ComparePricesConstants.LOCATION_CHANGES_MARGIN)) {
                             if (newStoresVersionExists == "1") { // force store updates
                                 UpdateStoresInfoPrivate($scope, savedLat, savedLon, $scope.c.rangeForShops).then(function () {
-                                    defer.resolve(true);
+                                    defer.resolve(1);
                                 });
                             } else {
-                                defer.resolve(true);
+                                defer.resolve(1);
                             }
                             return;
                         }
@@ -1528,29 +1525,29 @@ angular.module('ComparePrices.services', ['ngResource'])
                                     // check for internet connection
                                     if (MiscFunctions.IsConnectedToInternet()) {
                                         ReverseGeocodingAndUpdateStore($scope, lat, lon).then(function() {
-                                            defer.resolve(true);
+                                            defer.resolve(1);
                                         });
                                     } else {
-                                        defer.resolve(false);
+                                        defer.resolve(0);
                                     }
                                 } else { // user doesn't want to update his location
                                     if (newStoresVersionExists == "1") { // force store updates
                                         $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
                                         UpdateStoresInfoPrivate($scope, savedLat, savedLon, $scope.c.rangeForShops).then(function() {
-                                            defer.resolve(true);
+                                            defer.resolve(1);
                                         });
                                     } else {
-                                        defer.resolve(true);
+                                        defer.resolve(1);
                                     }
                                 }
                             })
                         } else { // use geolocation
                             if (MiscFunctions.IsConnectedToInternet()) {
                                 ReverseGeocodingAndUpdateStore($scope, lat, lon).then(function () {
-                                    defer.resolve(true);
+                                    defer.resolve(1);
                                 });
                             } else {
-                                defer.resolve(false);
+                                defer.resolve(0);
                             }
 
                         }
@@ -1558,7 +1555,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                             $scope.c.HideLoading();
 
                             if ((error.code == error.PERMISSION_DENIED) || (error.code == error.TIMEOUT)) {
-                                defer.resolve(true);
+                                defer.resolve(2);
 
                                 var title = $scope.c.localize.strings['NavigateToSettings'];
                                 var text = $scope.c.localize.strings['DoYouWantToOpenSettings'];
@@ -1573,12 +1570,11 @@ angular.module('ComparePrices.services', ['ngResource'])
                                         if ($ionicSideMenuDelegate.isOpen()) {
                                             $ionicSideMenuDelegate.toggleRight();
                                         }
-
                                         $scope.c.useUsersCurrentLocation = false;
                                     }
                                 });
                             } else {
-                                defer.resolve(false);
+                                defer.resolve(0);
                             }
                         }, { maximumAge: 3000, timeout: 5000, enableHighAccuracy: true}
                 );
