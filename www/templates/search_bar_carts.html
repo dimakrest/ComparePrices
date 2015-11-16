@@ -23,6 +23,11 @@
                                     <h2 ng-style="{'padding-top': product.ItemName.length < 15 ? '7px' : '0px' }" style="text-align: right; white-space: pre-line;">{{::singleProduct.ItemName}}</h2>
                                 </div>
                             </div>
+                            <!-- Special "button/item" to show search tooltip -->
+                            <div class="item item-avatar-right" style="height:72px; background-color: white" ng-click="ShowSearchToolTip()">
+                                <img style="width: auto;" src="img/drink.jpg">
+                                <h2 style="text-align: right; white-space: pre-line;">Click here to see the tooltip</h2>
+                            </div>
 
                         </uib-accordion-group>
                     </uib-accordion>

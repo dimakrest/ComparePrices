@@ -248,6 +248,8 @@ angular.module('ComparePrices.controllers', [])
             });
             $scope.popover.show($event);
         };
+
+        // closePopover and remove are not called
         $scope.closePopover = function() {
             $scope.popover.hide();
         };
@@ -448,14 +450,13 @@ angular.module('ComparePrices.controllers', [])
         };
     })
 
-    .controller('ProductGroupsCtrl', function($scope, $ionicScrollDelegate, FindBestShops, GroupsAndSubGroups, ionicMaterialMotion, $ionicHistory) {
+    .controller('ProductGroupsCtrl', function($scope, $ionicScrollDelegate, FindBestShops, GroupsAndSubGroups, $ionicHistory, $ionicPopover) {
         $scope.isGroupOpen      = {};
         $scope.isSubGroupOpen   = {};
         $scope.openGroupID      = -1;
         $scope.openSubGroupID   = 0;
         $scope.c.showTipInProductGroups = localStorage.getItem('showTipInProductGroups') || 1;
         localStorage.setItem('showTipInProductGroups', 0);
-
 
         $scope.productGroupsInfo    = [];
         GroupsAndSubGroups.InitProductGroupsAndSubGroups($scope);
@@ -498,11 +499,31 @@ angular.module('ComparePrices.controllers', [])
             }, 100);
         };
 
-//        $scope.$on('$ionicView.afterEnter', function(){
-//            setTimeout(function() {
-//                ionicMaterialMotion.blinds();
-//            }, 0);
-//        });
+        // Popover for missing products in best_shops window
+        $scope.ShowSearchToolTip = function() {
+            var template = '<ion-popover-view class="fit"><ion-content scroll="false"> ' +
+                '<h5 style="white-space: pre-line; text-align:center; margin-top: 5px;"> ' +
+                '{{c.localize.strings["PartialComparisonMade"]}}<br>{{c.localize.strings["ShowShopsThatPartiallySuit"]}}' +
+                '</h5> <div class="settings-border-divider"></div> <h5 style="text-align:right; padding-right:10px;">';
+
+            template += '</h4></ion-content></ion-popover-view>';
+
+            $scope.popover = $ionicPopover.fromTemplate(template, {
+                scope: $scope
+            });
+            $scope.popover.show(document.getElementById('productGroupsTooltipPosition'));
+        };
+
+        // closePopover is not called
+        $scope.closePopover = function() {
+            $scope.popover.hide();
+        };
+        //Cleanup the popover when we're done with it!
+        $scope.$on('$destroy', function() {
+            if (typeof($scope.popover) != "undefined") {
+                $scope.popover.remove();
+            }
+        });
     })
 
     .controller('MyCartsCtrl', function($scope, $timeout, $ionicPopup, PopUpFactory, ComparePricesStorage, ComparePricesConstants, PrepareInfoForControllers, ionicMaterialMotion) {
@@ -689,7 +710,7 @@ angular.module('ComparePrices.controllers', [])
     })
 
     // TODO: merge common functions like update or something ...
-    .controller('SearchBarCartDetailsCtrl', function($scope, $ionicFilterBar, $ionicHistory, $ionicScrollDelegate, GroupsAndSubGroups, ComparePricesStorage) {
+    .controller('SearchBarCartDetailsCtrl', function($scope, $ionicFilterBar, $ionicHistory, $ionicScrollDelegate, $ionicPopover, GroupsAndSubGroups, ComparePricesStorage) {
         $scope.c.filteredProductsToShow = [];
         $scope.showNoResults    = false;
 
@@ -862,6 +883,32 @@ angular.module('ComparePrices.controllers', [])
             }
             $scope.c.UpdateProductAmountInMyCart(product, amount);
         };
+
+        // Popover for missing products in best_shops window
+        $scope.ShowSearchToolTip = function() {
+            var template = '<ion-popover-view class="fit"><ion-content scroll="false"> ' +
+                '<h5 style="white-space: pre-line; text-align:center; margin-top: 5px;"> ' +
+                '{{c.localize.strings["PartialComparisonMade"]}}<br>{{c.localize.strings["ShowShopsThatPartiallySuit"]}}' +
+                '</h5> <div class="settings-border-divider"></div> <h5 style="text-align:right; padding-right:10px;">';
+
+            template += '</h4></ion-content></ion-popover-view>';
+
+            $scope.popover = $ionicPopover.fromTemplate(template, {
+                scope: $scope
+            });
+            $scope.popover.show(document.getElementById('filterBarTooltipPosition'));
+        };
+
+        // closePopover and remove are not called
+        $scope.closePopover = function() {
+            $scope.popover.hide();
+        };
+        //Cleanup the popover when we're done with it!
+        $scope.$on('$destroy', function() {
+            if (typeof($scope.popover) != "undefined") {
+                $scope.popover.remove();
+            }
+        });
     })
 
     .controller('CartDetailsCtrl', function($scope, $stateParams, $ionicHistory, PrepareInfoForControllers, ComparePricesStorage, FindBestShops, PopUpFactory) {

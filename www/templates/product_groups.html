@@ -1,6 +1,6 @@
 <ion-header-bar style="justify-content: flex-end; -webkit-justify-content: flex-end;" class="bar bar-subheader item-input-inset  effectSubHeader" ng-click="ShowFilterBar()">
     <div>
-        <span style="color: #5593B7; padding:10px;" >{{::c.localize.strings['FindProduct']}}</span>
+        <span id="productGroupsTooltipPosition" style="color: #5593B7; padding:10px;" >{{::c.localize.strings['FindProduct']}}</span>
         <i class="icon ion-ios-search" style="padding-top: 10px; padding-right: 10px;"></i>
     </div>
 </ion-header-bar>
@@ -31,6 +31,13 @@
                             <a class="item item-avatar-right">
                                 <img style="width: auto;" ng-src={{::singleProduct['ImagePath']}}>
                                 <h2  ng-style="{ 'padding-top': singleProduct.ItemName.length < 35 ? '10px' : '0px' }" style="text-align: right; white-space: pre-line;">{{::singleProduct.ItemName}}</h2>
+                            </a>
+                        </div>
+                        <!-- Special "button/item" to show search tooltip -->
+                        <div style="margin: 0px;" class="card" ng-click="ShowSearchToolTip()">
+                            <a class="item item-avatar-right">
+                                <img style="width: auto;" src="img/drink.jpg">
+                                <h2 style="text-align: right; white-space: pre-line;">Click here to see tooltip</h2>
                             </a>
                         </div>
                     </uib-accordion-group>

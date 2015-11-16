@@ -18,7 +18,7 @@ angular.module('jett.ionic.filter.bar', ['ionic']);
               '<div class="bar bar-header bar-{{::config.theme}} item-input-inset">' +
                 '<label class="item-input-wrapper">' +
                   '<button style="display:none;" class="filter-bar-clear button button-icon icon {{::config.clear}}"></button>' +
-                  '<input style="direction: rtl;" type="search" class="filter-bar-search" ng-model="filterText" placeholder="{{::config.placeholder}}" />' +
+                  '<input id="filterBarTooltipPosition" style="direction: rtl;" type="search" class="filter-bar-search" ng-model="filterText" placeholder="{{::config.placeholder}}" />' +
                 '</label>' +
                 '<button class="filter-bar-cancel button button-icon icon ion-ios-arrow-forward"></button>' +
               '</div>' +
@@ -30,7 +30,7 @@ angular.module('jett.ionic.filter.bar', ['ionic']);
                 '<button class="filter-bar-cancel filter-bar-cancel-ios button button-clear" ng-bind-html="::cancelText"></button>' +
                 '<label class="item-input-wrapper">' +
                   '<button style="display:none;" class="filter-bar-clear button button-icon icon {{::config.clear}}"></button>' +
-                  '<input style="direction: rtl;" type="search" class="filter-bar-search" ng-model="filterText" placeholder="{{::config.placeholder}}"/>' +
+                  '<input id="filterBarTooltipPosition" style="direction: rtl;" type="search" class="filter-bar-search" ng-model="filterText" placeholder="{{::config.placeholder}}"/>' +
                   '<i class="icon {{::config.search}} placeholder-icon"></i>' +
                 '</label>' +
               '</div>' +
