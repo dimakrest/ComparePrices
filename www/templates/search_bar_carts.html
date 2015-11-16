@@ -24,9 +24,10 @@
                                 </div>
                             </div>
                             <!-- Special "button/item" to show search tooltip -->
-                            <div class="item item-avatar-right" style="height:72px; background-color: white" ng-click="ShowSearchToolTip()">
-                                <img style="width: auto;" src="img/drink.jpg">
-                                <h2 style="text-align: right; white-space: pre-line;">Click here to see the tooltip</h2>
+                            <div style="margin: 0px; text-align: center" class="card" >
+                                <button class="button button-light" style="direction: rtl;" ng-click="ShowSearchToolTip()">
+                                    {{::c.localize.strings['SearchTooltipButtonText']}}
+                                </button>
                             </div>
 
                         </uib-accordion-group>

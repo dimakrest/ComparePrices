@@ -503,7 +503,7 @@ angular.module('ComparePrices.controllers', [])
         $scope.ShowSearchToolTip = function() {
             var template = '<ion-popover-view class="fit"><ion-content scroll="false"> ' +
                 '<h5 style="white-space: pre-line; text-align:center; margin-top: 5px;"> ' +
-                '{{c.localize.strings["PartialComparisonMade"]}}<br>{{c.localize.strings["ShowShopsThatPartiallySuit"]}}' +
+                '{{c.localize.strings["SearchTooltip1"]}}<br>{{c.localize.strings["SearchTooltip2"]}}' +
                 '</h5> <div class="settings-border-divider"></div> <h5 style="text-align:right; padding-right:10px;">';
 
             template += '</h4></ion-content></ion-popover-view>';
@@ -888,7 +888,7 @@ angular.module('ComparePrices.controllers', [])
         $scope.ShowSearchToolTip = function() {
             var template = '<ion-popover-view class="fit"><ion-content scroll="false"> ' +
                 '<h5 style="white-space: pre-line; text-align:center; margin-top: 5px;"> ' +
-                '{{c.localize.strings["PartialComparisonMade"]}}<br>{{c.localize.strings["ShowShopsThatPartiallySuit"]}}' +
+                '{{c.localize.strings["SearchTooltip1"]}}<br>{{c.localize.strings["SearchTooltip2"]}}' +
                 '</h5> <div class="settings-border-divider"></div> <h5 style="text-align:right; padding-right:10px;">';
 
             template += '</h4></ion-content></ion-popover-view>';

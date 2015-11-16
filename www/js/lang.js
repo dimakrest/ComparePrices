@@ -79,7 +79,10 @@
         'HowWeDoThisText7': 'אפשר לבחור מקום שסביבו אתם רוצים לבדוק את המחירים או פשוט להשתמש במיקום שלכם!',
         'CurrentLocationText': 'מיקום הנוכחי',
         'ErrorEnterAddressAgain': 'הכתובת לא נמצאה, נסה שנית',
-        'AddrManualText': 'הכנס כתובת ידנית'
+        'AddrManualText': 'הכנס כתובת ידנית',
+        'SearchTooltipButtonText': 'עוד מוצרים',
+        'SearchTooltip1': 'הרשימה למטה כוללת רק מוצרים בסיסיים',
+        'SearchTooltip2': 'השתמש בחיפוש למציאת כל המוצרים הקיימים'
     }
 
     document.selectLanguage = function(lang)
