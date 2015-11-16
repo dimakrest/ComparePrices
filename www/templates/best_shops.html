@@ -18,13 +18,19 @@
             <i class="icon ion-information-circled" style="position: absolute; right: 20px;"></i>
         </ion-item>
 
-        <div style="margin-top: 7px; margin-bottom: 7px;">
-            <span style="direction: rtl; margin-right: 20%; margin-top: 4px; float: right;">{{::c.localize.strings['SortBy']}}</span>
-            <span class="circled-button-group" style="margin-left: 30%;">
-                <span class="circled-button-left" ng-click="c.SortShopsBy('price')" ng-style="{'background-color': c.SortShopsByDistance == 1 ? 'white' : '#8FB5CC'}">{{::c.localize.strings['Price']}}</span>
-                <span class="circled-button-right" ng-click="c.SortShopsBy('distance')" ng-style="{'background-color': c.SortShopsByDistance == 1 ? '#8FB5CC' : 'white'}">{{::c.localize.strings['Distance']}}</span>
-            </span>
-        </div>
+        <table style="margin-top: 10px; margin-bottom: 10px; margin-left: 30%;">
+            <tr>
+                <td>
+                    <span class="circled-button-group">
+                        <span class="circled-button-left" ng-click="c.SortShopsBy('price')" ng-style="{'background-color': c.SortShopsByDistance == 1 ? 'white' : '#8FB5CC'}">{{::c.localize.strings['Price']}}</span>
+                        <span class="circled-button-right" ng-click="c.SortShopsBy('distance')" ng-style="{'background-color': c.SortShopsByDistance == 1 ? '#8FB5CC' : 'white'}">{{::c.localize.strings['Distance']}}</span>
+                    </span>
+                </td>
+                <td>
+                    <span style="direction: rtl; margin-left: 12px; float: right;">{{::c.localize.strings['SortBy']}}</span>
+                </td>
+            </tr>
+        </table>
 
         <div ng-repeat="shop in c.shopsNearThatHaveNeededProducts track by $index" ng-init="parentIndex = $index">
             <div class="item item-avatar-right"
@@ -38,21 +44,21 @@
                     <div style="width: 104px; height: 47px" ng-click="c.OpenWaze(shop['Lat'], shop['Lon']); $event.stopPropagation()">
                         <button class="waze-button" style="margin-top: 10px; margin-right: 10px; margin-bottom: 2px;"></button>
                     </div>
-                    <div style="width: 104px; height: 47px" ng-click="c.OpenGoogleMaps(shop['Lat'], shop['Lon']); $event.stopPropagation()">
+                    <div style="width: 104px; height: 42px" ng-click="c.OpenGoogleMaps(shop['Lat'], shop['Lon']); $event.stopPropagation()">
                         <button class="maps-button" style="margin-bottom: 10px; margin-right: 10px; margin-top: 2px;"></button>
                     </div>
                     <!--It's made with a table as it doesn't work the other way with KM in hebrew. DON'T TOUCH!-->
                     <table>
                         <tr>
-                            <td style=width:33px;">
+                            <td style=width:21px;">
                             </td>
-                            <td style="text-align:right;">
-                                <h4>
+                            <td style="text-align:right; font-size: 100%;">
+                                <h4 style="font-size: 100%;">
                                     {{::c.localize.strings['Kilometer']}}
                                 </h4>
                             </td>
-                            <td style="text-align:left;">
-                                <h4>
+                            <td style="text-align:left; font-size: 100%;">
+                                <h4 style="font-size: 100%;">
                                     &nbsp;{{shop['Distance']}}
                                 </h4>
                             </td>

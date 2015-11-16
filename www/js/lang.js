@@ -36,7 +36,7 @@
         'CurrentAddress': 'איזור החיפוש',
         'PriceInStore': 'מחיר: ',
         'StoreAddress': 'כתובת: ',
-        'UpdatingListOfStores': '... מעדכן את רשימת החנויות',
+        'UpdatingListOfStores': '... מעדכן את המחירים ורשימת החנויות',
         'LookingForBestShop': 'מחפש את החנות הזולה',
         'ToggleMyLocation': 'שימוש במיקום הנוכחי',
         'DistanceToShop': 'חפש חנויות במרחק: ',

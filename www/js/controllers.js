@@ -62,7 +62,7 @@ angular.module('ComparePrices.controllers', [])
         // init localization array
         $scope.c.localize = document.localize;
         document.selectLanguage('heb');
-        $scope.c.SortShopsByDistance = 1;
+        $scope.c.SortShopsByDistance = 0;
 
         $scope.c.lastAddress = localStorage.getItem('lastAddress') || "";
 

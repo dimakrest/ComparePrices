@@ -7,6 +7,13 @@ table.bottomBorder td { text-align:center; padding:3px;}
     src: url(../simpleclm.ttf);
 }
 
+.item-avatar-right > img:first-child{
+    top: 11px;
+    right: 11px;
+    max-width: 50px;
+    max-height: 50px;
+}
+
 .effectHeader{
     -webkit-box-shadow: 0 -5px 6px 5px #777;
        -moz-box-shadow: 0 -5px 6px 5px #777;
