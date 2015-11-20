@@ -1052,9 +1052,9 @@ angular.module('ComparePrices.services', ['ngResource'])
                         $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
                         UpdateStores.UpdateStoresInfoIfRequired($scope).then(function (isConnectedToInternet) {
                             $scope.c.HideLoading();
-                            if (isConnectedToInternet) {
+                            if (isConnectedToInternet == 1) {
                                 FindBestShopPrivate($scope, productsToCalculatePrice);
-                            } else {
+                            } else if (isConnectedToInternet == 0) {
                                 var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotUpdateStoresInRange'];
                                 PopUpFactory.ErrorPopUp($scope, popUpText);
                             }
@@ -1552,8 +1552,22 @@ angular.module('ComparePrices.services', ['ngResource'])
 
                         }
                     } , function (error) { // error callback
+                            // when user just enabled geolocation, local storage still has the old value and we can know that user just turned on
+                            // the geolocation and no need to show popup
+                            var useUsersCurrentLocation = localStorage.getItem('UseUsersCurrentLocation');
+                            var savedLat = localStorage.getItem('Lat') || "";
+                            var savedLon = localStorage.getItem('Lon') || "";
+                            // we got user's geolocation before that and now we came here because we are price for cart and wanted
+                            // to check if his location changed. In this case we assume that user didn't change his location
+                            if ((useUsersCurrentLocation == 1) && (savedLat != "") && (savedLon != "")) {
+                                if (MiscFunctions.IsConnectedToInternet()) {
+                                    defer.resolve(1);
+                                } else {
+                                    defer.resolve(0);
+                                }
+                                return;
+                            }
                             $scope.c.HideLoading();
-
                             if ((error.code == error.PERMISSION_DENIED) || (error.code == error.TIMEOUT)) {
                                 defer.resolve(2);
 
