@@ -83,6 +83,7 @@ table.bottomBorder td { text-align:center; padding:3px;}
     -ms-transform: rotate(-90deg);
     -o-transform: rotate(-90deg);
     transform: rotate(-90deg);
+    color: #000000;
 }
 
 .button.button-fab {

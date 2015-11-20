@@ -40,7 +40,7 @@
         'LookingForBestShop': 'מחפש את החנות הזולה',
         'ToggleMyLocation': 'שימוש במיקום הנוכחי',
         'DistanceToShop': 'חפש חנויות במרחק: ',
-        'CancelSearch': 'ביטול',
+        'CancelSearch': 'חזור',
         'CannotGetCurrentLocation': 'המיקום לא נמצא, אנא נסה שנית',
         'DontHaveAllProducts': 'מוצרים חסרים',
         'PartialComparisonMade': 'לא כל המוצרים שבסל קיימים במקום אחד',
@@ -51,7 +51,7 @@
         'NoProductsInCart': 'אין מוצרים בסל',
         'NoShopWithSuchItemInTheArea': 'לא נמצאו מוצרים לפי הגדרות החיפוש הנוכחיות',
         'AddProduct': 'הוספה',
-        'FindProduct': 'חפש מוצר',
+        'FindProduct': 'חיפוש כללי',
         'Mivca': 'מבצע',
         'Price': 'מחיר',
         'Distance': 'מרחק',
@@ -64,7 +64,7 @@
         'NavigateToSettings': 'אפשר מיקומך',
         'UserDefinedCarts': 'הסלים שלי',
         'PredefinedCarts': 'סלים לדוגמא',
-        'PredefinedProductGroups': 'מוצרים בסיסיים לפי מחלקות',
+        'PredefinedProductGroups': 'מוצרים פופולריים לפי מחלקות',
         'DoYouWantToOpenSettings': 'על מנת להשתמש במיקום נוכחי, עליך לאפשר אותנו בהגדרות',
         'NoInternetConnection': 'אפליקציה זו דורשת חיבור לרשת',
         'NoInternetConnectionCannotUpdateStoresInRange': 'עדכון חנויות נכשל. אין חיבור לרשת.',
@@ -81,8 +81,8 @@
         'ErrorEnterAddressAgain': 'הכתובת לא נמצאה, נסה שנית',
         'AddrManualText': 'הכנס כתובת ידנית',
         'SearchTooltipButtonText': 'עוד מוצרים',
-        'SearchTooltip1': 'הרשימה למטה כוללת רק מוצרים בסיסיים',
-        'SearchTooltip2': 'השתמש בחיפוש למציאת כל המוצרים הקיימים'
+        'SearchTooltip1': 'ברשימה למטה מופיעים מוצרים פופולריים.',
+        'SearchTooltip2': 'השתמש בחיפוש כדי למצוא את כל המוצרים הקיימים.'
     }
 
     document.selectLanguage = function(lang)
