@@ -831,7 +831,13 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
 
         function TwoArraysAreIdentical(Array1, Array2) {
-            // below filter find common items in unsorted arrays
+            // if lengths are different return false
+            if (Array1.length != Array2.length)
+            {
+                return false;
+            }
+
+            // go over array 1 elements and remove elements that don't present in second one
             var tmpArray1 = Array1.filter(function(n) {
                 return (Array2.indexOf(n) != -1);
             });
@@ -844,7 +850,146 @@ angular.module('ComparePrices.services', ['ngResource'])
             return false;
         }
 
-        function FindMaxShopsWithMaxCommonProducts($scope, cart, shops) {
+        function SecondArrayContainsAllElementsOfFirstArray(Array1, Array2) {
+            // go over array 1 elements and remove elements that don't present in second one
+            var tmpArray1 = Array1.filter(function(n) {
+                return (Array2.indexOf(n) != -1);
+            });
+
+            // if length of tmpArray1 still the same, all its elements present in the second array
+            if (tmpArray1.length == Array1.length)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        function sortShopsByNumOfProducts(a,b) {
+            if (a.rows.length < b.rows.length)
+                return -1;
+            if (a.rows.length > b.rows.length)
+                return 1;
+            return 0;
+        }
+
+        // finds more than one shop with big but not certainly maximum available combination of products
+        // in case there is 1 shop with 5 products, and 3 shops with 4 products, it will return 3 shops with 4 products
+        // we look also if shops with more products contain also all products of smaller shops
+        // but we don't do real intersection of products here, too much compute power
+        function FindAtLeast2BrandsWithCommonProducts($scope, cart, shops) {
+            var allOptionalCarts = [];
+
+            shops.sort(sortShopsByNumOfProducts);
+
+            // find max number of products in any carts and optional carts with maximum products
+            // For example found that 3 items is max, but 3 optional carts with 3 items: [1,2,3],[1,4,3],[1,2,4]
+            // optionalCartsWithMaxNumOfProducts - this struct holds [1,2,3],[1,4,3],[1,2,4]
+            for (var i=0; i < shops.length; i++) {
+                var productCodesInShop = [];
+                var shopBrand = shops[i].shopInfo['BrandName'];
+                shops[i].rows.forEach(function(singleItem) {
+                    productCodesInShop.push(singleItem['ItemCode']);
+                });
+                shops[i].shopInfo['NumOfProducts'] = shops[i].rows.length;
+                shops[i].shopInfo['Products'] = shops[i].rows;
+
+                // group identical carts in shops to groups
+                if (shops[i].shopInfo['NumOfProducts'] != 0)
+                {
+                    var cartAlreadyPresent = 0;
+                    for (var j = 0; j < allOptionalCarts.length; j++) {
+                        // this exact type present
+                        if (TwoArraysAreIdentical(allOptionalCarts[j].productsInCart, productCodesInShop)) {
+                            allOptionalCarts[j].shopsWithThisCart++;
+                            cartAlreadyPresent = 1;
+                            // in case we don't have this brand yet we need to add it
+                            if (allOptionalCarts[j].shopBrands.indexOf(shopBrand) == -1) {
+                                allOptionalCarts[j].shopBrands.push(shopBrand);
+                                allOptionalCarts[j].numOfDifferentBrands++;
+                            }
+                        }
+                        else
+                        {
+                            // this shop contain all products of smaller group
+                            if (SecondArrayContainsAllElementsOfFirstArray(allOptionalCarts[j].productsInCart, productCodesInShop)) {
+                                allOptionalCarts[j].shopsWithThisCart++;
+                                // in case we don't have this brand yet we need to add it
+                                if (allOptionalCarts[j].shopBrands.indexOf(shopBrand) == -1) {
+                                    allOptionalCarts[j].shopBrands.push(shopBrand);
+                                    allOptionalCarts[j].numOfDifferentBrands++;
+                                }
+                            }
+                        }
+                    }
+                    // new cart type
+                    if (cartAlreadyPresent == 0) {
+                        // add optional cart
+                        allOptionalCarts.push({ "shopsWithThisCart": 1,"productsInCart": productCodesInShop, "shopBrands": [shopBrand], "numOfDifferentBrands": 1});
+                    }
+                }
+            }
+
+            //console.log("******** CARTS *******");
+            //console.log(allOptionalCarts);
+            //for (var j = 0; j < allOptionalCarts.length; j++) {
+            //    console.log("Products:"+allOptionalCarts[j].productsInCart.length+" Shops:"+allOptionalCarts[j].shopsWithThisCart+" Brands:"+allOptionalCarts[j].numOfDifferentBrands);
+            //}
+
+            // go over optional carts, and find max cart with at least 2 brands
+            // in case there are 2 carts with equal amount of products will take the one with more shops
+            var productsInCartWith2BrandsOrMore = [];
+            var amountOfProductsInLastBestCart = 1;
+            var amountOfShopsInLastBestCart = 1;
+            for (var i=0; i < allOptionalCarts.length; i++) {
+                // if we increased number of products and have more than 2 brands take new cart, doesn't matter how many shops
+                if ((allOptionalCarts[i].numOfDifferentBrands > 1) && (allOptionalCarts[i].productsInCart.length > amountOfProductsInLastBestCart)){
+                    amountOfShopsInLastBestCart = allOptionalCarts[i].shopsWithThisCart;
+                    amountOfProductsInLastBestCart = allOptionalCarts[i].productsInCart.length;
+                    productsInCartWith2BrandsOrMore = allOptionalCarts[i].productsInCart;
+                }
+                // if we have the same number of products and have more than 2 brands take new cart only in case more shops
+                if ((allOptionalCarts[i].numOfDifferentBrands > 1) && (allOptionalCarts[i].productsInCart.length == amountOfProductsInLastBestCart) && (allOptionalCarts[i].shopsWithThisCart > amountOfShopsInLastBestCart)){
+                    amountOfShopsInLastBestCart = allOptionalCarts[i].shopsWithThisCart;
+                    amountOfProductsInLastBestCart = allOptionalCarts[i].productsInCart.length;
+                    productsInCartWith2BrandsOrMore = allOptionalCarts[i].productsInCart;
+                }
+            }
+
+            // take only shops that have needed cart of products
+            var suitableShops = [];
+            for (var i=0; i < shops.length; i++)
+            {
+                var productCodesInShop = [];
+                shops[i].rows.forEach(function(singleItem) {
+                    productCodesInShop.push(singleItem['ItemCode']);
+                });
+                if (SecondArrayContainsAllElementsOfFirstArray(productsInCartWith2BrandsOrMore,productCodesInShop))
+                {
+                    var calcPriceResult = CalculatePriceForShop($scope, cart, shops[i].rows);
+                    shops[i].shopInfo['CartPrice'] = calcPriceResult['CartPrice'];
+                    shops[i].shopInfo['ProductsToShowInAccordion'] = calcPriceResult['ProductsToShowInAccordion'];
+                    shops[i].shopInfo['BrandImage'] = 'img/markets/' + shops[i].shopInfo['BrandName'] + '.jpg';
+
+                    suitableShops.push(shops[i].shopInfo);
+                }
+            }
+
+            // calculate missing items
+            var productCodesInMyCart = [];
+            cart.forEach(function(singleItem) {
+                productCodesInMyCart.push(singleItem['ItemCode']);
+            });
+
+            var missingProducts = productCodesInMyCart.filter(function(n) {
+                return (productsInCartWith2BrandsOrMore.indexOf(n) == -1);
+            });
+
+            return {"suitableShops":suitableShops,"missingProducts":missingProducts};
+        }
+
+        // finds the maximum available combination of products in shops, even if it's only 1 shop
+        // in case there are 2 shops with 5 products, and 3 shops with 5 other products, it will also take cart with more shops, i.e. with 3 shops
+        function FindShopsWithMaxCommonProducts($scope, cart, shops) {
             var maxNumOfProducts = 1; // we don't want to end with shops that have 0 products
             var optionalCartsWithMaxNumOfProducts = [];
 
@@ -945,11 +1090,34 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             ComparePricesStorage.GetProductsPerShopAndShops(productCodesInMyCart, radius).then(function(result) {
 
-                // inside that function we decide what products we compare and get all shops with these products
-                var findShopsResponse = FindMaxShopsWithMaxCommonProducts($scope, cart, result);
+                // we have 3 possible options of how we show results:
+                // 1. All products > 2 brands
+                // 2. All products in 1 brand
+                //    Best collection > 2 brands
+                // 3. Best collection > 2 brands
+                // For that purpose we first find maximum cart with at least 2 brands
+                // Then we check if there are missing products, if not it is case 1
+                // If there are missing products we will need to additionally run function with maximum products for any carts.
+                // then we check if in that maximum cart there are missing products, if yes it is case 3, if all produts inside it is case 2
+                var findShopsResponse = FindAtLeast2BrandsWithCommonProducts($scope, cart, result);
+                var findShopsWithMacProductsResponse;
+
+                if (findShopsResponse['missingProducts'].length > 1)
+                {
+                    // finds the maximum available combination of products in shops, even if it's only 1 shop
+                    // in case there are 2 shops with 5 products, and 3 shops with 5 other products, it will take cart with more shops, i.e. with 3 shops
+                    findShopsWithMacProductsResponse = FindShopsWithMaxCommonProducts($scope, cart, result);
+                    // only in that case we take results
+                    if(findShopsWithMacProductsResponse['missingProducts'].length == 0)
+                    {
+
+                    }
+                }
+
                 var suitableShops = findShopsResponse['suitableShops'];
                 $scope.c.missingProducts = findShopsResponse['missingProducts'];
 
+                // send Analytics
                 if (suitableShops[0].Products.length == 1)
                 {
                     if ((localStorage.getItem('IsRunningOnDevice') || "0") != "0") {
