@@ -849,7 +849,8 @@ angular.module('ComparePrices.services', ['ngResource'])
             var optionalCartsWithMaxNumOfProducts = [];
 
             // find max number of products in any carts and optional carts with maximum products
-            // For example found that 3 items is max, but 3 optional carts with 3 items: [1,2,3],[1,2,3],[1,2,4]
+            // For example found that 3 items is max, but 3 optional carts with 3 items: [1,2,3],[1,4,3],[1,2,4]
+            // optionalCartsWithMaxNumOfProducts - this struct holds [1,2,3],[1,4,3],[1,2,4]
             for (var i=0; i < shops.length; i++) {
                 var productCodesInShop = [];
                 shops[i].rows.forEach(function(singleItem) {
@@ -876,7 +877,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                             for (var j = 0; j < optionalCartsWithMaxNumOfProducts.length; j++) {
                                 if (TwoArraysAreIdentical(optionalCartsWithMaxNumOfProducts[j].productsInCart, productCodesInShop)) {
                                     optionalCartsWithMaxNumOfProducts[j].shopsWithThisCart++;
-                                    cartAlreadyPresent = 1
+                                    cartAlreadyPresent = 1;
                                     break;
                                 }
                             }
@@ -891,7 +892,7 @@ angular.module('ComparePrices.services', ['ngResource'])
             }
 
             // go over optional carts, and find max carts for the max amount of products.
-            // For example above ([1,2,3],[1,2,3],[1,2,4]), we have 2 carts of [1,2,3] and 1 cart [1,2,4]
+            // For example above ([1,2,3],[1,4,3],[1,2,4]), we have 2 carts of [1,2,3] and 1 cart [1,2,4]
             var maxCartsWithMaxAmountOfProducts = 0;
             var productsInCartWithMaxAmount = [];
             for (var i=0; i < optionalCartsWithMaxNumOfProducts.length; i++) {
@@ -944,6 +945,7 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             ComparePricesStorage.GetProductsPerShopAndShops(productCodesInMyCart, radius).then(function(result) {
 
+                // inside that function we decide what products we compare and get all shops with these products
                 var findShopsResponse = FindMaxShopsWithMaxCommonProducts($scope, cart, result);
                 var suitableShops = findShopsResponse['suitableShops'];
                 $scope.c.missingProducts = findShopsResponse['missingProducts'];
