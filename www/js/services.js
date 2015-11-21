@@ -734,14 +734,14 @@ angular.module('ComparePrices.services', ['ngResource'])
 
     .factory('FindBestShops', ['ComparePricesStorage', 'MiscFunctions', 'SortShops', 'UpdateStores', 'ShowModal', 'PopUpFactory', '$q', '$cordovaGoogleAnalytics', function(ComparePricesStorage, MiscFunctions, SortShops, UpdateStores, ShowModal, PopUpFactory, $q, $cordovaGoogleAnalytics) {
 
-        function CalculatePriceForShop($scope, productCart, productPriceInStore) {
+        function CalculatePriceForShop($scope, productCart, productPriceInStore, neededProductsItemCodes) {
             var totalPrice = 0.0;
             var productsToShowInAccordion = [];
             productPriceInStore.forEach(function(product) {
                 var numOfProductsInCart = productCart.length;
 
                 for (var i=0; i < numOfProductsInCart; i++) {
-                    if (productCart[i]['ItemCode'] == product['ItemCode']) {
+                    if ((productCart[i]['ItemCode'] == product['ItemCode']) && (neededProductsItemCodes.indexOf(product['ItemCode']) != -1)) {
                         // check that we have discount for that products + sanity check that discount price is better
                         // whole discount logic is in image on Slava mail with "ComparePrices discount description"
                         if ((product['DiscountAmount'] != "") && (product['DiscountPrice'] != "") && (product['DiscountPrice'] != 0) && (product['DiscountPrice'] / product['DiscountAmount'] < product['ItemPrice']))
@@ -878,23 +878,24 @@ angular.module('ComparePrices.services', ['ngResource'])
         // but we don't do real intersection of products here, too much compute power
         function FindAtLeast2BrandsWithCommonProducts($scope, cart, shops) {
             var allOptionalCarts = [];
+            var tmpShops = angular.copy(shops);
 
-            shops.sort(sortShopsByNumOfProducts);
+            tmpShops.sort(sortShopsByNumOfProducts);
 
             // find max number of products in any carts and optional carts with maximum products
             // For example found that 3 items is max, but 3 optional carts with 3 items: [1,2,3],[1,4,3],[1,2,4]
             // optionalCartsWithMaxNumOfProducts - this struct holds [1,2,3],[1,4,3],[1,2,4]
-            for (var i=0; i < shops.length; i++) {
+            for (var i=0; i < tmpShops.length; i++) {
                 var productCodesInShop = [];
-                var shopBrand = shops[i].shopInfo['BrandName'];
-                shops[i].rows.forEach(function(singleItem) {
+                var shopBrand = tmpShops[i].shopInfo['BrandName'];
+                tmpShops[i].rows.forEach(function(singleItem) {
                     productCodesInShop.push(singleItem['ItemCode']);
                 });
-                shops[i].shopInfo['NumOfProducts'] = shops[i].rows.length;
-                shops[i].shopInfo['Products'] = shops[i].rows;
+                tmpShops[i].shopInfo['NumOfProducts'] = tmpShops[i].rows.length;
+                tmpShops[i].shopInfo['Products'] = tmpShops[i].rows;
 
                 // group identical carts in shops to groups
-                if (shops[i].shopInfo['NumOfProducts'] != 0)
+                if (tmpShops[i].shopInfo['NumOfProducts'] != 0)
                 {
                     var cartAlreadyPresent = 0;
                     for (var j = 0; j < allOptionalCarts.length; j++) {
@@ -957,20 +958,20 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             // take only shops that have needed cart of products
             var suitableShops = [];
-            for (var i=0; i < shops.length; i++)
+            for (var i=0; i < tmpShops.length; i++)
             {
                 var productCodesInShop = [];
-                shops[i].rows.forEach(function(singleItem) {
+                tmpShops[i].rows.forEach(function(singleItem) {
                     productCodesInShop.push(singleItem['ItemCode']);
                 });
                 if (SecondArrayContainsAllElementsOfFirstArray(productsInCartWith2BrandsOrMore,productCodesInShop))
                 {
-                    var calcPriceResult = CalculatePriceForShop($scope, cart, shops[i].rows);
-                    shops[i].shopInfo['CartPrice'] = calcPriceResult['CartPrice'];
-                    shops[i].shopInfo['ProductsToShowInAccordion'] = calcPriceResult['ProductsToShowInAccordion'];
-                    shops[i].shopInfo['BrandImage'] = 'img/markets/' + shops[i].shopInfo['BrandName'] + '.jpg';
+                    var calcPriceResult = CalculatePriceForShop($scope, cart, tmpShops[i].rows, productsInCartWith2BrandsOrMore);
+                    tmpShops[i].shopInfo['CartPrice'] = calcPriceResult['CartPrice'];
+                    tmpShops[i].shopInfo['ProductsToShowInAccordion'] = calcPriceResult['ProductsToShowInAccordion'];
+                    tmpShops[i].shopInfo['BrandImage'] = 'img/markets/' + tmpShops[i].shopInfo['BrandName'] + '.jpg';
 
-                    suitableShops.push(shops[i].shopInfo);
+                    suitableShops.push(tmpShops[i].shopInfo);
                 }
             }
 
@@ -992,24 +993,25 @@ angular.module('ComparePrices.services', ['ngResource'])
         function FindShopsWithMaxCommonProducts($scope, cart, shops) {
             var maxNumOfProducts = 1; // we don't want to end with shops that have 0 products
             var optionalCartsWithMaxNumOfProducts = [];
+            var tmpShops = angular.copy(shops);
 
             // find max number of products in any carts and optional carts with maximum products
             // For example found that 3 items is max, but 3 optional carts with 3 items: [1,2,3],[1,4,3],[1,2,4]
             // optionalCartsWithMaxNumOfProducts - this struct holds [1,2,3],[1,4,3],[1,2,4]
-            for (var i=0; i < shops.length; i++) {
+            for (var i=0; i < tmpShops.length; i++) {
                 var productCodesInShop = [];
-                shops[i].rows.forEach(function(singleItem) {
+                tmpShops[i].rows.forEach(function(singleItem) {
                     productCodesInShop.push(singleItem['ItemCode']);
                 });
-                shops[i].shopInfo['NumOfProducts'] = shops[i].rows.length;
-                shops[i].shopInfo['Products'] = shops[i].rows;
+                tmpShops[i].shopInfo['NumOfProducts'] = tmpShops[i].rows.length;
+                tmpShops[i].shopInfo['Products'] = tmpShops[i].rows;
 
-                if (shops[i].shopInfo['NumOfProducts'] != 0)
+                if (tmpShops[i].shopInfo['NumOfProducts'] != 0)
                 {
                     // found new max amount of products
-                    if (shops[i].shopInfo['NumOfProducts'] > maxNumOfProducts)
+                    if (tmpShops[i].shopInfo['NumOfProducts'] > maxNumOfProducts)
                     {
-                        maxNumOfProducts = shops[i].shopInfo['NumOfProducts'];
+                        maxNumOfProducts = tmpShops[i].shopInfo['NumOfProducts'];
                         // start filling optional carts from beginning
                         optionalCartsWithMaxNumOfProducts = [];
                         optionalCartsWithMaxNumOfProducts.push({"shopsWithThisCart":1,"productsInCart":productCodesInShop});
@@ -1017,7 +1019,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     else
                     {
                         // we already have this amount, now need to understand if we already have the same cart or it is new
-                        if (shops[i].shopInfo['NumOfProducts'] == maxNumOfProducts) {
+                        if (tmpShops[i].shopInfo['NumOfProducts'] == maxNumOfProducts) {
                             var cartAlreadyPresent = 0;
                             for (var j = 0; j < optionalCartsWithMaxNumOfProducts.length; j++) {
                                 if (TwoArraysAreIdentical(optionalCartsWithMaxNumOfProducts[j].productsInCart, productCodesInShop)) {
@@ -1049,20 +1051,20 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             // take only shops that have needed cart of products
             var suitableShops = [];
-            for (var i=0; i < shops.length; i++)
+            for (var i=0; i < tmpShops.length; i++)
             {
                 var productCodesInShop = [];
-                shops[i].rows.forEach(function(singleItem) {
+                tmpShops[i].rows.forEach(function(singleItem) {
                     productCodesInShop.push(singleItem['ItemCode']);
                 });
                 if (TwoArraysAreIdentical(productsInCartWithMaxAmount,productCodesInShop))
                 {
-                    var calcPriceResult = CalculatePriceForShop($scope, cart, shops[i].rows);
-                    shops[i].shopInfo['CartPrice'] = calcPriceResult['CartPrice'];
-                    shops[i].shopInfo['ProductsToShowInAccordion'] = calcPriceResult['ProductsToShowInAccordion'];
-                    shops[i].shopInfo['BrandImage'] = 'img/markets/' + shops[i].shopInfo['BrandName'] + '.jpg';
+                    var calcPriceResult = CalculatePriceForShop($scope, cart, tmpShops[i].rows, productsInCartWithMaxAmount);
+                    tmpShops[i].shopInfo['CartPrice'] = calcPriceResult['CartPrice'];
+                    tmpShops[i].shopInfo['ProductsToShowInAccordion'] = calcPriceResult['ProductsToShowInAccordion'];
+                    tmpShops[i].shopInfo['BrandImage'] = 'img/markets/' + tmpShops[i].shopInfo['BrandName'] + '.jpg';
 
-                    suitableShops.push(shops[i].shopInfo);
+                    suitableShops.push(tmpShops[i].shopInfo);
                 }
             }
 
@@ -1098,19 +1100,20 @@ angular.module('ComparePrices.services', ['ngResource'])
                 // For that purpose we first find maximum cart with at least 2 brands
                 // Then we check if there are missing products, if not it is case 1
                 // If there are missing products we will need to additionally run function with maximum products for any carts.
-                // then we check if in that maximum cart there are missing products, if yes it is case 3, if all produts inside it is case 2
+                // then we check if in that maximum cart there are missing products, if yes it is case 3, if all products inside it is case 2
                 var findShopsResponse = FindAtLeast2BrandsWithCommonProducts($scope, cart, result);
-                var findShopsWithMacProductsResponse;
+                var findShopsWithMaxProductsResponse;
+                var suitableShopsWithAllProducts = [];
 
-                if (findShopsResponse['missingProducts'].length > 1)
+                if (findShopsResponse['missingProducts'].length > 0)
                 {
                     // finds the maximum available combination of products in shops, even if it's only 1 shop
                     // in case there are 2 shops with 5 products, and 3 shops with 5 other products, it will take cart with more shops, i.e. with 3 shops
-                    findShopsWithMacProductsResponse = FindShopsWithMaxCommonProducts($scope, cart, result);
-                    // only in that case we take results
-                    if(findShopsWithMacProductsResponse['missingProducts'].length == 0)
+                    findShopsWithMaxProductsResponse = FindShopsWithMaxCommonProducts($scope, cart, result);
+                    // only in that case we take results, i.e. in best collection there are missing products, while in all products no missing products
+                    if(findShopsWithMaxProductsResponse['missingProducts'].length == 0)
                     {
-
+                        suitableShopsWithAllProducts = findShopsWithMaxProductsResponse['suitableShops'];
                     }
                 }
 
@@ -1133,7 +1136,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     }
                 }
 
-                SortShops.SortByPriceAndStoreInGlobalVar($scope, suitableShops); // needed to add % of additional price
+                SortShops.SortByPriceAndStoreInGlobalVar($scope, suitableShops, suitableShopsWithAllProducts); // needed to add % of additional price
                 if ($scope.c.SortShopsByDistance == 1)
                 {
                     SortShops.SortAndLimitAmount($scope, "Distance", "CartPrice");
@@ -1199,6 +1202,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 PopUpFactory.ErrorPopUp($scope, popUpText);
             } else {
                 $scope.c.shopsNearThatHaveNeededProducts = [];
+                $scope.c.shopsNearThatHaveAllProducts = [];
                 // user closed the app before all tables were created
                 var updateStoreInfoCompleted = localStorage.getItem('UpdateStoreInfoCompleted');
                 if (updateStoreInfoCompleted == "0") {
@@ -1405,7 +1409,7 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
 
         return {
-            SortByPriceAndStoreInGlobalVar : function ($scope, suitableShops) {
+            SortByPriceAndStoreInGlobalVar : function ($scope, suitableShops, suitableShopsWithAllProducts) {
                 // sort shops by price
                 suitableShops.sort(dynamicSortMultiple("CartPrice", "Distance"));
 
@@ -1423,10 +1427,38 @@ angular.module('ComparePrices.services', ['ngResource'])
                     }
                 }
                 $scope.c.allShopsNearThatHaveNeededProducts = suitableShops;
+
+                if (suitableShopsWithAllProducts.length > 0)
+                {
+                    // sort shops by price
+                    suitableShopsWithAllProducts.sort(dynamicSortMultiple("CartPrice", "Distance"));
+
+                    var minimalPriceWithAllProducts = suitableShopsWithAllProducts[0]['CartPrice'];
+
+                    for (var i = 0; i < suitableShopsWithAllProducts.length; i++) {
+                        if (parseFloat(suitableShopsWithAllProducts[i]['CartPrice']) > parseFloat(minimalPriceWithAllProducts)) {
+                            var percentsToShowNearPrice = Math.round((suitableShopsWithAllProducts[i]['CartPrice'] / minimalPriceWithAllProducts - 1) * 100);
+                            suitableShopsWithAllProducts[i]['PercentsToShowNearPrice'] = (percentsToShowNearPrice == 0) ? "" : ' (+' + percentsToShowNearPrice + '%) ';
+                            suitableShopsWithAllProducts[i]['PriceColor'] = (percentsToShowNearPrice == 0) ? "green" : (percentsToShowNearPrice < 30) ? "orange" : "red";
+                        }
+                        else {
+                            suitableShopsWithAllProducts[i]['PercentsToShowNearPrice'] = "";
+                            suitableShopsWithAllProducts[i]['PriceColor'] = "green";
+                        }
+                    }
+                    $scope.c.allShopsNearThatHaveAllProducts = suitableShopsWithAllProducts;
+                }
+                else
+                {
+                    $scope.c.allShopsNearThatHaveAllProducts = [];
+                }
             },
 
 
             SortAndLimitAmount : function ($scope, firstSort, secondSort) {
+                $scope.c.shopsNearThatHaveNeededProducts = [];
+                $scope.c.shopsNearThatHaveAllProducts = [];
+
                 var suitableShops = $scope.c.allShopsNearThatHaveNeededProducts;
 
                 // sort shops by price
@@ -1434,7 +1466,6 @@ angular.module('ComparePrices.services', ['ngResource'])
 
                 var totalShops = 0;
                 var shopsOfSpecificBrand = [];
-                $scope.c.shopsNearThatHaveNeededProducts = [];
 
                 for (var i = 0; i < suitableShops.length; i++) {
                     if (totalShops < ComparePricesConstants.DEFAULT_MAX_SHOPS_TO_SHOW) {
@@ -1456,6 +1487,40 @@ angular.module('ComparePrices.services', ['ngResource'])
                         break;
                     }
                 }
+
+                if ($scope.c.allShopsNearThatHaveAllProducts.length > 0)
+                {
+                    var suitableShopsWithAllProducts = $scope.c.allShopsNearThatHaveAllProducts;
+
+                    // sort shops by price
+                    suitableShopsWithAllProducts.sort(dynamicSortMultiple(firstSort, secondSort));
+
+                    var totalShopsWithAllProducts = 0;
+                    var shopsOfSpecificBrandWithAllProducts = [];
+
+
+                    for (var i = 0; i < suitableShopsWithAllProducts.length; i++) {
+                        if (totalShopsWithAllProducts < ComparePricesConstants.DEFAULT_MAX_SHOPS_TO_SHOW) {
+                            var brandName = suitableShopsWithAllProducts[i]['BrandName'];
+                            if (typeof (shopsOfSpecificBrandWithAllProducts[brandName]) == "undefined") {
+                                shopsOfSpecificBrandWithAllProducts[brandName] = 1;
+                                $scope.c.shopsNearThatHaveAllProducts.push(suitableShopsWithAllProducts[i]);
+                                totalShopsWithAllProducts++;
+                            }
+                            else {
+                                if (shopsOfSpecificBrandWithAllProducts[brandName] < ComparePricesConstants.DEFAULT_MAX_SHOPS_OF_THE_SAME_BRAND) {
+                                    shopsOfSpecificBrandWithAllProducts[brandName]++;
+                                    $scope.c.shopsNearThatHaveAllProducts.push(suitableShopsWithAllProducts[i]);
+                                    totalShopsWithAllProducts++;
+                                }
+                            }
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                }
+
             }
         }
     }])

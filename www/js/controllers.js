@@ -56,6 +56,9 @@ angular.module('ComparePrices.controllers', [])
         $scope.c.shopsNearThatHaveNeededProducts = [];
         $scope.c.allShopsNearThatHaveNeededProducts = [];
 
+        $scope.c.shopsNearThatHaveAllProducts = [];
+        $scope.c.allShopsNearThatHaveAllProducts = [];
+
         $scope.c.missingProducts = [];
         $scope.c.filteredProductsToShow = [];
         $scope.c.myCart      = [];
