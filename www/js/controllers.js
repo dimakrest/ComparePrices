@@ -302,7 +302,7 @@ angular.module('ComparePrices.controllers', [])
                 function () {
                 },
                 function (error) {
-                }, {preferGoogleMaps: true});
+                }, {});
         };
 
         // TODO: need to restructure this, need to print the list in a pretty way
