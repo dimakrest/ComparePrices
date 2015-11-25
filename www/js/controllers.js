@@ -297,7 +297,7 @@ angular.module('ComparePrices.controllers', [])
 
         $scope.c.OpenWaze = function(lat, lng) {
             if (((localStorage.getItem('IsRunningOnDevice') || "0") != "0")) {
-                WazeLink.open('waze://?ll=' + lat + ',' + lng);
+                WazeLink.open('waze://?ll=' + lat + ',' + lng + '&navigate=yes');
             }
         };
 
@@ -311,7 +311,7 @@ angular.module('ComparePrices.controllers', [])
                 function () {
                 },
                 function (error) {
-                }, {preferGoogleMaps: true});
+                }, {});
         };
 
         // TODO: need to restructure this, need to print the list in a pretty way
