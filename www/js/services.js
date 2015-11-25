@@ -639,9 +639,9 @@ angular.module('ComparePrices.services', ['ngResource'])
     .factory('PopUpFactory', ['$ionicLoading', '$timeout', '$ionicPopup', 'ionicMaterialInk', function($ionicLoading, $timeout, $ionicPopup, ionicMaterialInk) {
         return {
 
-            ErrorPopUp: function($scope, popUpText, callback) {
+            ErrorPopUp: function($scope, popUpText, showTitle, callback) {
                 var alertPopup = $ionicPopup.alert({
-                    title: 'שגיאה',
+                    title : showTitle ? 'שגיאה' : '',
                     template: '<div style="text-align:right">' + popUpText + '</div>',
                     cssClass: 'non-transparent-pop-up'
                 });
@@ -1120,32 +1120,29 @@ angular.module('ComparePrices.services', ['ngResource'])
                 var suitableShops = findShopsResponse['suitableShops'];
                 $scope.c.missingProducts = findShopsResponse['missingProducts'];
 
-                // send Analytics
-                if (suitableShops[0].Products.length == 1)
-                {
-                    if ((localStorage.getItem('IsRunningOnDevice') || "0") != "0") {
-                        // send product id, and num of shops in result
-                        $cordovaGoogleAnalytics.trackEvent('FindeBestShop', 'Product', suitableShops[0].Products[0].ItemCode, suitableShops.length);
+                if (suitableShops.length != 0) {
+                    // send Analytics
+                    if (suitableShops[0].Products.length == 1) {
+                        if ((localStorage.getItem('IsRunningOnDevice') || "0") != "0") {
+                            // send product id, and num of shops in result
+                            $cordovaGoogleAnalytics.trackEvent('FindeBestShop', 'Product', suitableShops[0].Products[0].ItemCode, suitableShops.length);
+                        }
+                    }
+                    else {
+                        if ((localStorage.getItem('IsRunningOnDevice') || "0") != "0") {
+                            // send cart id to understand if its predefined or user cart, and num of shops in result
+                            $cordovaGoogleAnalytics.trackEvent('FindeBestShop', 'Cart', $scope.cartID, suitableShops.length);
+                        }
+                    }
+
+                    SortShops.SortByPriceAndStoreInGlobalVar($scope, suitableShops, suitableShopsWithAllProducts); // needed to add % of additional price
+                    if ($scope.c.SortShopsByDistance == 1) {
+                        SortShops.SortAndLimitAmount($scope, "Distance", "CartPrice");
+                    }
+                    else {
+                        SortShops.SortAndLimitAmount($scope, "CartPrice", "Distance");
                     }
                 }
-                else
-                {
-                    if ((localStorage.getItem('IsRunningOnDevice') || "0") != "0") {
-                        // send cart id to understand if its predefined or user cart, and num of shops in result
-                        $cordovaGoogleAnalytics.trackEvent('FindeBestShop', 'Cart', $scope.cartID, suitableShops.length);
-                    }
-                }
-
-                SortShops.SortByPriceAndStoreInGlobalVar($scope, suitableShops, suitableShopsWithAllProducts); // needed to add % of additional price
-                if ($scope.c.SortShopsByDistance == 1)
-                {
-                    SortShops.SortAndLimitAmount($scope, "Distance", "CartPrice");
-                }
-                else
-                {
-                    SortShops.SortAndLimitAmount($scope, "CartPrice", "Distance");
-                }
-
                 // after all we need products names, images to show in accordions
                 d.resolve(ComparePricesStorage.GetProductsInfo(productCodesInMyCart));
             });
@@ -1177,7 +1174,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 if ($scope.c.missingProducts.length == productsInfo.rows.length)
                 {
                         var text  = $scope.c.localize.strings['NoShopWithSuchItemInTheArea'];
-                        PopUpFactory.ErrorPopUp($scope, text, function() {});
+                        PopUpFactory.ErrorPopUp($scope, text, false, function() {});
                 }
                 else
                 {
@@ -1199,7 +1196,7 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             if (productsToCalculatePrice.length == 0) {
                 var popUpText = $scope.c.localize.strings['NoProductsInCart'];
-                PopUpFactory.ErrorPopUp($scope, popUpText);
+                PopUpFactory.ErrorPopUp($scope, popUpText, true);
             } else {
                 $scope.c.shopsNearThatHaveNeededProducts = [];
                 $scope.c.shopsNearThatHaveAllProducts = [];
@@ -1209,7 +1206,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     // Need to check for internet connection
                     if (!MiscFunctions.IsConnectedToInternet()) {
                         var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotUpdateStoresInRange'];
-                        PopUpFactory.ErrorPopUp($scope, popUpText);
+                        PopUpFactory.ErrorPopUp($scope, popUpText, true);
                     } else {
                         $scope.c.ShowLoading($scope.c.localize.strings['UpdatingListOfStores']);
                         var myLat = localStorage.getItem('Lat');
@@ -1230,7 +1227,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                                 FindBestShopPrivate($scope, productsToCalculatePrice);
                             } else if (isConnectedToInternet == 0) {
                                 var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotUpdateStoresInRange'];
-                                PopUpFactory.ErrorPopUp($scope, popUpText);
+                                PopUpFactory.ErrorPopUp($scope, popUpText, true);
                             }
                         });
                     } else {

@@ -98,7 +98,7 @@ angular.module('ComparePrices.controllers', [])
         function CheckConnection() {
             if (!MiscFunctions.IsConnectedToInternet()) {
                 var popUpText = $scope.c.localize.strings['NoInternetConnection'];
-                PopUpFactory.ErrorPopUp($scope, popUpText);
+                PopUpFactory.ErrorPopUp($scope, popUpText, true);
             }
         }
 
@@ -150,7 +150,7 @@ angular.module('ComparePrices.controllers', [])
                 } else {
                     popUpText = $scope.c.localize.strings['NoInternetConnection'];
                 }
-                PopUpFactory.ErrorPopUp($scope, popUpText);
+                PopUpFactory.ErrorPopUp($scope, popUpText, true);
             }
 
             // check if new stores version is available
@@ -222,7 +222,7 @@ angular.module('ComparePrices.controllers', [])
                         $scope.c.rangeForShops = previousRangeForShops;
                         localStorage.setItem('RangeForShops', previousRangeForShops);
                         var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotUpdateStoresInRange'];
-                        PopUpFactory.ErrorPopUp($scope, popUpText);
+                        PopUpFactory.ErrorPopUp($scope, popUpText, true);
                     }
                 }
             },500);
@@ -287,7 +287,7 @@ angular.module('ComparePrices.controllers', [])
                     } else if (isConnectedToInternet == 0) {
                         $scope.c.useUsersCurrentLocation = false;
                         var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotUpdateStoresInRange'];
-                        PopUpFactory.ErrorPopUp($scope, popUpText);
+                        PopUpFactory.ErrorPopUp($scope, popUpText, true);
                     }
                 });
             } else {
@@ -392,7 +392,7 @@ angular.module('ComparePrices.controllers', [])
                         } else if (isConnectedToInternet == 0) {
                             $scope.c.useUsersCurrentLocation = false;
                             var popUpText = $scope.c.localize.strings['NoInternetConnectionCannotUpdateStoresInRange'];
-                            PopUpFactory.ErrorPopUp($scope, popUpText);
+                            PopUpFactory.ErrorPopUp($scope, popUpText, true);
                         }
                     });
                 } else {

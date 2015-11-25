@@ -35,7 +35,7 @@ angular.module('ComparePrices', ['ionic', 'ionic-material', 'ngCordova', 'Compar
                 document.getElementById('searchBar').value = '';
 
                 if (!place.geometry) {
-                    PopUpFactory.ErrorPopUp($scope, $scope.c.localize.strings['ErrorEnterAddressAgain']);
+                    PopUpFactory.ErrorPopUp($scope, $scope.c.localize.strings['ErrorEnterAddressAgain'], true);
                     return;
                 }
 
