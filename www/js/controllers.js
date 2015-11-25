@@ -229,9 +229,9 @@ angular.module('ComparePrices.controllers', [])
         };
 
         // Popover for missing products in best_shops window
-        $scope.openPopover = function($event) {
+        $scope.openPopoverMissingProducts = function($event) {
             var template = '<ion-popover-view class="fit"><ion-content scroll="false"> ' +
-                '<h5 style="white-space: pre-line; text-align:center; margin-top: 5px;"> ' +
+                '<h5 style="direction: rtl; white-space: pre-line; text-align:right; margin-top: 5px;"> ' +
                 '{{c.localize.strings["PartialComparisonMade"]}}<br>{{c.localize.strings["ShowShopsThatPartiallySuit"]}}' +
                 '</h5> <div class="settings-border-divider"></div> <h5 style="text-align:right; padding-right:10px;">';
 
@@ -240,11 +240,20 @@ angular.module('ComparePrices.controllers', [])
                 template += $scope.c.comparedProducts[missingProductCode].Name + '<br>';
             }
 
-            template += '</h4></ion-content></ion-popover-view>';
+            template += '</h5></ion-content></ion-popover-view>';
 
-           //ng-repeat="productCode in c.missingProducts"
-            //<h2 style="text-align:right">{{c.comparedProducts[productCode].Name}}</h2>
+            $scope.popover = $ionicPopover.fromTemplate(template, {
+                scope: $scope
+            });
+            $scope.popover.show($event);
+        };
 
+        // Popover for having all products in best_shops window
+        $scope.openPopoverHaveAllProducts = function($event) {
+            var template = '<ion-popover-view class="fit"><ion-content scroll="false"> ' +
+                '<h5 style="direction: rtl; white-space: pre-line; text-align:right; margin-top: 5px;"> ' +
+                '{{c.localize.strings["FullyComparisonMade"]}}' +
+                '</h5></ion-content></ion-popover-view>';
 
             $scope.popover = $ionicPopover.fromTemplate(template, {
                 scope: $scope
