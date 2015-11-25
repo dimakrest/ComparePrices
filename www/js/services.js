@@ -1805,7 +1805,10 @@ angular.module('ComparePrices.services', ['ngResource'])
 
                                 var title = $scope.c.localize.strings['NavigateToSettings'];
                                 var text = $scope.c.localize.strings['DoYouWantToOpenSettings'];
-                                PopUpFactory.ConfirmationPopUp($scope, title, text).then(function (confirmed) {
+                                var noButtonText  = $scope.c.localize.strings['NoButtonOpenSettings'];
+                                var yesButtonText = $scope.c.localize.strings['YesButtonOpenSettings'];
+
+                                PopUpFactory.ConfirmationPopUp($scope, title, text, noButtonText, yesButtonText).then(function (confirmed) {
                                     if (confirmed) {
                                         localStorage.setItem('UserClickedSettingsLocation', 1);
                                         if ($ionicSideMenuDelegate.isOpen()) {

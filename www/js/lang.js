@@ -85,7 +85,9 @@
         'AddrManualText': 'הכנס כתובת ידנית',
         'SearchTooltipButtonText': 'עוד מוצרים',
         'SearchTooltip1': 'ברשימה למטה מופיעים מוצרים פופולריים.',
-        'SearchTooltip2': 'השתמש בחיפוש כדי למצוא את כל המוצרים הקיימים.'
+        'SearchTooltip2': 'השתמש בחיפוש כדי למצוא את כל המוצרים הקיימים.',
+        'NoButtonOpenSettings' : 'לא לאפשר',
+        'YesButtonOpenSettings' : 'פתח הגדרות'
     }
 
     document.selectLanguage = function(lang)
