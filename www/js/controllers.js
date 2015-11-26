@@ -232,7 +232,7 @@ angular.module('ComparePrices.controllers', [])
         $scope.openPopoverMissingProducts = function($event) {
             var template = '<ion-popover-view class="fit"><ion-content scroll="false"> ' +
                 '<h5 style="direction: rtl; white-space: pre-line; text-align:right; margin-top: 5px;"> ' +
-                '{{c.localize.strings["PartialComparisonMade"]}}<br>{{c.localize.strings["ShowShopsThatPartiallySuit"]}}' +
+                '{{c.localize.strings["ShowShopsThatPartiallySuit"]}}' +
                 '</h5> <div class="settings-border-divider"></div> <h5 style="text-align:right; padding-right:10px;">';
 
             for (var i=0; i < $scope.c.missingProducts.length; i++) {
