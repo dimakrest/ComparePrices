@@ -1750,7 +1750,11 @@ angular.module('ComparePrices.services', ['ngResource'])
                                 return;
                             }
                             $scope.c.HideLoading();
-                            if ((error.code == error.PERMISSION_DENIED) || (error.code == error.TIMEOUT)) {
+
+                            // on ios for some reason error.types is undefined
+                            // error.PERMISSION_DENIED = 1
+                            // error.code == error.TIMEOUT = 3
+                            if ((error.code == 1) || (error.code == 3)) {
                                 defer.resolve(2);
 
                                 var title = $scope.c.localize.strings['NavigateToSettings'];
