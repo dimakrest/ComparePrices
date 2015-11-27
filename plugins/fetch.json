@@ -3,46 +3,22 @@
         "source": {
             "type": "registry",
             "id": "com.ionic.keyboard"
-        }
+        },
+        "is_top_level": true,
+        "variables": {}
     },
     "nl.x-services.plugins.socialsharing": {
         "source": {
-            "type": "git",
-            "url": "https://github.com/EddyVerbruggen/SocialSharing-PhoneGap-Plugin.git",
-            "subdir": "."
-        },
-        "is_top_level": true,
-        "variables": {}
-    },
-    "cordova-plugin-file-transfer": {
-        "source": {
             "type": "registry",
-            "id": "cordova-plugin-file-transfer"
-        },
-        "is_top_level": true,
-        "variables": {}
-    },
-    "cordova-plugin-file": {
-        "source": {
-            "type": "registry",
-            "id": "cordova-plugin-file"
-        },
-        "is_top_level": false,
-        "variables": {}
-    },
-    "cordova-plugin-geolocation": {
-        "source": {
-            "type": "registry",
-            "id": "cordova-plugin-geolocation"
+            "id": "nl.x-services.plugins.socialsharing"
         },
         "is_top_level": true,
         "variables": {}
     },
     "cordova-plugin-google-analytics": {
         "source": {
-            "type": "git",
-            "url": "https://github.com/danwilson/google-analytics-plugin.git",
-            "subdir": "."
+            "type": "registry",
+            "id": "cordova-plugin-google-analytics"
         },
         "is_top_level": true,
         "variables": {}
@@ -58,9 +34,8 @@
     },
     "cordova-plugin-network-information": {
         "source": {
-            "type": "git",
-            "url": "https://git-wip-us.apache.org/repos/asf/cordova-plugin-network-information.git",
-            "subdir": "."
+            "type": "registry",
+            "id": "cordova-plugin-network-information"
         },
         "is_top_level": true,
         "variables": {}
@@ -77,25 +52,31 @@
     "uk.co.workingedge.phonegap.plugin.LaunchNavigator": {
         "source": {
             "type": "registry",
-            "id": "uk.co.workingedge.phonegap.plugin.launchnavigator"
+            "id": "uk.co.workingedge.phonegap.plugin.LaunchNavigator"
         },
         "is_top_level": true,
         "variables": {}
     },
     "de.appplant.cordova.plugin.email-composer": {
         "source": {
-            "type": "git",
-            "url": "https://github.com/katzer/cordova-plugin-email-composer.git",
-            "subdir": "."
+            "type": "registry",
+            "id": "de.appplant.cordova.plugin.email-composer"
         },
         "is_top_level": true,
         "variables": {}
     },
     "cordova-plugin-whitelist": {
         "source": {
-            "type": "git",
-            "url": "https://github.com/apache/cordova-plugin-whitelist.git",
-            "subdir": "."
+            "type": "registry",
+            "id": "cordova-plugin-whitelist"
+        },
+        "is_top_level": true,
+        "variables": {}
+    },
+    "cordova-plugin-geolocation": {
+        "source": {
+            "type": "registry",
+            "id": "cordova-plugin-geolocation"
         },
         "is_top_level": true,
         "variables": {}

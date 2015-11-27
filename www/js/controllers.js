@@ -42,7 +42,7 @@ angular.module('ComparePrices.controllers', [])
     })
 
     .controller('RootCtrl', function($scope, $ionicLoading, $timeout, $ionicSideMenuDelegate, PopUpFactory, ComparePricesStorage, ComparePricesConstants, UpdateStores, $cordovaGoogleAnalytics,
-                                     MiscFunctions, SortShops, $ionicPopover, UpdatesFromServer, $cordovaEmailComposer, $ionicScrollDelegate, FindBestShops, ImageCache, ShowModal, $ionicTabsDelegate) {
+                                     MiscFunctions, SortShops, $ionicPopover, UpdatesFromServer, $cordovaEmailComposer, $ionicScrollDelegate, FindBestShops, ShowModal, $ionicTabsDelegate) {
         $scope.c = {};
         $scope.c.currentCartName = "";
         $scope.c.currentProductGroupName = "";
@@ -453,7 +453,6 @@ angular.module('ComparePrices.controllers', [])
                     'ImagePath': itemInfo['ImagePath'],
                     'Amount': parseInt(amountToAdd)};
                 $scope.c.myCart.push(newItemInCart);
-                ImageCache.CacheImage(itemInfo['ItemCode'], itemInfo['ImagePath']);
                 ComparePricesStorage.UpdateCart($scope.c.cartID, $scope.c.myCart);
             } else {
                 $scope.c.myCart[productIndex]['Amount'] += parseInt(amountToAdd);

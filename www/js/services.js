@@ -1238,65 +1238,6 @@ angular.module('ComparePrices.services', ['ngResource'])
         }
     }])
 
-    // I assume that the device is ready when I get here
-    .factory('ImageCache', ['$cordovaFileTransfer', '$cordovaFile', 'ComparePricesStorage',  function ($cordovaFileTransfer, $cordovaFile, ComparePricesStorage) {
-
-        function IsImageCached(imageUrl) {
-            // for browser cordova is not defined
-            if (typeof (cordova) == "undefined") {
-                return true;
-            }
-
-            var splitedImageUrl = imageUrl.split('/');
-            var imageName       = splitedImageUrl[(splitedImageUrl.length - 1)];
-
-            return $cordovaFile.checkFile(cordova.file.documentsDirectory, imageName);
-        }
-
-        return {
-            CacheImage: function (productCode, imageUrl) {
-                var isImageCached = IsImageCached(imageUrl);
-                // wa for browser caching
-                if (isImageCached) {
-                    return;
-                }
-
-                isImageCached.then(
-                    function(success) { // image is cached, do nothing
-                    },
-                    function(error) { // image is not cached
-                        var splitedImageUrl = imageUrl.split('/');
-                        var imageName       = splitedImageUrl[(splitedImageUrl.length - 1)];
-                        var targetPath      = cordova.file.documentsDirectory + imageName;
-                        var trustHosts      = false;
-                        var options         = {};
-
-                        $cordovaFileTransfer.download(imageUrl, targetPath, options, trustHosts)
-                            .then(function (result) {
-                                ComparePricesStorage.UpdateImageUrl(productCode, targetPath);
-                            }, function (err) {
-
-                            }, function (progress) {
-                            });
-                    }
-                );
-            },
-
-            DeleteCachedImage: function (imageUrl) {
-                var splitedImageUrl = imageUrl.split('/');
-                var imageName       = splitedImageUrl[(splitedImageUrl.length - 1)];
-
-                $cordovaFile.removeFile(cordova.file.dataDirectory, imageName)
-                    .then(function (success) {
-                        // success
-                    }, function (error) {
-                        // error
-                    });
-
-            }
-        }
-    }])
-
     .factory('GoogleReverseGeocoding', ['$q', '$resource', function($q, $resource) {
         return function(lat, lon) {
             var defer = $q.defer();
