@@ -964,7 +964,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 tmpShops[i].rows.forEach(function(singleItem) {
                     productCodesInShop.push(singleItem['ItemCode']);
                 });
-                if (SecondArrayContainsAllElementsOfFirstArray(productsInCartWith2BrandsOrMore,productCodesInShop))
+                if (SecondArrayContainsAllElementsOfFirstArray(productsInCartWith2BrandsOrMore,productCodesInShop) && (productsInCartWith2BrandsOrMore.length > 0))
                 {
                     var calcPriceResult = CalculatePriceForShop($scope, cart, tmpShops[i].rows, productsInCartWith2BrandsOrMore);
                     tmpShops[i].shopInfo['CartPrice'] = calcPriceResult['CartPrice'];
@@ -1101,6 +1101,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 // Then we check if there are missing products, if not it is case 1
                 // If there are missing products we will need to additionally run function with maximum products for any carts.
                 // then we check if in that maximum cart there are missing products, if yes it is case 3, if all products inside it is case 2
+                // UPDATE: now we have also option 4 when there are 1 product in 1 brand, and no Best collection at all
                 var findShopsResponse = FindAtLeast2BrandsWithCommonProducts($scope, cart, result);
                 var findShopsWithMaxProductsResponse;
                 var suitableShopsWithAllProducts = [];
@@ -1118,11 +1119,12 @@ angular.module('ComparePrices.services', ['ngResource'])
                 }
 
                 var suitableShops = findShopsResponse['suitableShops'];
+
                 $scope.c.missingProducts = findShopsResponse['missingProducts'];
 
-                if (suitableShops.length != 0) {
+                if ((suitableShops.length != 0) || (suitableShopsWithAllProducts.length != 0)) {
                     // send Analytics
-                    if (suitableShops[0].Products.length == 1) {
+                    if ((suitableShops.length != 0) && (suitableShops[0].Products.length == 1)) {
                         if ((localStorage.getItem('IsRunningOnDevice') || "0") != "0") {
                             // send product id, and num of shops in result
                             $cordovaGoogleAnalytics.trackEvent('FindeBestShop', 'Product', suitableShops[0].Products[0].ItemCode, suitableShops.length);
@@ -1171,7 +1173,7 @@ angular.module('ComparePrices.services', ['ngResource'])
 
                 $scope.c.HideLoading();
                 // no items found
-                if ($scope.c.missingProducts.length == productsInfo.rows.length)
+                if (($scope.c.allShopsNearThatHaveNeededProducts.length == 0) && ($scope.c.allShopsNearThatHaveAllProducts.length == 0))
                 {
                         var text  = $scope.c.localize.strings['NoShopWithSuchItemInTheArea'];
                         PopUpFactory.ErrorPopUp($scope, text, false, function() {});
@@ -1348,23 +1350,30 @@ angular.module('ComparePrices.services', ['ngResource'])
 
         return {
             SortByPriceAndStoreInGlobalVar : function ($scope, suitableShops, suitableShopsWithAllProducts) {
-                // sort shops by price
-                suitableShops.sort(dynamicSortMultiple("CartPrice", "Distance"));
+                if (suitableShops.length > 0)
+                {
+                    // sort shops by price
+                    suitableShops.sort(dynamicSortMultiple("CartPrice", "Distance"));
 
-                var minimalPrice = suitableShops[0]['CartPrice'];
-                
-                for (var i = 0; i < suitableShops.length; i++) {
-                    if (parseFloat(suitableShops[i]['CartPrice']) > parseFloat(minimalPrice)) {
-                        var percentsToShowNearPrice = Math.round((suitableShops[i]['CartPrice'] / minimalPrice - 1) * 100);
-                        suitableShops[i]['PercentsToShowNearPrice'] = (percentsToShowNearPrice == 0) ? "" : ' (+' + percentsToShowNearPrice + '%) ';
-                        suitableShops[i]['PriceColor'] = (percentsToShowNearPrice == 0) ? "green" : (percentsToShowNearPrice < 30) ? "orange" : "red";
+                    var minimalPrice = suitableShops[0]['CartPrice'];
+
+                    for (var i = 0; i < suitableShops.length; i++) {
+                        if (parseFloat(suitableShops[i]['CartPrice']) > parseFloat(minimalPrice)) {
+                            var percentsToShowNearPrice = Math.round((suitableShops[i]['CartPrice'] / minimalPrice - 1) * 100);
+                            suitableShops[i]['PercentsToShowNearPrice'] = (percentsToShowNearPrice == 0) ? "" : ' (+' + percentsToShowNearPrice + '%) ';
+                            suitableShops[i]['PriceColor'] = (percentsToShowNearPrice == 0) ? "green" : (percentsToShowNearPrice < 30) ? "orange" : "red";
+                        }
+                        else {
+                            suitableShops[i]['PercentsToShowNearPrice'] = "";
+                            suitableShops[i]['PriceColor'] = "green";
+                        }
                     }
-                    else {
-                        suitableShops[i]['PercentsToShowNearPrice'] = "";
-                        suitableShops[i]['PriceColor'] = "green";
-                    }
+                    $scope.c.allShopsNearThatHaveNeededProducts = suitableShops;
                 }
-                $scope.c.allShopsNearThatHaveNeededProducts = suitableShops;
+                else
+                {
+                    $scope.c.allShopsNearThatHaveNeededProducts = [];
+                }
 
                 if (suitableShopsWithAllProducts.length > 0)
                 {

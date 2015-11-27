@@ -114,7 +114,7 @@
             </div>
         </div>
 
-        <ion-item style="direction: rtl; padding-right: 42px; background-color: #FF8C83; height: 40px; padding-top: 9px; font-size: 13px;" ng-show="c.missingProducts.length > 0" ng-click="openPopoverMissingProducts($event)">
+        <ion-item style="direction: rtl; padding-right: 42px; background-color: #FF8C83; height: 40px; padding-top: 9px; font-size: 13px;" ng-show="(c.missingProducts.length > 0) && (c.shopsNearThatHaveNeededProducts.length > 0)" ng-click="openPopoverMissingProducts($event)">
             {{::c.localize.strings['DontHaveAllProducts']}}
             <i class="icon ion-information-circled" style="position: absolute; right: 20px;"></i>
         </ion-item>
