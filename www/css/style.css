@@ -174,11 +174,11 @@ ion-popover-view.fit ion-content {
     position: relative;
 }
 
-.platform-android ion-popover-view.fit {
+ion-popover-view.fit {
     margin-top: 5px;
 }
 
-.platform-ios ion-popover-view.fit {
+ion-popover-view.fit {
     padding-top: 5px;
     padding-bottom: 5px;
 }

@@ -896,7 +896,6 @@ angular.module('ComparePrices.controllers', [])
             $scope.c.UpdateProductAmountInMyCart(product, amount);
         };
 
-        // Popover for missing products in best_shops window
         $scope.ShowSearchToolTip = function() {
             var template = '<ion-popover-view class="fit"><ion-content scroll="false"> ' +
                 '<h5 style="white-space: pre-line; text-align:center; margin-top: 5px; direction: rtl;"> ' +
