@@ -628,9 +628,15 @@ angular.module('ComparePrices.controllers', [])
         });
     })
 
-    .controller('SearchBarGroupsCtrl', function($scope, $ionicFilterBar, $ionicHistory, ComparePricesStorage) {
+    .controller('SearchBarGroupsCtrl', function($scope, $ionicPlatform, $ionicFilterBar, $ionicHistory, ComparePricesStorage) {
         $scope.c.filteredProductsToShow = [];
         $scope.showNoResults    = false;
+
+        $scope.ionContentTopSearchBar = 'android-content-top-search-bar';
+        var isRunningOnDevice = localStorage.getItem('IsRunningOnDevice') || 0;
+        if (isRunningOnDevice) {
+            $scope.ionContentTopSearchBar = $ionicPlatform.is('android') ? 'android-content-top-search-bar' : 'ios-content-top-search-bar';
+        }
 
         $scope.$on('$ionicView.afterEnter', function () {
             $scope.c.CancelFilterBar = $ionicFilterBar.show({
@@ -721,7 +727,7 @@ angular.module('ComparePrices.controllers', [])
     })
 
     // TODO: merge common functions like update or something ...
-    .controller('SearchBarCartDetailsCtrl', function($scope, $ionicFilterBar, $ionicHistory, $ionicScrollDelegate, $ionicPopover, GroupsAndSubGroups, ComparePricesStorage) {
+    .controller('SearchBarCartDetailsCtrl', function($scope, $ionicPlatform, $ionicFilterBar, $ionicHistory, $ionicScrollDelegate, $ionicPopover, GroupsAndSubGroups, ComparePricesStorage) {
         $scope.c.filteredProductsToShow = [];
         $scope.showNoResults    = false;
 
@@ -730,6 +736,12 @@ angular.module('ComparePrices.controllers', [])
         $scope.isSubGroupOpen   = {};
         $scope.openGroupID      = -1;
         $scope.openSubGroupID   = 0;
+
+        $scope.ionContentTopSearchBar = 'android-content-top-search-bar';
+        var isRunningOnDevice = localStorage.getItem('IsRunningOnDevice') || 0;
+        if (isRunningOnDevice) {
+            $scope.ionContentTopSearchBar = $ionicPlatform.is('android') ? 'android-content-top-search-bar' : 'ios-content-top-search-bar';
+        }
 
         $scope.productGroupsInfo    = [];
         GroupsAndSubGroups.InitProductGroupsAndSubGroups($scope);

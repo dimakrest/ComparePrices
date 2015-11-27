@@ -1,6 +1,6 @@
 <ion-view hide-nav-bar="true">
     <!-- top 44px is the height of search bar -->
-    <ion-content style="top: 44px;" has-bouncing="true">
+    <ion-content ng-class="ionContentTopSearchBar" has-bouncing="true">
 
         <div class="list" collection-repeat="singleProduct in c.filteredProductsToShow" item-height="72px" divider-collection-repeat>
             <a class="item item-avatar-right" ng-click="c.FindBestShopProductGroups(singleProduct['ItemCode'], singleProduct['ItemName'], singleProduct['ImagePath'])" style="background-color: white">

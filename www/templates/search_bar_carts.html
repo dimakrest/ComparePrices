@@ -1,6 +1,6 @@
 <ion-view hide-nav-bar="true">
     <!-- top 44px is the height of search bar -->
-    <ion-content style="top: 44px;" has-bouncing="true" delegate-handle="searchBarCartsContent">
+    <ion-content ng-class="ionContentTopSearchBar" has-bouncing="true" delegate-handle="searchBarCartsContent">
 
         <div ng-if="c.filteredProductsToShow.length == 0 && !showNoResults">
             <uib-accordion ng-repeat="singleProductGroupInfo in productGroupsInfo track by $index" ng-init="groupIndex = $index" ng-click="GroupWasClicked($index)">
