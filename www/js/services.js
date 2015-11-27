@@ -661,7 +661,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 }
                 return $ionicPopup.confirm({
                     title: popUpTitle,
-                    template: '<div style="text-align:right">' + popUpText + '</div>',
+                    template: '<div style="text-align:right; direction: rtl">' + popUpText + '</div>',
                     cssClass: 'non-transparent-pop-up',
                     buttons: [
                         { text: noButtonText,
@@ -1690,7 +1690,7 @@ angular.module('ComparePrices.services', ['ngResource'])
 
                         if (addressAlreadySet && useUsersCurrentLocation == "1") {
                             var popUpTitle  = $scope.c.localize.strings['LocationUpdatePopupTitle'];
-                            var popUpText   = $scope.c.localize.strings['LocationUpdatePopupText'];
+                            var popUpText   = $scope.c.localize.strings['LocationUpdateYourLastAddress'] + ' <b>' + $scope.c.lastAddress + '</b>.</br> ' + $scope.c.localize.strings['LocationUpdatePopupText'];
                             $scope.c.HideLoading();
                             PopUpFactory.ConfirmationPopUp($scope, popUpTitle, popUpText).then(function (confirmed) {
                                 if (confirmed) {
