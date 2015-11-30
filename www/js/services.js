@@ -12,6 +12,7 @@ angular.module('ComparePrices.services', ['ngResource'])
 
             // TODO: database size + don't want to call init every time
             var db = openDatabase("ComparePricesDB", "1.0", "Global storage", 4 * 1024 * 1024); // TODO: check what happens when we exceed this limit
+            var productPricesInRange = {};
 
             // Function to mark that for this store products json exists
             function SuccessTableCreation(brandName, storeID, defer) {
@@ -36,7 +37,18 @@ angular.module('ComparePrices.services', ['ngResource'])
                             if (!products.hasOwnProperty(itemCode)) {
                                 continue;
                             }
+                            // TODO: take care of discounts
                             var singleProduct = products[itemCode];
+                            if (typeof(productPricesInRange[itemCode]) == "undefined") {
+                                productPricesInRange[itemCode] = {min : parseFloat(singleProduct['P']), max : parseFloat(singleProduct['P'])};
+                            } else {
+                                if (productPricesInRange[itemCode]['min'] > parseFloat(singleProduct['P'])) {
+                                    productPricesInRange[itemCode]['min'] = parseFloat(singleProduct['P']);
+                                }
+                                if (productPricesInRange[itemCode]['max'] < parseFloat(singleProduct['P'])) {
+                                    productPricesInRange[itemCode]['max'] = parseFloat(singleProduct['P']);
+                                }
+                            }
                             // we don't have discounts for all the items
                             var sqlQuery = "";
                             if (typeof(singleProduct['Q']) == "undefined" || typeof(singleProduct['dP']) == "undefined") {
@@ -143,6 +155,18 @@ angular.module('ComparePrices.services', ['ngResource'])
                 return d.promise;
             }
 
+            function UpdateMinimumAndMaximumPrices() {
+                db.transaction(function (tx) {
+                    for (var key in productPricesInRange) {
+                        if (productPricesInRange.hasOwnProperty(key)) {
+                            var sqlQuery = 'UPDATE tbProducts SET MinPrice=' + productPricesInRange[key]['min'] + ', MaxPrice=' + productPricesInRange[key]['max'] + ' WHERE ItemCode="' + key + '"';
+                            tx.executeSql(sqlQuery);
+                        }
+                    }
+                    productPricesInRange = {};
+                }, errorCB, function() {});
+            };
+
             return {
                 DownloadNewJsons : function(newStoresInfoExists) {
                     var defer = $q.defer();
@@ -165,7 +189,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     S3Jsons.query({jsonName:jsonsVersion + '/stores/all_products'}, function (products) {
                         db.transaction(function (tx) {
                             tx.executeSql('DROP TABLE IF EXISTS tbProducts');
-                            tx.executeSql('CREATE TABLE IF NOT EXISTS tbProducts (ItemCode TEXT PRIMARY KEY, ItemName TEXT, ImagePath TEXT)');
+                            tx.executeSql('CREATE TABLE IF NOT EXISTS tbProducts (ItemCode TEXT PRIMARY KEY, ItemName TEXT, ImagePath TEXT, MinPrice FLOAT, MaxPrice FLOAT)');
                             var numOfProducts = products.length;
                             // TODO: how better mask ' and "
                             for (var i = 0; i < numOfProducts; i++) {
@@ -187,7 +211,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                                 var sqlQuery = 'INSERT INTO tbProducts VALUES ("' +
                                     singleProduct['C'] + '", "' +
                                     singleProduct['N'].replace(/\"/g, "\'\'").replace(/^\s+/, '').replace(/\s+$/, '') + '", "' +
-                                    imagePath + '")';
+                                    imagePath + '", 0.0, 0.0)';
                                 tx.executeSql(sqlQuery)
                             }
                         }, function() {
@@ -370,7 +394,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     response.rows = [];
 
                     db.transaction(function (tx) {
-                        tx.executeSql('SELECT ItemCode, ItemName, ImagePath FROM tbProducts WHERE (' + searchField + ' LIKE ?)', [pattern], function (tx, rawresults) {
+                        tx.executeSql('SELECT ItemCode, ItemName, ImagePath, MinPrice, MaxPrice FROM tbProducts WHERE (' + searchField + ' LIKE ?)', [pattern], function (tx, rawresults) {
                             var len = rawresults.rows.length;
                             for (var i = 0; i < len; i++) {
                                 // Amount is changed in the cart, so I have to make a copy,
@@ -627,6 +651,8 @@ angular.module('ComparePrices.services', ['ngResource'])
                             promises.push(CreateProductTableForSingleShop($scope, realNumOfShops, tableName, fileName, brandName, storeID));
                         }
                         $q.all(promises).then(function() {
+                            // Set minimum and maximum price
+                            UpdateMinimumAndMaximumPrices();
                             defer.resolve();
                         });
                     });
