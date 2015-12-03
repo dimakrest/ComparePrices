@@ -7,7 +7,9 @@
                 <img style="width: auto;" ng-src={{singleProduct['ImagePath']}}>
                 <i class="icon ion-chevron-left" style="float:left; padding-top: 10px; padding-right: 10px;"></i>
                 <h2 ng-style="{ 'padding-top': singleProduct.ItemName.length < 35 ? '10px' : '0px' }" style="text-align: right; padding-top:10px;">{{singleProduct['ItemName']}}</h2>
-                <span> {{singleProduct.MinPrice}} - {{singleProduct.MaxPrice}}</span>
+                <h3 style="text-align: right; direction: rtl; color: green" ng-show='(c.lastAddress != "") && ((singleProduct.MinPrice + singleProduct.MaxPrice) != 0) && (singleProduct.MinPrice != singleProduct.MaxPrice)' >{{singleProduct.MaxPrice}}{{::c.localize.strings['CurrencySign']}} - {{singleProduct.MinPrice}}{{::c.localize.strings['CurrencySign']}} </h3>
+                <h3 style="text-align: right; direction: rtl; color: green" ng-show='(c.lastAddress != "") && ((singleProduct.MinPrice + singleProduct.MaxPrice) != 0) && (singleProduct.MinPrice == singleProduct.MaxPrice)' >{{singleProduct.MaxPrice}}{{::c.localize.strings['CurrencySign']}} ~</h3>
+                <h3 style="text-align: right; direction: rtl; color: red" ng-show='(c.lastAddress != "") && ((singleProduct.MinPrice + singleProduct.MaxPrice) == 0)' >{{::c.localize.strings['NoProductNearYou']}}</h3>
             </a>
         </div>
 

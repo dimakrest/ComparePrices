@@ -87,6 +87,8 @@
         'SearchTooltip1': 'ברשימה למטה מופיעים מוצרים פופולריים.',
         'SearchTooltip2': 'השתמש בחיפוש כדי למצוא את כל המוצרים הקיימים.',
         'NoButtonOpenSettings' : 'לא מאשר',
+        'PricesDistribution' : 'טווח מחירים:',
+        'NoProductNearYou' : 'אין מוצר לידך',
         'YesButtonOpenSettings' : 'פתח הגדרות'
     }
 

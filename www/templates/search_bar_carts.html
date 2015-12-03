@@ -21,6 +21,9 @@
                                         <span ng-class="{'ionic-input-group-addon-right': singleProduct.Amount != 0, 'ionic-input-group-addon-center': singleProduct.Amount == 0}" ng-click="UpdateProductAmountFromGroups(singleProduct, +1); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
                                     </div>
                                     <h2 ng-style="{'padding-top': product.ItemName.length < 15 ? '7px' : '0px' }" style="text-align: right; white-space: pre-line;">{{::singleProduct.ItemName}}</h2>
+                                    <h3 style="text-align: right; direction: rtl; color: green" ng-show='(c.lastAddress != "") && ((singleProduct.MinPrice + singleProduct.MaxPrice) != 0) && (singleProduct.MinPrice != singleProduct.MaxPrice)' >{{singleProduct.MaxPrice}}{{::c.localize.strings['CurrencySign']}} - {{singleProduct.MinPrice}}{{::c.localize.strings['CurrencySign']}} </h3>
+                                    <h3 style="text-align: right; direction: rtl; color: green" ng-show='(c.lastAddress != "") && ((singleProduct.MinPrice + singleProduct.MaxPrice) != 0) && (singleProduct.MinPrice == singleProduct.MaxPrice)' >{{singleProduct.MaxPrice}}{{::c.localize.strings['CurrencySign']}} ~</h3>
+                                    <h3 style="text-align: right; direction: rtl; color: red" ng-show='(c.lastAddress != "") && ((singleProduct.MinPrice + singleProduct.MaxPrice) == 0)' >{{::c.localize.strings['NoProductNearYou']}}</h3>
                                 </div>
                             </div>
                             <!-- Special "button/item" to show search tooltip -->
@@ -53,7 +56,9 @@
                         <span ng-class="{'ionic-input-group-addon-right': singleProduct.Amount != 0, 'ionic-input-group-addon-center': singleProduct.Amount == 0}" ng-click="UpdateProductAmountFromSearch(singleProduct, +1); $event.stopPropagation()">&nbsp;&nbsp;+&nbsp;&nbsp;</span>
                     </div>
                     <h2 ng-style="{'padding-top': product.ItemName.length < 15 ? '7px' : '0px' }" style="text-align: right; white-space: pre-line;">{{singleProduct.ItemName}}</h2>
-                    <span> {{singleProduct.MinPrice}} - {{singleProduct.MaxPrice}}</span>
+                    <h3 style="text-align: right; direction: rtl; color: green" ng-show='(c.lastAddress != "") && ((singleProduct.MinPrice + singleProduct.MaxPrice) != 0) && (singleProduct.MinPrice != singleProduct.MaxPrice)' >{{singleProduct.MaxPrice}}{{::c.localize.strings['CurrencySign']}} - {{singleProduct.MinPrice}}{{::c.localize.strings['CurrencySign']}} </h3>
+                    <h3 style="text-align: right; direction: rtl; color: green" ng-show='(c.lastAddress != "") && ((singleProduct.MinPrice + singleProduct.MaxPrice) != 0) && (singleProduct.MinPrice == singleProduct.MaxPrice)' >{{singleProduct.MaxPrice}}{{::c.localize.strings['CurrencySign']}} ~</h3>
+                    <h3 style="text-align: right; direction: rtl; color: red" ng-show='(c.lastAddress != "") && ((singleProduct.MinPrice + singleProduct.MaxPrice) == 0)' >{{::c.localize.strings['NoProductNearYou']}}</h3>
                 </div>
             </div>
         </ion-list>
