@@ -16,7 +16,7 @@
             </div>
         </div>
 
-        <h1 class="item item-divider" style="text-align:right; background-color: #C1D6E2;">
+        <h1 class="item item-divider" style="text-align:right; background-color: #ECECEC;">
             {{::c.localize.strings['PredefinedProductGroups']}}
         </h1>
 
@@ -30,6 +30,7 @@
                         <div style="margin: 0px;" ng-repeat="singleProduct in singleSubGroup['Products']" class="card" ng-click="FindBestShop(singleProduct)">
                             <a class="item item-avatar-right">
                                 <img style="width: auto;" ng-src={{::singleProduct['ImagePath']}}>
+                                <i class="icon ion-chevron-left" style="float:left; padding-top: 10px; padding-right: 10px;"></i>
                                 <h2  ng-style="{ 'padding-top': singleProduct.ItemName.length < 35 ? '10px' : '0px' }" style="text-align: right; white-space: pre-line;">{{::singleProduct.ItemName}}</h2>
                             </a>
                         </div>

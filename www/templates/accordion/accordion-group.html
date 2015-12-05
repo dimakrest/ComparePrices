@@ -1,5 +1,5 @@
 <div class="panel panel-default">
-    <a class="item item-avatar-right" ng-click="toggleOpen()" uib-accordion-transclude="heading" href tabindex="0" ng-class="{effectSubHeader: isGroup && isOpen}">
+    <a class="item item-avatar-right" ng-click="toggleOpen()" uib-accordion-transclude="heading" href tabindex="0" ng-style="{ 'background-color': isGroup ? '#D4D7DA' : '#E2E2E2' }" ng-class="{effectSubHeader: isGroup && isOpen}">
         <img ng-style="{ 'margin-right': isGroup ? '0px' : '20px' }" ng-src={{::imageUrl}}>
         <i ng-if=isGroup class="icon products-list ion-chevron-down" ng-class="{open: isOpen}"></i>
         <i ng-if=!isGroup class="icon products-list-sub ion-arrow-left-b" ng-class="{open: isOpen}"></i>
