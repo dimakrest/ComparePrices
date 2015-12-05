@@ -37,18 +37,31 @@ angular.module('ComparePrices.services', ['ngResource'])
                             if (!products.hasOwnProperty(itemCode)) {
                                 continue;
                             }
-                            // TODO: take care of discounts
+
                             var singleProduct = products[itemCode];
+                            var singleProductPrice;
+
+                            // Take care of discounts
+                            if ((parseInt(singleProduct['Q']) == 1) && (parseFloat(singleProduct['dP']) < parseFloat(singleProduct['P'])))
+                            {
+                                singleProductPrice = parseFloat(singleProduct['dP']);
+                            }
+                            else
+                            {
+                                singleProductPrice = parseFloat(singleProduct['P']);
+                            }
+
                             if (typeof(productPricesInRange[itemCode]) == "undefined") {
-                                productPricesInRange[itemCode] = {min : parseFloat(singleProduct['P']), max : parseFloat(singleProduct['P'])};
+                                productPricesInRange[itemCode] = {min : singleProductPrice, max : singleProductPrice};
                             } else {
-                                if (productPricesInRange[itemCode]['min'] > parseFloat(singleProduct['P'])) {
-                                    productPricesInRange[itemCode]['min'] = parseFloat(singleProduct['P']);
+                                if (productPricesInRange[itemCode]['min'] > singleProductPrice) {
+                                    productPricesInRange[itemCode]['min'] = singleProductPrice;
                                 }
-                                if (productPricesInRange[itemCode]['max'] < parseFloat(singleProduct['P'])) {
-                                    productPricesInRange[itemCode]['max'] = parseFloat(singleProduct['P']);
+                                if (productPricesInRange[itemCode]['max'] < singleProductPrice) {
+                                    productPricesInRange[itemCode]['max'] = singleProductPrice;
                                 }
                             }
+
                             // we don't have discounts for all the items
                             var sqlQuery = "";
                             if (typeof(singleProduct['Q']) == "undefined" || typeof(singleProduct['dP']) == "undefined") {
@@ -1119,18 +1132,20 @@ angular.module('ComparePrices.services', ['ngResource'])
             ComparePricesStorage.GetProductsPerShopAndShops(productCodesInMyCart, radius).then(function(result) {
 
                 // we have 3 possible options of how we show results:
-                // 1. All products > 2 brands
-                // 2. All products in 1 brand
-                //    Best collection > 2 brands
-                // 3. Best collection > 2 brands
+                // 1. All products > 2 brands                     --> comes from FindAtLeast2BrandsWithCommonProducts
+                // 2. SINGLE product in any amount of brands      --> comes from FindShopsWithMaxCommonProducts
+                // 3. All products in 1 brand                     --> comes from FindShopsWithMaxCommonProducts
+                //    Best collection > 2 brands                  --> comes from FindAtLeast2BrandsWithCommonProducts
+                // 4. Best collection > 2 brands                  --> comes from FindAtLeast2BrandsWithCommonProducts
                 // For that purpose we first find maximum cart with at least 2 brands
                 // Then we check if there are missing products, if not it is case 1
                 // If there are missing products we will need to additionally run function with maximum products for any carts.
-                // then we check if in that maximum cart there are missing products, if yes it is case 3, if all products inside it is case 2
-                // UPDATE: now we have also option 4 when there are 1 product in 1 brand, and no Best collection at all
+                // then we check if in that maximum cart there are missing products, if yes it is case 4, if all products inside it is case 2 or 3
                 var findShopsResponse = FindAtLeast2BrandsWithCommonProducts($scope, cart, result);
-                var findShopsWithMaxProductsResponse;
+                var findShopsWithMaxProductsResponse = [];
                 var suitableShopsWithAllProducts = [];
+
+
 
                 if (findShopsResponse['missingProducts'].length > 0)
                 {
@@ -1170,6 +1185,11 @@ angular.module('ComparePrices.services', ['ngResource'])
                     else {
                         SortShops.SortAndLimitAmount($scope, "CartPrice", "Distance");
                     }
+                }
+                else
+                {
+                    $scope.c.allShopsNearThatHaveNeededProducts = [];
+                    $scope.c.allShopsNearThatHaveAllProducts = [];
                 }
                 // after all we need products names, images to show in accordions
                 d.resolve(ComparePricesStorage.GetProductsInfo(productCodesInMyCart));
