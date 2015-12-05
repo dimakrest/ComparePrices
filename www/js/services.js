@@ -1133,7 +1133,7 @@ angular.module('ComparePrices.services', ['ngResource'])
 
                 // we have 3 possible options of how we show results:
                 // 1. All products > 2 brands                     --> comes from FindAtLeast2BrandsWithCommonProducts
-                // 2. SINGLE product in any amount of brands      --> comes from FindShopsWithMaxCommonProducts
+                // 2. SINGLE product in 1 brand                   --> comes from FindShopsWithMaxCommonProducts
                 // 3. All products in 1 brand                     --> comes from FindShopsWithMaxCommonProducts
                 //    Best collection > 2 brands                  --> comes from FindAtLeast2BrandsWithCommonProducts
                 // 4. Best collection > 2 brands                  --> comes from FindAtLeast2BrandsWithCommonProducts
