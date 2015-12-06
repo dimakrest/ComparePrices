@@ -172,7 +172,11 @@ angular.module('ComparePrices.services', ['ngResource'])
                 db.transaction(function (tx) {
                     for (var key in productPricesInRange) {
                         if (productPricesInRange.hasOwnProperty(key)) {
-                            var sqlQuery = 'UPDATE tbProducts SET MinPrice=' + productPricesInRange[key]['min'] + ', MaxPrice=' + productPricesInRange[key]['max'] + ' WHERE ItemCode="' + key + '"';
+                            // set min price
+                            var sqlQuery = 'UPDATE tbProducts SET MinPrice=' + productPricesInRange[key]['min'] + ' WHERE ItemCode="' + key + '" AND (MinPrice=0 OR MinPrice > ' + productPricesInRange[key]['min'] + ')';
+                            tx.executeSql(sqlQuery);
+                            // set max price
+                            var sqlQuery = 'UPDATE tbProducts SET MaxPrice=' + productPricesInRange[key]['max'] + ' WHERE ItemCode="' + key + '" AND MaxPrice < ' + productPricesInRange[key]['max'];
                             tx.executeSql(sqlQuery);
                         }
                     }
