@@ -846,7 +846,10 @@ angular.module('ComparePrices.controllers', [])
                             for (var i = 0; i < numOfProductsInCart; i++) {
                                 for (var j = 0; j < numOfFilteredProducts; j++) {
                                     if ($scope.c.myCart[i]['ItemCode'] == foundItems[j]['ItemCode']) {
-                                        $scope.c.filteredProductsToShow.push(angular.copy($scope.c.myCart[i]));
+                                        var copyOfItemInCart = angular.copy($scope.c.myCart[i]);
+                                        copyOfItemInCart['MinPrice'] = foundItems[i]['MinPrice'];
+                                        copyOfItemInCart['MaxPrice'] = foundItems[i]['MaxPrice'];
+                                        $scope.c.filteredProductsToShow.push(copyOfItemInCart);
                                         break;
                                     }
                                 }
