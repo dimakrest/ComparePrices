@@ -230,35 +230,44 @@ angular.module('ComparePrices.controllers', [])
 
         // Popover for missing products in best_shops window
         $scope.openPopoverMissingProducts = function($event) {
-            var template = '<ion-popover-view class="fit"><ion-content scroll="false"> ' +
-                '<h5 style="direction: rtl; white-space: pre-line; text-align:right; margin-top: 5px;"> ' +
-                '{{c.localize.strings["ShowShopsThatPartiallySuit"]}}' +
-                '</h5> <div class="settings-border-divider"></div> <h5 style="text-align:right; padding-right:10px;">';
+            if (typeof($scope.popover) == "undefined") {
+                var template = '<ion-popover-view class="fit"><ion-content scroll="false"> ' +
+                    '<h5 style="direction: rtl; white-space: pre-line; text-align:right; margin-top: 5px;"> ' +
+                    '{{c.localize.strings["ShowShopsThatPartiallySuit"]}}' +
+                    '</h5> <div class="settings-border-divider"></div> <h5 style="text-align:right; padding-right:10px;">';
 
-            for (var i=0; i < $scope.c.missingProducts.length; i++) {
-                var missingProductCode = $scope.c.missingProducts[i];
-                template += $scope.c.comparedProducts[missingProductCode].Name + '<br>';
+                for (var i = 0; i < $scope.c.missingProducts.length; i++) {
+                    var missingProductCode = $scope.c.missingProducts[i];
+                    template += $scope.c.comparedProducts[missingProductCode].Name + '<br>';
+                }
+
+                template += '</h5></ion-content></ion-popover-view>';
+
+                $scope.popover = $ionicPopover.fromTemplate(template, {
+                    scope: $scope
+                });
             }
 
-            template += '</h5></ion-content></ion-popover-view>';
-
-            $scope.popover = $ionicPopover.fromTemplate(template, {
-                scope: $scope
-            });
-            $scope.popover.show($event);
+            if (!$scope.popover.isShown()) {
+                $scope.popover.show($event);
+            }
         };
 
         // Popover for having all products in best_shops window
         $scope.openPopoverHaveAllProducts = function($event) {
-            var template = '<ion-popover-view class="fit"><ion-content scroll="false"> ' +
-                '<h5 style="direction: rtl; white-space: pre-line; text-align:right; margin-top: 5px;"> ' +
-                '{{c.localize.strings["FullyComparisonMade"]}}' +
-                '</h5></ion-content></ion-popover-view>';
+            if (typeof($scope.popover) == "undefined") {
+                var template = '<ion-popover-view class="fit"><ion-content scroll="false"> ' +
+                    '<h5 style="direction: rtl; white-space: pre-line; text-align:right; margin-top: 5px;"> ' +
+                    '{{c.localize.strings["FullyComparisonMade"]}}' +
+                    '</h5></ion-content></ion-popover-view>';
 
-            $scope.popover = $ionicPopover.fromTemplate(template, {
-                scope: $scope
-            });
-            $scope.popover.show($event);
+                $scope.popover = $ionicPopover.fromTemplate(template, {
+                    scope: $scope
+                });
+            }
+            if (!$scope.popover.isShown()) {
+                $scope.popover.show($event);
+            }
         };
 
         // closePopover and remove are not called
@@ -337,7 +346,6 @@ angular.module('ComparePrices.controllers', [])
             $ionicLoading.show({
                 template: templateText
             });
-
         };
 
         $scope.c.HideLoading = function() {
@@ -412,7 +420,14 @@ angular.module('ComparePrices.controllers', [])
         };
 
         $scope.c.HowWeDoThis = function() {
-            ShowModal($scope, 'templates/how_we_do_this.html');
+            ShowModal($scope, 'templates/how_we_do_this.html').then(function (modal) {
+                $scope.modal = modal;
+                $scope.modal.show();
+
+                $scope.modal.close = function () {
+                    $scope.modal.remove()
+                };
+            });
         };
 
         // this function is called from search bar in product groups
@@ -512,23 +527,29 @@ angular.module('ComparePrices.controllers', [])
 
         // Popover for missing products in best_shops window
         $scope.ShowSearchToolTip = function() {
-            var template = '<ion-popover-view class="fit"><ion-content scroll="false"> ' +
-                '<h5 style="white-space: pre-line; text-align:center; margin-top: 5px; direction: rtl;"> ' +
-                '{{c.localize.strings["SearchTooltip1"]}}<br>{{c.localize.strings["SearchTooltip2"]}}' +
-                '</h5> <div class="settings-border-divider"></div> <h5 style="text-align:right; padding-right:10px;">';
+            if (typeof($scope.popover) == "undefined") {
+                var template = '<ion-popover-view class="fit"><ion-content scroll="false"> ' +
+                    '<h5 style="white-space: pre-line; text-align:center; margin-top: 5px; direction: rtl;"> ' +
+                    '{{c.localize.strings["SearchTooltip1"]}}<br>{{c.localize.strings["SearchTooltip2"]}}' +
+                    '</h5> <div class="settings-border-divider"></div> <h5 style="text-align:right; padding-right:10px;">';
 
-            template += '</h4></ion-content></ion-popover-view>';
+                template += '</h4></ion-content></ion-popover-view>';
 
-            $scope.popover = $ionicPopover.fromTemplate(template, {
-                scope: $scope
-            });
-            $scope.popover.show(document.getElementById('productGroupsTooltipPosition'));
+                $scope.popover = $ionicPopover.fromTemplate(template, {
+                    scope: $scope
+                });
+            }
+
+            if (!$scope.popover.isShown()) {
+                $scope.popover.show(document.getElementById('productGroupsTooltipPosition'));
+            }
         };
 
         // closePopover is not called
         $scope.closePopover = function() {
             $scope.popover.hide();
         };
+
         //Cleanup the popover when we're done with it!
         $scope.$on('$destroy', function() {
             if (typeof($scope.popover) != "undefined") {
@@ -911,17 +932,22 @@ angular.module('ComparePrices.controllers', [])
         };
 
         $scope.ShowSearchToolTip = function() {
-            var template = '<ion-popover-view class="fit"><ion-content scroll="false"> ' +
-                '<h5 style="white-space: pre-line; text-align:center; margin-top: 5px; direction: rtl;"> ' +
-                '{{c.localize.strings["SearchTooltip1"]}}<br>{{c.localize.strings["SearchTooltip2"]}}' +
-                '</h5> <div class="settings-border-divider"></div> <h5 style="text-align:right; padding-right:10px;">';
+            if (typeof($scope.popover) == "undefined") {
+                var template = '<ion-popover-view class="fit"><ion-content scroll="false"> ' +
+                    '<h5 style="white-space: pre-line; text-align:center; margin-top: 5px; direction: rtl;"> ' +
+                    '{{c.localize.strings["SearchTooltip1"]}}<br>{{c.localize.strings["SearchTooltip2"]}}' +
+                    '</h5> <div class="settings-border-divider"></div> <h5 style="text-align:right; padding-right:10px;">';
 
-            template += '</h4></ion-content></ion-popover-view>';
+                template += '</h4></ion-content></ion-popover-view>';
 
-            $scope.popover = $ionicPopover.fromTemplate(template, {
-                scope: $scope
-            });
-            $scope.popover.show(document.getElementById('filterBarTooltipPosition'));
+                $scope.popover = $ionicPopover.fromTemplate(template, {
+                    scope: $scope
+                });
+            }
+
+            if (!$scope.popover.isShown()) {
+                $scope.popover.show(document.getElementById('filterBarTooltipPosition'));
+            }
         };
 
         // closePopover and remove are not called

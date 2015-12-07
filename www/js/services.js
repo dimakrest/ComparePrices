@@ -759,19 +759,11 @@ angular.module('ComparePrices.services', ['ngResource'])
 
     .factory('ShowModal', ['$ionicModal', function($ionicModal) {
         return function($scope, templateURL) {
-            $ionicModal.fromTemplateUrl(templateURL, {
-                scope: $scope,
-                animation: 'slide-in-up',
-                backdropClickToClose: true,
-                hardwareBackButtonClose: true
-            }).then(function (modal) {
-                $scope.modal = modal;
-                $scope.modal.show();
-
-                $scope.modal.close = function () {
-                    $scope.modal.remove()
-                };
-            });
+            return $ionicModal.fromTemplateUrl(templateURL, {
+                                               scope: $scope,
+                                               animation: 'slide-in-up',
+                                               backdropClickToClose: true,
+                                               hardwareBackButtonClose: true});
         }
     }])
 
@@ -1221,16 +1213,24 @@ angular.module('ComparePrices.services', ['ngResource'])
                     $scope.c.comparedProducts[productsInfo.rows[i].ItemCode]['Name'] = productsInfo.rows[i].ItemName;
                 }
 
-                $scope.c.HideLoading();
                 // no items found
                 if (($scope.c.allShopsNearThatHaveNeededProducts.length == 0) && ($scope.c.allShopsNearThatHaveAllProducts.length == 0))
                 {
+                        $scope.c.HideLoading();
                         var text  = $scope.c.localize.strings['NoShopWithSuchItemInTheArea'];
                         PopUpFactory.ErrorPopUp($scope, text, false, function() {});
                 }
                 else
                 {
-                    ShowModal($scope, 'templates/best_shops.html');
+                    ShowModal($scope, 'templates/best_shops.html').then(function (modal) {
+                        $scope.c.HideLoading();
+                        $scope.modal = modal;
+                        $scope.modal.show();
+
+                        $scope.modal.close = function () {
+                            $scope.modal.remove()
+                        };
+                    });
                 }
             });
         }
