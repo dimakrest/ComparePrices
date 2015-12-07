@@ -4,8 +4,8 @@
         <div style="white-space: normal;" class="h1 title light">
             {{::c.localize.strings['BestShopsHeader']}}
             <span ng-show="(c.shopsNearThatHaveNeededProducts[0].Products.length == 1)">{{c.comparedProducts[c.shopsNearThatHaveNeededProducts[0].Products[0].ItemCode].Name}}</span>
-            <span ng-show="(c.shopsNearThatHaveNeededProducts[0].Products.length > 1)">{{c.currentCartName}}</span>
-
+            <span ng-show="(c.shopsNearThatHaveAllProducts[0].Products.length == 1)">{{c.comparedProducts[c.shopsNearThatHaveAllProducts[0].Products[0].ItemCode].Name}}</span>
+            <span ng-show="(c.shopsNearThatHaveNeededProducts[0].Products.length + c.shopsNearThatHaveAllProducts[0].Products.length> 1)">{{c.currentCartName}}</span>
         </div>
 
         <!--<button class="button button-icon icon ion-ios-upload-outline light" ng-click="c.ShareCartAndShopDetails()"></button>-->
