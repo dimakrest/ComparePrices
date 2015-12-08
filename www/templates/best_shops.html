@@ -20,7 +20,7 @@
 
     <ion-content has-bouncing="true" class="content-bg" delegate-handle="modalContent" style="background-image: url('img/bg.png'); background-size: auto; background-repeat: repeat;">
 
-        <ion-item style="direction: rtl; padding-right: 42px; background-color: #b0ffa9; height: 40px; padding-top: 9px;" ng-show="(c.shopsNearThatHaveAllProducts.length > 0) && (c.missingProducts.length > 0)" ng-click="openPopoverHaveAllProducts($event)">
+        <ion-item style="direction: rtl; padding-right: 42px; background-color: #b0ffa9; height: 40px; padding-top: 9px;" ng-show="(c.shopsNearThatHaveAllProducts.length > 0) && (c.shopsNearThatHaveNeededProducts.length > 0)" ng-click="openPopoverHaveAllProducts($event)">
             {{::c.localize.strings['HaveAllProducts']}}
             <i class="icon ion-information-circled" style="position: absolute; right: 20px;"></i>
         </ion-item>
