@@ -42,7 +42,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                             var singleProductPrice;
 
                             // Take care of discounts
-                            if ((parseInt(singleProduct['Q']) == 1) && (parseFloat(singleProduct['dP']) < parseFloat(singleProduct['P'])))
+                            if ((parseInt(singleProduct['Q']) == 1) && (parseFloat(singleProduct['dP']) != 0) && (parseFloat(singleProduct['dP']) < parseFloat(singleProduct['P'])))
                             {
                                 singleProductPrice = parseFloat(singleProduct['dP']);
                             }
@@ -64,7 +64,7 @@ angular.module('ComparePrices.services', ['ngResource'])
 
                             // we don't have discounts for all the items
                             var sqlQuery = "";
-                            if (typeof(singleProduct['Q']) == "undefined" || typeof(singleProduct['dP']) == "undefined") {
+                            if (typeof(singleProduct['Q']) == "undefined" || typeof(singleProduct['dP']) == "undefined" || (parseFloat(singleProduct['dP']) == 0) || (parseFloat(singleProduct['Q']) == 0)) {
                                 sqlQuery = 'INSERT INTO ' + tableName + ' VALUES ("' +
                                     itemCode + '", "' +
                                     singleProduct['P'] + '","","")';
@@ -929,7 +929,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 tmpShops[i].shopInfo['NumOfProducts'] = tmpShops[i].rows.length;
                 tmpShops[i].shopInfo['Products'] = tmpShops[i].rows;
 
-                // group identical carts in shops to groups
+                // group identical carts in shops to groups, take only shops that have at least some products
                 if (tmpShops[i].shopInfo['NumOfProducts'] != 0)
                 {
                     var cartAlreadyPresent = 0;
@@ -991,8 +991,30 @@ angular.module('ComparePrices.services', ['ngResource'])
                 }
             }
 
+            // CODE NEEDED FOR CALCULATING CART PRICE WITH MINIMAL PRICE FOR ITEM FROM ANY SHOP
+            var pseudoShopWithMinimalPrices = [];
+            var pseudoShopWithMinimalPricesWithDiscount = []; // in this case we transform price to be discounted, as theoretically when we order many things we will use this discount together with other customers
+
+            for (var i=0; i < productsInCartWith2BrandsOrMore.length; i++)
+            {
+                // create pseudo shop with minimal price for each item
+                var tmpCode = productsInCartWith2BrandsOrMore[i];
+                pseudoShopWithMinimalPrices[tmpCode] = new Object();
+                pseudoShopWithMinimalPrices[tmpCode]["DiscountAmount"] = "1";
+                pseudoShopWithMinimalPrices[tmpCode]["DiscountPrice"] = "100000";
+                pseudoShopWithMinimalPrices[tmpCode]["ItemCode"] = tmpCode;
+                pseudoShopWithMinimalPrices[tmpCode]["ItemPrice"] = "100000";
+
+                pseudoShopWithMinimalPricesWithDiscount[tmpCode] = new Object();
+                pseudoShopWithMinimalPricesWithDiscount[tmpCode]["DiscountAmount"] = "1";
+                pseudoShopWithMinimalPricesWithDiscount[tmpCode]["DiscountPrice"] = "100000";
+                pseudoShopWithMinimalPricesWithDiscount[tmpCode]["ItemCode"] = tmpCode;
+                pseudoShopWithMinimalPricesWithDiscount[tmpCode]["ItemPrice"] = "100000";
+            }
+
             // take only shops that have needed cart of products
             var suitableShops = [];
+            var minimalPriceForShop = 100000;
             for (var i=0; i < tmpShops.length; i++)
             {
                 var productCodesInShop = [];
@@ -1007,8 +1029,60 @@ angular.module('ComparePrices.services', ['ngResource'])
                     tmpShops[i].shopInfo['BrandImage'] = 'img/markets/' + tmpShops[i].shopInfo['BrandName'] + '.jpg';
 
                     suitableShops.push(tmpShops[i].shopInfo);
+
+                    // CODE NEEDED FOR CALCULATING CART PRICE WITH MINIMAL PRICE FOR ITEM FROM ANY SHOP
+                    if (calcPriceResult['CartPrice'] < minimalPriceForShop)
+                    {
+                        minimalPriceForShop = calcPriceResult['CartPrice'];
+                    }
+                }
+
+                // CODE NEEDED FOR CALCULATING CART PRICE WITH MINIMAL PRICE FOR ITEM FROM ANY SHOP
+                // go over all items in shop and check whether it has minimal price
+                for (var k=0; k < tmpShops[i].rows.length; k++)
+                {
+                    var tmpItemCode = tmpShops[i].rows[k]["ItemCode"];
+                    // check whether we need to check this product price
+                    if (productsInCartWith2BrandsOrMore.indexOf(tmpItemCode) > -1) {
+                        if (parseFloat(tmpShops[i].rows[k]["ItemPrice"]) < parseFloat(pseudoShopWithMinimalPrices[tmpItemCode]["ItemPrice"]))
+                        {
+                            pseudoShopWithMinimalPrices[tmpItemCode]["ItemPrice"] = tmpShops[i].rows[k]["ItemPrice"];
+                        }
+                        if (parseFloat(tmpShops[i].rows[k]["ItemPrice"]) < parseFloat(pseudoShopWithMinimalPricesWithDiscount[tmpItemCode]["ItemPrice"]))
+                        {
+                            pseudoShopWithMinimalPricesWithDiscount[tmpItemCode]["ItemPrice"] = tmpShops[i].rows[k]["ItemPrice"];
+                        }
+                        // in some cases it will not be correct, as we may take some better discount, but will not have enough products to activate it, but it's ok
+                        if ((tmpShops[i].rows[k]["DiscountPrice"] != "") && (tmpShops[i].rows[k]["DiscountAmount"] != "") )
+                        {
+                            if ((parseFloat(tmpShops[i].rows[k]["DiscountPrice"]) / parseFloat(tmpShops[i].rows[k]["DiscountAmount"])) < (parseFloat(pseudoShopWithMinimalPrices[tmpItemCode]["DiscountPrice"]) / parseFloat(pseudoShopWithMinimalPrices[tmpItemCode]["DiscountAmount"]))) {
+                                pseudoShopWithMinimalPrices[tmpItemCode]["DiscountPrice"] = tmpShops[i].rows[k]["DiscountPrice"];
+                                pseudoShopWithMinimalPrices[tmpItemCode]["DiscountAmount"] = tmpShops[i].rows[k]["DiscountAmount"];
+                                // we use all possible discounts in that case
+                                if ((parseFloat(tmpShops[i].rows[k]["DiscountPrice"]) / parseFloat(tmpShops[i].rows[k]["DiscountAmount"])) < parseFloat(pseudoShopWithMinimalPricesWithDiscount[tmpItemCode]["ItemPrice"]))
+                                {
+                                    pseudoShopWithMinimalPricesWithDiscount[tmpItemCode]["ItemPrice"] = parseFloat(tmpShops[i].rows[k]["DiscountPrice"]) / parseFloat(tmpShops[i].rows[k]["DiscountAmount"]);
+                                }
+                            }
+                        }
+                    }
                 }
             }
+
+            // CODE NEEDED FOR CALCULATING CART PRICE WITH MINIMAL PRICE FOR ITEM FROM ANY SHOP
+            // get rid of associative ItemCode keys
+            var pseudoShopWithMinimalPricesArray = [];
+            var pseudoShopWithMinimalPricesWithDiscountArray = [];
+            for (var itemCodeTmp2 in pseudoShopWithMinimalPrices){
+                pseudoShopWithMinimalPricesArray.push(pseudoShopWithMinimalPrices[itemCodeTmp2]);
+                pseudoShopWithMinimalPricesWithDiscountArray.push(pseudoShopWithMinimalPricesWithDiscount[itemCodeTmp2]);
+            }
+            var calcMinCompoundPrice = CalculatePriceForShop($scope, cart, pseudoShopWithMinimalPricesArray, productsInCartWith2BrandsOrMore);
+            var calcMinCompoundPriceWithDiscounts = CalculatePriceForShop($scope, cart, pseudoShopWithMinimalPricesWithDiscountArray, productsInCartWith2BrandsOrMore);
+
+            //console.log(minimalPriceForShop);
+            //console.log(calcMinCompoundPrice['CartPrice']);
+            //console.log(calcMinCompoundPriceWithDiscounts['CartPrice']);
 
             // calculate missing items
             var productCodesInMyCart = [];
@@ -1020,7 +1094,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 return (productsInCartWith2BrandsOrMore.indexOf(n) == -1);
             });
 
-            return {"suitableShops":suitableShops,"missingProducts":missingProducts};
+            return {"suitableShops":suitableShops,"missingProducts":missingProducts,"minPriceForShop":minimalPriceForShop,"minCompoundPrice":calcMinCompoundPrice['CartPrice'],"minCompoundPriceWithDiscounts":calcMinCompoundPriceWithDiscounts['CartPrice']};
         }
 
         // finds the maximum available combination of products in shops, even if it's only 1 shop
@@ -1084,8 +1158,30 @@ angular.module('ComparePrices.services', ['ngResource'])
                 }
             }
 
+            // CODE NEEDED FOR CALCULATING CART PRICE WITH MINIMAL PRICE FOR ITEM FROM ANY SHOP
+            var pseudoShopWithMinimalPrices = [];
+            var pseudoShopWithMinimalPricesWithDiscount = []; // in this case we transform price to be discounted, as theoretically when we order many things we will use this discount together with other customers
+
+            for (var i=0; i < productsInCartWithMaxAmount.length; i++)
+            {
+                // create pseudo shop with minimal price for each item
+                var tmpCode = productsInCartWithMaxAmount[i];
+                pseudoShopWithMinimalPrices[tmpCode] = new Object();
+                pseudoShopWithMinimalPrices[tmpCode]["DiscountAmount"] = "1";
+                pseudoShopWithMinimalPrices[tmpCode]["DiscountPrice"] = "100000";
+                pseudoShopWithMinimalPrices[tmpCode]["ItemCode"] = tmpCode;
+                pseudoShopWithMinimalPrices[tmpCode]["ItemPrice"] = "100000";
+
+                pseudoShopWithMinimalPricesWithDiscount[tmpCode] = new Object();
+                pseudoShopWithMinimalPricesWithDiscount[tmpCode]["DiscountAmount"] = "1";
+                pseudoShopWithMinimalPricesWithDiscount[tmpCode]["DiscountPrice"] = "100000";
+                pseudoShopWithMinimalPricesWithDiscount[tmpCode]["ItemCode"] = tmpCode;
+                pseudoShopWithMinimalPricesWithDiscount[tmpCode]["ItemPrice"] = "100000";
+            }
+
             // take only shops that have needed cart of products
             var suitableShops = [];
+            var minimalPriceForShop = 100000;
             for (var i=0; i < tmpShops.length; i++)
             {
                 var productCodesInShop = [];
@@ -1100,8 +1196,60 @@ angular.module('ComparePrices.services', ['ngResource'])
                     tmpShops[i].shopInfo['BrandImage'] = 'img/markets/' + tmpShops[i].shopInfo['BrandName'] + '.jpg';
 
                     suitableShops.push(tmpShops[i].shopInfo);
+
+                    // CODE NEEDED FOR CALCULATING CART PRICE WITH MINIMAL PRICE FOR ITEM FROM ANY SHOP
+                    if (calcPriceResult['CartPrice'] < minimalPriceForShop)
+                    {
+                        minimalPriceForShop = calcPriceResult['CartPrice'];
+                    }
+                }
+
+                // CODE NEEDED FOR CALCULATING CART PRICE WITH MINIMAL PRICE FOR ITEM FROM ANY SHOP
+                // go over all items in shop and check whether it has minimal price
+                for (var k=0; k < tmpShops[i].rows.length; k++)
+                {
+                    var tmpItemCode = tmpShops[i].rows[k]["ItemCode"];
+                    // check whether we need to check this product price
+                    if (productsInCartWithMaxAmount.indexOf(tmpItemCode) > -1) {
+                        if (parseFloat(tmpShops[i].rows[k]["ItemPrice"]) < parseFloat(pseudoShopWithMinimalPrices[tmpItemCode]["ItemPrice"]))
+                        {
+                            pseudoShopWithMinimalPrices[tmpItemCode]["ItemPrice"] = tmpShops[i].rows[k]["ItemPrice"];
+                        }
+                        if (parseFloat(tmpShops[i].rows[k]["ItemPrice"]) < parseFloat(pseudoShopWithMinimalPricesWithDiscount[tmpItemCode]["ItemPrice"]))
+                        {
+                            pseudoShopWithMinimalPricesWithDiscount[tmpItemCode]["ItemPrice"] = tmpShops[i].rows[k]["ItemPrice"];
+                        }
+                        // in some cases it will not be correct, as we may take some better discount, but will not have enough products to activate it, but it's ok
+                        if ((tmpShops[i].rows[k]["DiscountPrice"] != "") && (tmpShops[i].rows[k]["DiscountAmount"] != "") )
+                        {
+                            if ((parseFloat(tmpShops[i].rows[k]["DiscountPrice"]) / parseFloat(tmpShops[i].rows[k]["DiscountAmount"])) < (parseFloat(pseudoShopWithMinimalPrices[tmpItemCode]["DiscountPrice"]) / parseFloat(pseudoShopWithMinimalPrices[tmpItemCode]["DiscountAmount"]))) {
+                                pseudoShopWithMinimalPrices[tmpItemCode]["DiscountPrice"] = tmpShops[i].rows[k]["DiscountPrice"];
+                                pseudoShopWithMinimalPrices[tmpItemCode]["DiscountAmount"] = tmpShops[i].rows[k]["DiscountAmount"];
+                                // we use all possible discounts in that case
+                                if ((parseFloat(tmpShops[i].rows[k]["DiscountPrice"]) / parseFloat(tmpShops[i].rows[k]["DiscountAmount"])) < parseFloat(pseudoShopWithMinimalPricesWithDiscount[tmpItemCode]["ItemPrice"]))
+                                {
+                                    pseudoShopWithMinimalPricesWithDiscount[tmpItemCode]["ItemPrice"] = parseFloat(tmpShops[i].rows[k]["DiscountPrice"]) / parseFloat(tmpShops[i].rows[k]["DiscountAmount"]);
+                                }
+                            }
+                        }
+                    }
                 }
             }
+
+            // CODE NEEDED FOR CALCULATING CART PRICE WITH MINIMAL PRICE FOR ITEM FROM ANY SHOP
+            // get rid of associative ItemCode keys
+            var pseudoShopWithMinimalPricesArray = [];
+            var pseudoShopWithMinimalPricesWithDiscountArray = [];
+            for (var itemCodeTmp2 in pseudoShopWithMinimalPrices){
+                pseudoShopWithMinimalPricesArray.push(pseudoShopWithMinimalPrices[itemCodeTmp2]);
+                pseudoShopWithMinimalPricesWithDiscountArray.push(pseudoShopWithMinimalPricesWithDiscount[itemCodeTmp2]);
+            }
+            var calcMinCompoundPrice = CalculatePriceForShop($scope, cart, pseudoShopWithMinimalPricesArray, productsInCartWithMaxAmount);
+            var calcMinCompoundPriceWithDiscounts = CalculatePriceForShop($scope, cart, pseudoShopWithMinimalPricesWithDiscountArray, productsInCartWithMaxAmount);
+
+            //console.log(minimalPriceForShop);
+            //console.log(calcMinCompoundPrice['CartPrice']);
+            //console.log(calcMinCompoundPriceWithDiscounts['CartPrice']);
 
             // calculate missing items
             var productCodesInMyCart = [];
@@ -1113,7 +1261,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                 return (productsInCartWithMaxAmount.indexOf(n) == -1);
             });
 
-            return {"suitableShops":suitableShops,"missingProducts":missingProducts};
+            return {"suitableShops":suitableShops,"missingProducts":missingProducts,"minPriceForShop":minimalPriceForShop,"minCompoundPrice":calcMinCompoundPrice['CartPrice'],"minCompoundPriceWithDiscounts":calcMinCompoundPriceWithDiscounts['CartPrice']};
         }
 
         function FindBestShopInRadius ($scope, cart, radius) {
@@ -1159,21 +1307,60 @@ angular.module('ComparePrices.services', ['ngResource'])
 
                 $scope.c.missingProducts = findShopsResponse['missingProducts'];
 
-                if ((suitableShops.length != 0) || (suitableShopsWithAllProducts.length != 0)) {
-                    // send Analytics
-                    if ((suitableShops.length != 0) && (suitableShops[0].Products.length == 1)) {
-                        if ((localStorage.getItem('IsRunningOnDevice') || "0") != "0") {
+                // SEND ANALYTICS
+                if ((localStorage.getItem('IsRunningOnDevice') || "0") != "0")
+                {
+                    if (suitableShops.length != 0)
+                    {
+                        // Single product
+                        if ((suitableShops[0].Products.length == 1) && ($scope.c.missingProducts == 0))
+                        {
                             // send product id, and num of shops in result
-                            $cordovaGoogleAnalytics.trackEvent('FindeBestShop', 'Product', suitableShops[0].Products[0].ItemCode, suitableShops.length);
+                            $cordovaGoogleAnalytics.trackEvent('FindBestShop', 'Product', suitableShops[0].Products[0].ItemCode, suitableShops.length);
                         }
-                    }
-                    else {
-                        if ((localStorage.getItem('IsRunningOnDevice') || "0") != "0") {
-                            // send cart id to understand if its predefined or user cart, and num of shops in result
-                            $cordovaGoogleAnalytics.trackEvent('FindeBestShop', 'Cart', $scope.cartID, suitableShops.length);
+                        else // cart
+                        {
+                            var analyticArg = productCodesInMyCart.length+"_"+findShopsResponse['minPriceForShop']+"_"+findShopsResponse['minCompoundPrice']+"_"+findShopsResponse['minCompoundPriceWithDiscounts']+"_"+suitableShops.length;
+                            if (($scope.cartID == 1) || ($scope.cartID == 2)) // predefined cart
+                            {
+                                // send missing products as first argument, and then totalProducts_minPriceForShop_minCompoundPrice_minCompoundPriceWithDiscounts_suitableShops
+                                $cordovaGoogleAnalytics.trackEvent('FindBestShop', 'PredefinedCart'+$scope.cartID, $scope.c.missingProducts.length, analyticArg);
+                            }
+                            else // user cart
+                            {
+                                // send missing products as first argument, and then totalProducts_minPriceForShop_minCompoundPrice_minCompoundPriceWithDiscounts_suitableShops
+                                $cordovaGoogleAnalytics.trackEvent('FindBestShop', 'UserCart', $scope.c.missingProducts.length, analyticArg);
+                            }
                         }
                     }
 
+                    if (suitableShopsWithAllProducts.length != 0)
+                    {
+                        // Single product
+                        if (suitableShopsWithAllProducts[0].Products.length == 1)
+                        {
+                            // send product id, and num of shops in result
+                            $cordovaGoogleAnalytics.trackEvent('FindBestShop', 'Product', suitableShopsWithAllProducts[0].Products[0].ItemCode, suitableShopsWithAllProducts.length);
+                        }
+                        else // cart
+                        {
+                            var analyticArg = productCodesInMyCart.length+"_"+findShopsWithMaxProductsResponse['minPriceForShop']+"_"+findShopsWithMaxProductsResponse['minCompoundPrice']+"_"+findShopsWithMaxProductsResponse['minCompoundPriceWithDiscounts']+"_"+suitableShopsWithAllProducts.length;
+                            if (($scope.cartID == 1) || ($scope.cartID == 2)) // predefined cart
+                            {
+                                // send missing products (in that case it's always 0) as first argument, and then totalProducts_minPriceForShop_minCompoundPrice_minCompoundPriceWithDiscounts_suitableShops
+                                $cordovaGoogleAnalytics.trackEvent('FindBestShop', 'PredefinedCart'+$scope.cartID, 0, analyticArg);
+                            }
+                            else // user cart
+                            {
+                                // send missing products (in that case it's always 0) as first argument, and then totalProducts_minPriceForShop_minCompoundPrice_minCompoundPriceWithDiscounts_suitableShops
+                                $cordovaGoogleAnalytics.trackEvent('FindBestShop', 'UserCart', 0, analyticArg);
+                            }
+                        }
+                    }
+                }
+
+
+                if ((suitableShops.length != 0) || (suitableShopsWithAllProducts.length != 0)) {
                     SortShops.SortByPriceAndStoreInGlobalVar($scope, suitableShops, suitableShopsWithAllProducts); // needed to add % of additional price
                     if ($scope.c.SortShopsByDistance == 1) {
                         SortShops.SortAndLimitAmount($scope, "Distance", "CartPrice");
@@ -1187,6 +1374,7 @@ angular.module('ComparePrices.services', ['ngResource'])
                     $scope.c.allShopsNearThatHaveNeededProducts = [];
                     $scope.c.allShopsNearThatHaveAllProducts = [];
                 }
+
                 // after all we need products names, images to show in accordions
                 d.resolve(ComparePricesStorage.GetProductsInfo(productCodesInMyCart));
             });
