@@ -14,6 +14,11 @@ table.bottomBorder td { text-align:center; padding:3px;}
     max-height: 50px;
 }
 
+.item-accord{
+    margin-bottom: -2px;
+    border-bottom-width: 0px;
+}
+
 .effectHeader{
     -webkit-box-shadow: 0 -5px 6px 5px #777;
        -moz-box-shadow: 0 -5px 6px 5px #777;
