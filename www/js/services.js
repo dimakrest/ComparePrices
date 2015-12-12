@@ -1321,10 +1321,10 @@ angular.module('ComparePrices.services', ['ngResource'])
                         else // cart
                         {
                             var analyticArg = productCodesInMyCart.length+"_"+findShopsResponse['minPriceForShop']+"_"+findShopsResponse['minCompoundPrice']+"_"+findShopsResponse['minCompoundPriceWithDiscounts']+"_"+suitableShops.length;
-                            if (($scope.cartID == 1) || ($scope.cartID == 2)) // predefined cart
+                            if (($scope.c.cartID == 1) || ($scope.c.cartID == 2)) // predefined cart
                             {
                                 // send missing products as first argument, and then totalProducts_minPriceForShop_minCompoundPrice_minCompoundPriceWithDiscounts_suitableShops
-                                $cordovaGoogleAnalytics.trackEvent('FindBestShop', 'PredefinedCart'+$scope.cartID, $scope.c.missingProducts.length, analyticArg);
+                                $cordovaGoogleAnalytics.trackEvent('FindBestShop', 'PredefinedCart'+$scope.c.cartID, $scope.c.missingProducts.length, analyticArg);
                             }
                             else // user cart
                             {
@@ -1345,10 +1345,10 @@ angular.module('ComparePrices.services', ['ngResource'])
                         else // cart
                         {
                             var analyticArg = productCodesInMyCart.length+"_"+findShopsWithMaxProductsResponse['minPriceForShop']+"_"+findShopsWithMaxProductsResponse['minCompoundPrice']+"_"+findShopsWithMaxProductsResponse['minCompoundPriceWithDiscounts']+"_"+suitableShopsWithAllProducts.length;
-                            if (($scope.cartID == 1) || ($scope.cartID == 2)) // predefined cart
+                            if (($scope.c.cartID == 1) || ($scope.c.cartID == 2)) // predefined cart
                             {
                                 // send missing products (in that case it's always 0) as first argument, and then totalProducts_minPriceForShop_minCompoundPrice_minCompoundPriceWithDiscounts_suitableShops
-                                $cordovaGoogleAnalytics.trackEvent('FindBestShop', 'PredefinedCart'+$scope.cartID, 0, analyticArg);
+                                $cordovaGoogleAnalytics.trackEvent('FindBestShop', 'PredefinedCart'+$scope.c.cartID, 0, analyticArg);
                             }
                             else // user cart
                             {
