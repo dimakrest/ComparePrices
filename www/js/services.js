@@ -4,7 +4,7 @@
 
 angular.module('ComparePrices.services', ['ngResource'])
     .factory('S3Jsons', ['$resource', function($resource) {
-        return $resource('https://s3.amazonaws.com/compare.prices/stores/:jsonName.json.gz');s
+        return $resource('https://s3.amazonaws.com/compare.prices/stores/:jsonName.json.gz');
     }])
 
     .factory('ComparePricesStorage', ['S3Jsons', 'MiscFunctions', '$q',

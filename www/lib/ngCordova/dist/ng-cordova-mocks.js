@@ -2570,7 +2570,7 @@ ngCordovaMocks.factory('$cordovaSocialSharing', ['$q', function ($q) {
  * @name ngCordovaMocks.cordovaSplashscreen
  *
  * @description
- * A service for testing the splash screen
+ * A service for testing the splashes screen
  * in an app build with ngCordova.
  */
 ngCordovaMocks.factory('$cordovaSplashscreen', function () {
@@ -2583,7 +2583,7 @@ ngCordovaMocks.factory('$cordovaSplashscreen', function () {
      * @propertyOf ngCordovaMocks.cordovaSplashscreen
      *
      * @description
-     * A flag that signals whether the splash screen is visible or not.
+     * A flag that signals whether the splashes screen is visible or not.
      * This property should only be used in automated tests.
      **/
     isVisible: isVisible,
